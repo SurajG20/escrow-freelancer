@@ -1,0 +1,187 @@
+"use client";
+
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { ArrowLeft, CheckCircle2, Clock, FileText, Send, Shield, AlertTriangle } from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+
+// Mock Data for a single project
+const project = {
+    id: 1,
+    title: "DeFi Dashboard Implementation",
+    client: "Alpha Labs",
+    totalAmount: "2.5 ETH",
+    released: "1.0 ETH",
+    status: "Active",
+    description: "Implementation of the main dashboard with wallet connection, staking view, and analytics.",
+    milestones: [
+        { id: 1, title: "UI Implementation", amount: "1.0 ETH", deadline: "Jan 10, 2026", status: "Completed" },
+        { id: 2, title: "Web3 Integration", amount: "1.0 ETH", deadline: "Jan 20, 2026", status: "In Progress" },
+        { id: 3, title: "QA & Deployment", amount: "0.5 ETH", deadline: "Jan 25, 2026", status: "Locked" },
+    ],
+};
+
+export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id } = await params;
+    // In a real app we'd fetch data based on id
+
+    return (
+        <div className="space-y-6">
+            {/* Back Link */}
+            <Link href="/dashboard/projects" className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <ArrowLeft className="h-4 w-4 mr-2" /> Back to Projects
+            </Link>
+
+            {/* Header */}
+            <div className="flex flex-col lg:flex-row gap-6 lg:items-start lg:justify-between">
+                <div className="space-y-2">
+                    <h1 className="text-3xl font-light tracking-tight">{project.title}</h1>
+                    <div className="flex items-center gap-3">
+                        <Badge variant="outline" className="glass bg-white/50">{project.client}</Badge>
+                        <Badge variant="success" className="bg-emerald-500/10 text-emerald-600 border-none">{project.status}</Badge>
+                        <span className="text-sm text-muted-foreground">Contract: 0x71C...9A21</span>
+                    </div>
+                </div>
+                <div className="flex gap-3">
+                    <Button variant="outline" className="glass bg-white/40">View Contract</Button>
+                    <Button>Deposit Funds</Button>
+                </div>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-6">
+                {/* Main Content: Milestones & Description */}
+                <div className="lg:col-span-2 space-y-6">
+                    <Card className="glass-card">
+                        <CardHeader>
+                            <CardTitle className="text-lg">Description</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground leading-relaxed">{project.description}</p>
+                        </CardContent>
+                    </Card>
+
+                    <div className="space-y-4">
+                        <h2 className="text-xl font-semibold">Milestones</h2>
+                        <div className="space-y-3">
+                            {project.milestones.map((milestone) => (
+                                <div key={milestone.id} className="group relative overflow-hidden rounded-xl border border-glass-border bg-glass p-5 hover:border-accent/30 transition-all duration-300">
+                                    {/* Progress Line */}
+                                    <div className={cn(
+                                        "absolute left-0 top-0 h-full w-1",
+                                        milestone.status === "Completed" ? "bg-emerald-500" :
+                                            milestone.status === "In Progress" ? "bg-accent" : "bg-muted"
+                                    )} />
+
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div className="space-y-1 ml-3">
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="font-medium text-foreground">{milestone.title}</h3>
+                                                {milestone.status === "Completed" && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+                                            </div>
+                                            <div className="flex gap-4 text-sm text-muted-foreground">
+                                                <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {milestone.deadline}</span>
+                                                <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> {milestone.amount}</span>
+                                            </div>
+                                        </div>
+                                        <div className="ml-3 sm:ml-0">
+                                            {milestone.status === "In Progress" && (
+                                                <Button size="sm" className="w-full sm:w-auto">Submit Work</Button>
+                                            )}
+                                            {milestone.status === "Completed" && (
+                                                <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50">Paid</Badge>
+                                            )}
+                                            {milestone.status === "Locked" && (
+                                                <Badge variant="secondary" className="bg-muted text-muted-foreground">Locked</Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sidebar: State & Summary */}
+                <div className="space-y-6">
+                    {/* Contract State Visualizer */}
+                    <Card className="glass-card bg-gradient-to-br from-glass to-accent/5 overflow-hidden">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                                <Shield className="h-4 w-4" /> Escrow State
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {/* Simplified State Machine Viz */}
+                            <div className="relative flex flex-col gap-6 py-2">
+                                <div className="absolute left-[15px] top-2 h-full w-0.5 bg-border -z-10" />
+
+                                {["Deposited", "Milestone 1 Active", "Milestone 2 Active", "Complete"].map((step, i) => (
+                                    <div key={step} className="flex items-center gap-3">
+                                        <div className={cn(
+                                            "flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold transition-colors z-10 bg-background",
+                                            i <= 1 ? "border-accent bg-accent text-white" : "border-muted text-muted-foreground"
+                                        )}>
+                                            {i + 1}
+                                        </div>
+                                        <span className={cn(
+                                            "text-sm font-medium",
+                                            i <= 1 ? "text-foreground" : "text-muted-foreground"
+                                        )}>{step}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Summary Stats */}
+                    <Card className="glass-card">
+                        <CardContent className="pt-6 space-y-4">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-muted-foreground">Total Contract Value</span>
+                                <span className="font-mono font-medium text-lg">2.50 ETH</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-muted-foreground">Released so far</span>
+                                <span className="font-mono font-medium text-emerald-600">1.00 ETH</span>
+                            </div>
+                            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                                <div className="h-full w-[40%] bg-emerald-500 rounded-full" />
+                            </div>
+
+                            <div className="pt-4 border-t border-glass-border">
+                                <Button variant="ghost" className="w-full text-red-500 hover:text-red-600 hover:bg-red-50">
+                                    <AlertTriangle className="h-4 w-4 mr-2" /> Raise Dispute
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Chat/Activity Placeholder */}
+                    <Card className="glass-card h-64 flex flex-col">
+                        <CardHeader className="pb-2 border-b border-glass-border">
+                            <CardTitle className="text-sm">Activity</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-1 overflow-y-auto pt-4 space-y-4">
+                            <div className="text-xs text-muted-foreground text-center">Today</div>
+                            <div className="flex gap-2">
+                                <div className="h-6 w-6 rounded-full bg-blue-200" />
+                                <div className="bg-white/50 p-2 rounded-r-lg rounded-bl-lg text-sm max-w-[80%]">
+                                    Submitting the UI mocks for review.
+                                </div>
+                            </div>
+                        </CardContent>
+                        <div className="p-3 border-t border-glass-border">
+                            <div className="relative">
+                                <input className="w-full bg-muted/50 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent" placeholder="Type a message..." />
+                                <Send className="absolute right-3 top-2 h-4 w-4 text-muted-foreground" />
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            </div>
+        </div>
+    );
+}
