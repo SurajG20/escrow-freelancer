@@ -1,32 +1,62 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { ArrowLeft, CheckCircle2, Clock, FileText, Send, Shield, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { mockStore } from "@/lib/store";
+import { Project } from "@/types";
 
-// Mock Data for a single project
-const project = {
-    id: 1,
-    title: "DeFi Dashboard Implementation",
-    client: "Alpha Labs",
-    totalAmount: "2.5 ETH",
-    released: "1.0 ETH",
-    status: "Active",
-    description: "Implementation of the main dashboard with wallet connection, staking view, and analytics.",
-    milestones: [
-        { id: 1, title: "UI Implementation", amount: "1.0 ETH", deadline: "Jan 10, 2026", status: "Completed" },
-        { id: 2, title: "Web3 Integration", amount: "1.0 ETH", deadline: "Jan 20, 2026", status: "In Progress" },
-        { id: 3, title: "QA & Deployment", amount: "0.5 ETH", deadline: "Jan 25, 2026", status: "Locked" },
-    ],
-};
+// Note: params is a Promise in newer Next.js versions (15+)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function ProjectDetailPage({ params }: { params: any }) {
+    const [project, setProject] = useState<Project | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [txPending, setTxPending] = useState(false);
 
-export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id } = await params;
-    // In a real app we'd fetch data based on id
+    useEffect(() => {
+        // Unwrap params if it's a promise, or use directly
+        const loadData = async () => {
+            let id;
+            if (params instanceof Promise) {
+                const resolved = await params;
+                id = resolved.id;
+            } else {
+                // Fallback if not a promise (older Next.js or different runtime)
+                id = params.id;
+            }
+
+            const data = mockStore.getProjectById(parseInt(id));
+            setProject(data || null);
+            setLoading(false);
+        };
+        loadData();
+    }, [params]);
+
+    const handleAction = async (action: string, milestoneId?: number) => {
+        setTxPending(true);
+        await mockStore.simulateTransaction(1500); // 1.5s delay
+
+        if (action === "submit" && milestoneId && project) {
+            mockStore.updateMilestoneStatus(project.id, milestoneId, "In Review");
+        } else if (action === "approve" && milestoneId && project) {
+            mockStore.updateMilestoneStatus(project.id, milestoneId, "Completed");
+        } else if (action === "release_funds" && project) {
+            // just mock visual effect
+        }
+
+        // Refresh data
+        if (project) {
+            setProject({ ...mockStore.getProjectById(project.id)! });
+        }
+        setTxPending(false);
+    };
+
+    if (loading) return <div className="p-10 text-center">Loading project details...</div>;
+    if (!project) return <div className="p-10 text-center">Project not found</div>;
 
     return (
         <div className="space-y-6">
@@ -41,13 +71,13 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                     <h1 className="text-3xl font-light tracking-tight">{project.title}</h1>
                     <div className="flex items-center gap-3">
                         <Badge variant="outline" className="glass bg-white/50">{project.client}</Badge>
-                        <Badge variant="success" className="bg-emerald-500/10 text-emerald-600 border-none">{project.status}</Badge>
-                        <span className="text-sm text-muted-foreground">Contract: 0x71C...9A21</span>
+                        <Badge variant={project.status === "Active" ? "success" : "default"} className="bg-emerald-500/10 text-emerald-600 border-none">{project.status}</Badge>
+                        <span className="text-sm text-muted-foreground font-mono">Contract: {project.contractAddress || "Pending"}</span>
                     </div>
                 </div>
                 <div className="flex gap-3">
                     <Button variant="outline" className="glass bg-white/40">View Contract</Button>
-                    <Button>Deposit Funds</Button>
+                    <Button disabled={txPending}>Deposit Funds</Button>
                 </div>
             </div>
 
@@ -72,7 +102,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                                     <div className={cn(
                                         "absolute left-0 top-0 h-full w-1",
                                         milestone.status === "Completed" ? "bg-emerald-500" :
-                                            milestone.status === "In Progress" ? "bg-accent" : "bg-muted"
+                                            milestone.status === "In Progress" ? "bg-accent" :
+                                                milestone.status === "In Review" ? "bg-orange-400" : "bg-muted"
                                     )} />
 
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -80,18 +111,26 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                                             <div className="flex items-center gap-2">
                                                 <h3 className="font-medium text-foreground">{milestone.title}</h3>
                                                 {milestone.status === "Completed" && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+                                                {milestone.status === "In Review" && <Clock className="h-4 w-4 text-orange-400" />}
                                             </div>
                                             <div className="flex gap-4 text-sm text-muted-foreground">
                                                 <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {milestone.deadline}</span>
                                                 <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> {milestone.amount}</span>
                                             </div>
                                         </div>
-                                        <div className="ml-3 sm:ml-0">
+                                        <div className="ml-3 sm:ml-0 flex gap-2">
                                             {milestone.status === "In Progress" && (
-                                                <Button size="sm" className="w-full sm:w-auto">Submit Work</Button>
+                                                <Button size="sm" className="w-full sm:w-auto" onClick={() => handleAction("submit", milestone.id)} disabled={txPending}>
+                                                    {txPending ? "Submitting..." : "Submit Work"}
+                                                </Button>
+                                            )}
+                                            {milestone.status === "In Review" && (
+                                                <Button size="sm" className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => handleAction("approve", milestone.id)} disabled={txPending}>
+                                                    {txPending ? "Approving..." : "Approve & Pay"}
+                                                </Button>
                                             )}
                                             {milestone.status === "Completed" && (
-                                                <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50">Paid</Badge>
+                                                <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50">Paid & Released</Badge>
                                             )}
                                             {milestone.status === "Locked" && (
                                                 <Badge variant="secondary" className="bg-muted text-muted-foreground">Locked</Badge>
@@ -118,20 +157,26 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                             <div className="relative flex flex-col gap-6 py-2">
                                 <div className="absolute left-[15px] top-2 h-full w-0.5 bg-border -z-10" />
 
-                                {["Deposited", "Milestone 1 Active", "Milestone 2 Active", "Complete"].map((step, i) => (
-                                    <div key={step} className="flex items-center gap-3">
-                                        <div className={cn(
-                                            "flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold transition-colors z-10 bg-background",
-                                            i <= 1 ? "border-accent bg-accent text-white" : "border-muted text-muted-foreground"
-                                        )}>
-                                            {i + 1}
+                                {["Deposited", "Milestone Active", "In Review", "Completed"].map((step, i) => {
+                                    // Crude logic to highlight step based on ANY active milestone status for demo
+                                    const stepIndex = project.milestones.some(m => m.status === "In Review") ? 2 : project.milestones.some(m => m.status === "Completed") ? 3 : 1;
+                                    const isActive = i <= stepIndex;
+
+                                    return (
+                                        <div key={step} className="flex items-center gap-3">
+                                            <div className={cn(
+                                                "flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold transition-colors z-10 bg-background",
+                                                isActive ? "border-accent bg-accent text-white" : "border-muted text-muted-foreground"
+                                            )}>
+                                                {i + 1}
+                                            </div>
+                                            <span className={cn(
+                                                "text-sm font-medium",
+                                                isActive ? "text-foreground" : "text-muted-foreground"
+                                            )}>{step}</span>
                                         </div>
-                                        <span className={cn(
-                                            "text-sm font-medium",
-                                            i <= 1 ? "text-foreground" : "text-muted-foreground"
-                                        )}>{step}</span>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
                         </CardContent>
                     </Card>
@@ -141,11 +186,11 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                         <CardContent className="pt-6 space-y-4">
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-muted-foreground">Total Contract Value</span>
-                                <span className="font-mono font-medium text-lg">2.50 ETH</span>
+                                <span className="font-mono font-medium text-lg">{project.totalAmount}</span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-muted-foreground">Released so far</span>
-                                <span className="font-mono font-medium text-emerald-600">1.00 ETH</span>
+                                <span className="font-mono font-medium text-emerald-600">{project.releasedAmount}</span>
                             </div>
                             <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                                 <div className="h-full w-[40%] bg-emerald-500 rounded-full" />

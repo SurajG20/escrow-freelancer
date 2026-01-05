@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
@@ -8,17 +8,17 @@ import { Card } from "@/components/ui/Card";
 import { LayoutGrid, List, Plus, Search, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-
-// Mock Data
-const projects = [
-    { id: 1, title: "DeFi Dashboard Implementation", client: "Alpha Labs", status: "Active", amount: "2.5 ETH", deadline: "2 days left" },
-    { id: 2, title: "NFT Marketplace Audit", client: "OpenSea Clone", status: "In Review", amount: "4.0 ETH", deadline: "5 days left" },
-    { id: 3, title: "Solana Smart Contract", client: "SolDevs", status: "Pending", amount: "15 SOL", deadline: "1 week left" },
-    { id: 4, title: "Marketing Website Redesign", client: "Creative Agency", status: "Disputed", amount: "1.2 ETH", deadline: "Overdue" },
-];
+import { mockStore } from "@/lib/store";
+import { Project } from "@/types";
 
 export default function ProjectsPage() {
     const [view, setView] = useState<"list" | "board">("list");
+    const [projects, setProjects] = useState<Project[]>([]);
+
+    useEffect(() => {
+        // Simulate fetch from our mock store
+        setProjects(mockStore.getProjects());
+    }, []);
 
     return (
         <div className="space-y-6">
@@ -85,7 +85,7 @@ export default function ProjectsPage() {
                                 <tr key={project.id} className="hover:bg-white/40 transition-colors group cursor-pointer" onClick={() => window.location.href = `/dashboard/projects/${project.id}`}>
                                     <td className="px-6 py-4 font-medium text-foreground">{project.title}</td>
                                     <td className="px-6 py-4 text-muted-foreground">{project.client}</td>
-                                    <td className="px-6 py-4 font-mono">{project.amount}</td>
+                                    <td className="px-6 py-4 font-mono">{project.totalAmount}</td>
                                     <td className="px-6 py-4">
                                         <Badge
                                             variant={
@@ -98,42 +98,55 @@ export default function ProjectsPage() {
                                             {project.status}
                                         </Badge>
                                     </td>
-                                    <td className="px-6 py-4 text-right text-muted-foreground">{project.deadline}</td>
+                                    {/* Mock Deadline logic or fetch from first milestone */}
+                                    <td className="px-6 py-4 text-right text-muted-foreground">
+                                        {project.milestones?.[0]?.deadline || "No deadline"}
+                                    </td>
                                 </tr>
                             ))}
+                            {projects.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">No projects found.</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {["Pending", "Active", "In Review", "Disputed"].map((col) => (
-                        <div key={col} className="space-y-4">
-                            <div className="flex items-center justify-between px-2">
-                                <h3 className="font-medium text-sm text-muted-foreground">{col}</h3>
-                                <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{projects.filter(p => p.status === col).length}</span>
-                            </div>
-                            <div className="space-y-3">
-                                {projects.filter(p => p.status === col).map(project => (
-                                    <Card key={project.id} className="glass-card hover:border-accent/50 cursor-pointer transition-all p-4">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <Badge variant="outline" className="text-[10px] h-5">{project.client}</Badge>
-                                            <span className="text-xs text-muted-foreground">{project.deadline}</span>
+                    {["Pending", "Active", "In Review", "Disputed"].map((col) => {
+                        const colProjects = projects.filter(p => p.status === col);
+                        return (
+                            <div key={col} className="space-y-4">
+                                <div className="flex items-center justify-between px-2">
+                                    <h3 className="font-medium text-sm text-muted-foreground">{col}</h3>
+                                    <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{colProjects.length}</span>
+                                </div>
+                                <div className="space-y-3">
+                                    {colProjects.map(project => (
+                                        <Link key={project.id} href={`/dashboard/projects/${project.id}`}>
+                                            <Card key={project.id} className="glass-card hover:border-accent/50 cursor-pointer transition-all p-4">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <Badge variant="outline" className="text-[10px] h-5">{project.client}</Badge>
+                                                    <span className="text-xs text-muted-foreground">{project.milestones?.[0]?.deadline || "N/A"}</span>
+                                                </div>
+                                                <h4 className="font-semibold mb-2">{project.title}</h4>
+                                                <div className="flex items-center justify-between mt-4">
+                                                    <div className="font-mono text-sm">{project.totalAmount}</div>
+                                                    <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-blue-400 to-purple-400" />
+                                                </div>
+                                            </Card>
+                                        </Link>
+                                    ))}
+                                    {colProjects.length === 0 && (
+                                        <div className="h-24 rounded-xl border border-dashed border-glass-border flex items-center justify-center text-xs text-muted-foreground">
+                                            Empty
                                         </div>
-                                        <h4 className="font-semibold mb-2">{project.title}</h4>
-                                        <div className="flex items-center justify-between mt-4">
-                                            <div className="font-mono text-sm">{project.amount}</div>
-                                            <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-blue-400 to-purple-400" />
-                                        </div>
-                                    </Card>
-                                ))}
-                                {projects.filter(p => p.status === col).length === 0 && (
-                                    <div className="h-24 rounded-xl border border-dashed border-glass-border flex items-center justify-center text-xs text-muted-foreground">
-                                        Empty
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
             )}
         </div>
