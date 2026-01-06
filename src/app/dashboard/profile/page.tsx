@@ -1,10 +1,9 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { User, Shield, Star, Award, Code2, MapPin, Link as LinkIcon } from "lucide-react";
-import Image from "next/image"; // Often used but I'll use div placeholder to avoid static image issues
+import { Shield, Star, Award, MapPin, Link as LinkIcon } from "lucide-react";
 
 export default function ProfilePage() {
     return (

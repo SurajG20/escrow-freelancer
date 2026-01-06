@@ -1,37 +1,84 @@
-export type ProjectStatus = "Draft" | "Pending" | "Active" | "In Review" | "Disputed" | "Completed" | "Cancelled";
-export type MilestoneStatus = "Draft" | "Locked" | "In Progress" | "In Review" | "Completed" | "Disputed" | "Released";
+export type ProjectStatus = "draft" | "active" | "in_dispute" | "completed" | "cancelled";
+export type MilestoneStatus = "awaiting_submission" | "submitted" | "approved" | "disputed" | "released";
+export type Currency = "NATIVE" | "USDT";
+export type UserRole = "client" | "freelancer" | "arbitrator";
+export type DisputeStatus = "open" | "voting" | "resolved";
 
 export interface User {
     id: string;
-    name: string;
-    role: "Client" | "Freelancer" | "Arbitrator";
-    walletAddress?: string;
-    avatar?: string;
-    reputation: number;
+    wallet_address: string;
+    display_name?: string | null;
+    bio?: string | null;
+    avatar_url?: string | null;
+    roles: UserRole[];
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Milestone {
-    id: number;
+    id: string;
+    project_id: string;
+    index: number;
     title: string;
     description?: string;
-    amount: string; // Keeping as string for now to support "1.5 ETH" format easily in UI, realistically would be BigInt or number
+    amount: string;
+    currency: Currency;
+    chain_id: number;
     deadline: string;
-    status: MilestoneStatus;
+    offchain_state: MilestoneStatus;
+    onchain_state?: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface Project {
-    id: number; // Using number for mock ID simplicity
-    pId?: string; // e.g. "PROJ-101"
+    id: string;
+    onchain_address: string;
+    client_wallet: string;
+    freelancer_wallet?: string;
+    chain_id: number;
     title: string;
-    client: string; // Client Name
-    clientAddress?: string;
-    freelancer?: string; // Freelancer Name
-    freelancerAddress?: string;
-    totalAmount: string; // e.g. "2.5 ETH"
-    releasedAmount: string;
-    status: ProjectStatus;
     description: string;
-    createdAt: string;
-    contractAddress?: string; // Mock address
-    milestones: Milestone[];
+    status: ProjectStatus;
+    created_at: string;
+    updated_at: string;
+    milestones?: Milestone[];
+}
+
+export interface Dispute {
+    id: string;
+    project_id: string;
+    milestone_id?: string;
+    opened_by: string;
+    status: DisputeStatus;
+    resolution?: {
+        split_percent?: number;
+        decision?: string;
+        votes?: Record<string, string>;
+    };
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Message {
+    id: string;
+    project_id: string;
+    milestone_id?: string;
+    sender_id: string;
+    content: string;
+    attachments?: Array<{
+        url: string;
+        name: string;
+        type: string;
+    }>;
+    created_at: string;
+}
+
+export interface ReputationEvent {
+    id: string;
+    user_id: string;
+    type: "completed_milestone" | "dispute_win" | "dispute_loss" | "late_delivery" | "review_received";
+    weight: number;
+    metadata?: Record<string, unknown>;
+    created_at: string;
 }

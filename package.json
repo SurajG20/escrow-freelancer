@@ -10,14 +10,24 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
+    "@reown/appkit": "^1.8.15",
+    "@reown/appkit-adapter-solana": "^1.8.15",
+    "@reown/appkit-adapter-wagmi": "^1.8.15",
+    "@solana/web3.js": "^1.98.4",
+    "@supabase/supabase-js": "^2.89.0",
+    "@tanstack/react-query": "^5.90.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.562.0",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "viem": "^2.43.5",
+    "wagmi": "^3.1.4",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

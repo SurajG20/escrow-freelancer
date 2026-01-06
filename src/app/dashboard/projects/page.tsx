@@ -1,24 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
-import { LayoutGrid, List, Plus, Search, Filter } from "lucide-react";
+import { LayoutGrid, List, Plus, Search, Filter, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { mockStore } from "@/lib/store";
-import { Project } from "@/types";
+import { useProjects } from "@/lib/hooks/useProjects";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { format } from "date-fns";
 
 export default function ProjectsPage() {
     const [view, setView] = useState<"list" | "board">("list");
-    const [projects, setProjects] = useState<Project[]>([]);
-
-    useEffect(() => {
-        // Simulate fetch from our mock store
-        setProjects(mockStore.getProjects());
-    }, []);
+    const [searchQuery, setSearchQuery] = useState("");
+    const { address } = useAuth();
+    const { data: projects = [], isLoading } = useProjects(
+        address ? { client_wallet: address.toLowerCase() } : undefined
+    );
 
     return (
         <div className="space-y-6">
@@ -40,7 +40,12 @@ export default function ProjectsPage() {
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                     <div className="relative w-full sm:w-64">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="Search projects..." className="pl-9 bg-white/50 border-transparent shadow-none" />
+                        <Input 
+                            placeholder="Search projects..." 
+                            className="pl-9 bg-white/50 border-transparent shadow-none"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </div>
                     <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-white/50">
                         <Filter className="h-4 w-4" />
@@ -81,72 +86,118 @@ export default function ProjectsPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-glass-border/50">
-                            {projects.map((project) => (
-                                <tr key={project.id} className="hover:bg-white/40 transition-colors group cursor-pointer" onClick={() => window.location.href = `/dashboard/projects/${project.id}`}>
-                                    <td className="px-6 py-4 font-medium text-foreground">{project.title}</td>
-                                    <td className="px-6 py-4 text-muted-foreground">{project.client}</td>
-                                    <td className="px-6 py-4 font-mono">{project.totalAmount}</td>
-                                    <td className="px-6 py-4">
-                                        <Badge
-                                            variant={
-                                                project.status === "Active" ? "success" :
-                                                    project.status === "Disputed" ? "destructive" :
-                                                        project.status === "Pending" ? "warning" : "default"
-                                            }
-                                            className="bg-opacity-10 dark:bg-opacity-20 backdrop-blur-sm"
-                                        >
-                                            {project.status}
-                                        </Badge>
-                                    </td>
-                                    {/* Mock Deadline logic or fetch from first milestone */}
-                                    <td className="px-6 py-4 text-right text-muted-foreground">
-                                        {project.milestones?.[0]?.deadline || "No deadline"}
-                                    </td>
-                                </tr>
-                            ))}
-                            {projects.length === 0 && (
+                            {isLoading ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">No projects found.</td>
+                                    <td colSpan={5} className="px-6 py-8 text-center">
+                                        <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                            Loading projects...
+                                        </div>
+                                    </td>
                                 </tr>
+                            ) : projects.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                                        No projects found. <Link href="/dashboard/projects/new" className="text-accent hover:underline">Create your first project</Link>
+                                    </td>
+                                </tr>
+                            ) : (
+                                projects
+                                    .filter((project) => 
+                                        !searchQuery || 
+                                        project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                        project.description.toLowerCase().includes(searchQuery.toLowerCase())
+                                    )
+                                    .map((project) => (
+                                        <tr 
+                                            key={project.id} 
+                                            className="hover:bg-white/40 transition-colors group cursor-pointer" 
+                                            onClick={() => window.location.href = `/dashboard/projects/${project.id}`}
+                                        >
+                                            <td className="px-6 py-4 font-medium text-foreground">{project.title}</td>
+                                            <td className="px-6 py-4 text-muted-foreground font-mono text-xs">
+                                                {project.freelancer_wallet 
+                                                    ? `${project.freelancer_wallet.substring(0, 6)}...${project.freelancer_wallet.substring(38)}`
+                                                    : "Not assigned"
+                                                }
+                                            </td>
+                                            <td className="px-6 py-4 font-mono text-sm">
+                                                {project.onchain_address ? "Deployed" : "Draft"}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <Badge
+                                                    variant={
+                                                        project.status === "active" ? "success" :
+                                                            project.status === "in_dispute" ? "destructive" :
+                                                                project.status === "draft" ? "warning" : "default"
+                                                    }
+                                                    className="bg-opacity-10 dark:bg-opacity-20 backdrop-blur-sm"
+                                                >
+                                                    {project.status.replace("_", " ")}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-6 py-4 text-right text-muted-foreground text-sm">
+                                                {format(new Date(project.created_at), "MMM d, yyyy")}
+                                            </td>
+                                        </tr>
+                                    ))
                             )}
                         </tbody>
                     </table>
                 </div>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {["Pending", "Active", "In Review", "Disputed"].map((col) => {
-                        const colProjects = projects.filter(p => p.status === col);
-                        return (
-                            <div key={col} className="space-y-4">
-                                <div className="flex items-center justify-between px-2">
-                                    <h3 className="font-medium text-sm text-muted-foreground">{col}</h3>
-                                    <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{colProjects.length}</span>
-                                </div>
-                                <div className="space-y-3">
-                                    {colProjects.map(project => (
-                                        <Link key={project.id} href={`/dashboard/projects/${project.id}`}>
-                                            <Card key={project.id} className="glass-card hover:border-accent/50 cursor-pointer transition-all p-4">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <Badge variant="outline" className="text-[10px] h-5">{project.client}</Badge>
-                                                    <span className="text-xs text-muted-foreground">{project.milestones?.[0]?.deadline || "N/A"}</span>
-                                                </div>
-                                                <h4 className="font-semibold mb-2">{project.title}</h4>
-                                                <div className="flex items-center justify-between mt-4">
-                                                    <div className="font-mono text-sm">{project.totalAmount}</div>
-                                                    <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-blue-400 to-purple-400" />
-                                                </div>
-                                            </Card>
-                                        </Link>
-                                    ))}
-                                    {colProjects.length === 0 && (
-                                        <div className="h-24 rounded-xl border border-dashed border-glass-border flex items-center justify-center text-xs text-muted-foreground">
-                                            Empty
-                                        </div>
-                                    )}
-                                </div>
+                    {isLoading ? (
+                        <div className="col-span-3 flex items-center justify-center py-12">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                                Loading projects...
                             </div>
-                        )
-                    })}
+                        </div>
+                    ) : (
+                        ["draft", "active", "in_dispute", "completed"].map((col) => {
+                            const colProjects = projects.filter(p => p.status === col);
+                            return (
+                                <div key={col} className="space-y-4">
+                                    <div className="flex items-center justify-between px-2">
+                                        <h3 className="font-medium text-sm text-muted-foreground capitalize">{col.replace("_", " ")}</h3>
+                                        <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{colProjects.length}</span>
+                                    </div>
+                                    <div className="space-y-3">
+                                        {colProjects.map(project => (
+                                            <Link key={project.id} href={`/dashboard/projects/${project.id}`}>
+                                                <Card className="glass-card hover:border-accent/50 cursor-pointer transition-all p-4">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <Badge variant="outline" className="text-[10px] h-5">
+                                                            {project.freelancer_wallet 
+                                                                ? `${project.freelancer_wallet.substring(0, 4)}...`
+                                                                : "Unassigned"
+                                                            }
+                                                        </Badge>
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {format(new Date(project.created_at), "MMM d")}
+                                                        </span>
+                                                    </div>
+                                                    <h4 className="font-semibold mb-2">{project.title}</h4>
+                                                    <div className="flex items-center justify-between mt-4">
+                                                        <div className="font-mono text-xs text-muted-foreground">
+                                                            {project.onchain_address ? "Deployed" : "Draft"}
+                                                        </div>
+                                                        <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-blue-400 to-purple-400" />
+                                                    </div>
+                                                </Card>
+                                            </Link>
+                                        ))}
+                                        {colProjects.length === 0 && (
+                                            <div className="h-24 rounded-xl border border-dashed border-glass-border flex items-center justify-center text-xs text-muted-foreground">
+                                                Empty
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                        })
+                    )}
                 </div>
             )}
         </div>

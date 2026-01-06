@@ -13,7 +13,7 @@ import { Project } from "@/types";
 // Note: params is a Promise in newer Next.js versions (15+)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function ProjectDetailPage({ params }: { params: any }) {
-    const [project, setProject] = useState<Project | null>(null);
+    const [project, setProject] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [txPending, setTxPending] = useState(false);
 
@@ -29,7 +29,7 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                 id = params.id;
             }
 
-            const data = mockStore.getProjectById(parseInt(id));
+            const data = mockStore.getProjectById(id);
             setProject(data || null);
             setLoading(false);
         };
@@ -38,19 +38,21 @@ export default function ProjectDetailPage({ params }: { params: any }) {
 
     const handleAction = async (action: string, milestoneId?: number) => {
         setTxPending(true);
-        await mockStore.simulateTransaction(1500); // 1.5s delay
+        await mockStore.simulateTransaction(1500);
 
         if (action === "submit" && milestoneId && project) {
-            mockStore.updateMilestoneStatus(project.id, milestoneId, "In Review");
+            mockStore.updateMilestoneStatus(project.id, milestoneId, "submitted");
         } else if (action === "approve" && milestoneId && project) {
-            mockStore.updateMilestoneStatus(project.id, milestoneId, "Completed");
+            mockStore.updateMilestoneStatus(project.id, milestoneId, "approved");
         } else if (action === "release_funds" && project) {
             // just mock visual effect
         }
 
-        // Refresh data
         if (project) {
-            setProject({ ...mockStore.getProjectById(project.id)! });
+            const updated = mockStore.getProjectById(project.id);
+            if (updated) {
+                setProject({ ...updated });
+            }
         }
         setTxPending(false);
     };
@@ -70,9 +72,9 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                 <div className="space-y-2">
                     <h1 className="text-3xl font-light tracking-tight">{project.title}</h1>
                     <div className="flex items-center gap-3">
-                        <Badge variant="outline" className="glass bg-white/50">{project.client}</Badge>
-                        <Badge variant={project.status === "Active" ? "success" : "default"} className="bg-emerald-500/10 text-emerald-600 border-none">{project.status}</Badge>
-                        <span className="text-sm text-muted-foreground font-mono">Contract: {project.contractAddress || "Pending"}</span>
+                        <Badge variant="outline" className="glass bg-white/50">{(project as any).client || "N/A"}</Badge>
+                        <Badge variant={project.status === "active" ? "success" : "default"} className="bg-emerald-500/10 text-emerald-600 border-none">{project.status}</Badge>
+                        <span className="text-sm text-muted-foreground font-mono">Contract: {(project as any).contractAddress || project.onchain_address || "Pending"}</span>
                     </div>
                 </div>
                 <div className="flex gap-3">
@@ -96,9 +98,8 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                     <div className="space-y-4">
                         <h2 className="text-xl font-semibold">Milestones</h2>
                         <div className="space-y-3">
-                            {project.milestones.map((milestone) => (
+                            {((project as any).milestones || []).map((milestone: any) => (
                                 <div key={milestone.id} className="group relative overflow-hidden rounded-xl border border-glass-border bg-glass p-5 hover:border-accent/30 transition-all duration-300">
-                                    {/* Progress Line */}
                                     <div className={cn(
                                         "absolute left-0 top-0 h-full w-1",
                                         milestone.status === "Completed" ? "bg-emerald-500" :
@@ -158,8 +159,8 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                                 <div className="absolute left-[15px] top-2 h-full w-0.5 bg-border -z-10" />
 
                                 {["Deposited", "Milestone Active", "In Review", "Completed"].map((step, i) => {
-                                    // Crude logic to highlight step based on ANY active milestone status for demo
-                                    const stepIndex = project.milestones.some(m => m.status === "In Review") ? 2 : project.milestones.some(m => m.status === "Completed") ? 3 : 1;
+                                    const mockMilestones = (project as any).milestones || [];
+                                    const stepIndex = mockMilestones.some((m: any) => m.status === "In Review") ? 2 : mockMilestones.some((m: any) => m.status === "Completed") ? 3 : 1;
                                     const isActive = i <= stepIndex;
 
                                     return (
@@ -186,11 +187,11 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                         <CardContent className="pt-6 space-y-4">
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-muted-foreground">Total Contract Value</span>
-                                <span className="font-mono font-medium text-lg">{project.totalAmount}</span>
+                                <span className="font-mono font-medium text-lg">{(project as any).totalAmount || "0"}</span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
                                 <span className="text-muted-foreground">Released so far</span>
-                                <span className="font-mono font-medium text-emerald-600">{project.releasedAmount}</span>
+                                <span className="font-mono font-medium text-emerald-600">{(project as any).releasedAmount || "0"}</span>
                             </div>
                             <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                                 <div className="h-full w-[40%] bg-emerald-500 rounded-full" />

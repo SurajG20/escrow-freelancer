@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Bell, Wallet, Mail, Shield, Smartphone } from "lucide-react";
+import { Wallet, Mail, Smartphone } from "lucide-react";
 
 export default function SettingsPage() {
     return (

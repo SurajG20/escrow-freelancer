@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { CheckCircle2, Briefcase, User, Shield } from "lucide-react";
+import { CheckCircle2, Briefcase, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function OnboardingPage() {

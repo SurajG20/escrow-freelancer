@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, CheckCircle2, Shield, Lock, Zap } from "lucide-react";
+import { ArrowRight, Shield, Lock, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function LandingPage() {
@@ -19,7 +19,7 @@ export default function LandingPage() {
             <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Sign In
             </Link>
-            <Link href="/dashboard">
+            <Link href="/login">
               <Button size="sm" variant="glass" className="hidden sm:inline-flex">
                 Launch App
               </Button>
@@ -46,7 +46,7 @@ export default function LandingPage() {
               Trustless, minimalist, and built for modern work.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/dashboard">
+              <Link href="/login">
                 <Button size="lg" className="h-12 px-8 text-base rounded-full shadow-lg shadow-accent/20">
                   Start an Escrow <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
