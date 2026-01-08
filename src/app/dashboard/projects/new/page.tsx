@@ -109,6 +109,28 @@ export default function NewProjectPage() {
         }, 0);
     };
 
+    const calculateTotalByCurrency = (currency: "NATIVE" | "USDT"): number => {
+        return milestones
+            .filter(m => m.currency === currency)
+            .reduce((sum, m) => {
+                const amount = parseFloat(m.amount) || 0;
+                return sum + amount;
+            }, 0);
+    };
+
+    const getPrimaryCurrency = (): { currency: "NATIVE" | "USDT" | "MIXED", symbol: string } => {
+        const nativeTotal = calculateTotalByCurrency("NATIVE");
+        const usdtTotal = calculateTotalByCurrency("USDT");
+        
+        if (nativeTotal > 0 && usdtTotal > 0) {
+            return { currency: "MIXED", symbol: "" };
+        } else if (usdtTotal > 0) {
+            return { currency: "USDT", symbol: "USDT" };
+        } else {
+            return { currency: "NATIVE", symbol: chainConfig?.nativeSymbol || "NATIVE" };
+        }
+    };
+
     const handleNext = () => {
         if (step === 1 && validateStep1()) {
             setStep(2);
@@ -395,53 +417,101 @@ export default function NewProjectPage() {
                         </div>
                     )}
 
-                    {step === 3 && (
-                        <div className="space-y-6 max-w-lg mx-auto py-4 text-center">
-                            <div className="h-16 w-16 bg-accent/10 rounded-full flex items-center justify-center text-accent mx-auto">
-                                <CheckCircle2 className="h-8 w-8" />
-                            </div>
-                            <h3 className="text-xl font-semibold">Ready to deploy?</h3>
-                            <div className="space-y-4 text-left">
-                                <div className="bg-glass/50 p-4 rounded-lg border border-glass-border">
-                                    <div className="text-sm text-muted-foreground mb-2">Project Summary</div>
-                                    <div className="font-medium">{title || "Untitled Project"}</div>
-                                    <div className="text-sm text-muted-foreground mt-1">{description.substring(0, 100)}{description.length > 100 ? "..." : ""}</div>
+                    {step === 3 && (() => {
+                        const primaryCurrency = getPrimaryCurrency();
+                        const nativeTotal = calculateTotalByCurrency("NATIVE");
+                        const usdtTotal = calculateTotalByCurrency("USDT");
+                        const nativeSymbol = chainConfig?.nativeSymbol || "ETH";
+                        
+                        return (
+                            <div className="space-y-6 max-w-lg mx-auto py-4 text-center">
+                                <div className="h-16 w-16 bg-accent/10 rounded-full flex items-center justify-center text-accent mx-auto">
+                                    <CheckCircle2 className="h-8 w-8" />
                                 </div>
-                                <div className="bg-muted/30 p-4 rounded-lg text-sm space-y-2 border border-glass-border">
-                                    <div className="flex justify-between">
-                                        <span>Number of Milestones</span>
-                                        <span className="font-medium">{milestones.length}</span>
+                                <h3 className="text-xl font-semibold">Ready to deploy?</h3>
+                                <div className="space-y-4 text-left">
+                                    <div className="bg-glass/50 p-4 rounded-lg border border-glass-border">
+                                        <div className="text-sm text-muted-foreground mb-2">Project Summary</div>
+                                        <div className="font-medium">{title || "Untitled Project"}</div>
+                                        <div className="text-sm text-muted-foreground mt-1">{description.substring(0, 100)}{description.length > 100 ? "..." : ""}</div>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span>Total Amount</span>
-                                        <span className="font-medium font-mono">
-                                            {calculateTotal().toFixed(3)} {chainConfig?.nativeSymbol || "ETH"}
-                                        </span>
+                                    <div className="bg-muted/30 p-4 rounded-lg text-sm space-y-2 border border-glass-border">
+                                        <div className="flex justify-between">
+                                            <span>Number of Milestones</span>
+                                            <span className="font-medium">{milestones.length}</span>
+                                        </div>
+                                        {primaryCurrency.currency === "MIXED" ? (
+                                            <>
+                                                <div className="flex justify-between">
+                                                    <span>Total Amount (NATIVE)</span>
+                                                    <span className="font-medium font-mono">
+                                                        {nativeTotal.toFixed(3)} {nativeSymbol}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span>Total Amount (USDT)</span>
+                                                    <span className="font-medium font-mono">
+                                                        {usdtTotal.toFixed(3)} USDT
+                                                    </span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex justify-between">
+                                                <span>Total Amount</span>
+                                                <span className="font-medium font-mono">
+                                                    {calculateTotal().toFixed(3)} {primaryCurrency.symbol}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div className="flex justify-between text-xs text-muted-foreground">
+                                            <span>Network Fee (Est.)</span>
+                                            <span>~0.001 {nativeSymbol}</span>
+                                        </div>
+                                        <div className="flex justify-between text-xs text-muted-foreground">
+                                            <span>Platform Fee</span>
+                                            <span>0% (Free)</span>
+                                        </div>
+                                        <div className="border-t border-border pt-2 mt-2 space-y-2">
+                                            <div className="flex justify-between font-bold">
+                                                <span>Total to Deposit</span>
+                                                <div className="flex flex-col items-end gap-1">
+                                                    {primaryCurrency.currency === "MIXED" ? (
+                                                        <>
+                                                            <span className="font-mono">
+                                                                {nativeTotal.toFixed(3)} {nativeSymbol}
+                                                            </span>
+                                                            <span className="font-mono text-xs font-normal">
+                                                                {usdtTotal.toFixed(3)} USDT
+                                                            </span>
+                                                        </>
+                                                    ) : primaryCurrency.currency === "USDT" ? (
+                                                        <span className="font-mono">
+                                                            {calculateTotal().toFixed(3)} USDT
+                                                        </span>
+                                                    ) : (
+                                                        <span className="font-mono">
+                                                            {(calculateTotal() + 0.001).toFixed(3)} {nativeSymbol}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            {primaryCurrency.currency === "USDT" && (
+                                                <div className="text-xs text-muted-foreground pt-1">
+                                                    + ~0.001 {nativeSymbol} for network fees
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between text-xs text-muted-foreground">
-                                        <span>Network Fee (Est.)</span>
-                                        <span>~0.001 {chainConfig?.nativeSymbol || "ETH"}</span>
-                                    </div>
-                                    <div className="flex justify-between text-xs text-muted-foreground">
-                                        <span>Platform Fee</span>
-                                        <span>0% (Free)</span>
-                                    </div>
-                                    <div className="border-t border-border pt-2 mt-2 flex justify-between font-bold">
-                                        <span>Total to Deposit</span>
-                                        <span className="font-mono">
-                                            {(calculateTotal() + 0.001).toFixed(3)} {chainConfig?.nativeSymbol || "ETH"}
-                                        </span>
-                                    </div>
+                                    {errors.submit && (
+                                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 flex items-start gap-2">
+                                            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                            <span>{errors.submit}</span>
+                                        </div>
+                                    )}
                                 </div>
-                                {errors.submit && (
-                                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 flex items-start gap-2">
-                                        <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                                        <span>{errors.submit}</span>
-                                    </div>
-                                )}
                             </div>
-                        </div>
-                    )}
+                        );
+                    })()}
                 </div>
 
                 <div className="pt-6 border-t border-glass-border flex justify-between">

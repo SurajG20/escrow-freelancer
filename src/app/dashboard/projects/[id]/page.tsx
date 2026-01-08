@@ -11,6 +11,7 @@ import { useProjectWithMilestones } from "@/lib/hooks/useProjects";
 import { useUpdateMilestone } from "@/lib/hooks/useMilestones";
 import { useCreateDispute } from "@/lib/hooks/useDisputes";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useWallet } from "@/lib/hooks/useWallet";
 import { format } from "date-fns";
 
 // Note: params is a Promise in newer Next.js versions (15+)
@@ -19,6 +20,7 @@ export default function ProjectDetailPage({ params }: { params: any }) {
     const [projectId, setProjectId] = useState<string | null>(null);
     const [txPending, setTxPending] = useState(false);
     const { address } = useAuth();
+    const { chainConfig } = useWallet();
     const updateMilestoneMutation = useUpdateMilestone();
     const createDisputeMutation = useCreateDispute();
 
@@ -177,7 +179,7 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                                                             <Clock className="h-3 w-3" /> {format(new Date(milestone.deadline), "MMM d, yyyy")}
                                                         </span>
                                                         <span className="flex items-center gap-1">
-                                                            <FileText className="h-3 w-3" /> {milestone.amount} {milestone.currency}
+                                                            <FileText className="h-3 w-3" /> {milestone.amount} {milestone.currency === "NATIVE" ? (chainConfig?.nativeSymbol || "NATIVE") : milestone.currency}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -261,18 +263,65 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                     {/* Summary Stats */}
                     <Card className="glass-card">
                         <CardContent className="pt-6 space-y-4">
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-muted-foreground">Total Contract Value</span>
-                                <span className="font-mono font-medium text-lg">
-                                    {project.milestones?.reduce((sum, m) => sum + parseFloat(m.amount || "0"), 0).toFixed(3) || "0"}
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-muted-foreground">Released so far</span>
-                                <span className="font-mono font-medium text-emerald-600">
-                                    {project.milestones?.filter(m => m.offchain_state === "released").reduce((sum, m) => sum + parseFloat(m.amount || "0"), 0).toFixed(3) || "0"}
-                                </span>
-                            </div>
+                            {(() => {
+                                const milestones = project.milestones || [];
+                                const nativeMilestones = milestones.filter(m => m.currency === "NATIVE");
+                                const usdtMilestones = milestones.filter(m => m.currency === "USDT");
+                                const nativeTotal = nativeMilestones.reduce((sum, m) => sum + parseFloat(m.amount || "0"), 0);
+                                const usdtTotal = usdtMilestones.reduce((sum, m) => sum + parseFloat(m.amount || "0"), 0);
+                                const nativeSymbol = chainConfig?.nativeSymbol || "NATIVE";
+                                
+                                return (
+                                    <>
+                                        {nativeTotal > 0 && usdtTotal > 0 ? (
+                                            <>
+                                                <div className="flex justify-between items-center text-sm">
+                                                    <span className="text-muted-foreground">Total Contract Value (NATIVE)</span>
+                                                    <span className="font-mono font-medium text-lg">
+                                                        {nativeTotal.toFixed(3)} {nativeSymbol}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center text-sm">
+                                                    <span className="text-muted-foreground">Total Contract Value (USDT)</span>
+                                                    <span className="font-mono font-medium text-lg">
+                                                        {usdtTotal.toFixed(3)} USDT
+                                                    </span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-muted-foreground">Total Contract Value</span>
+                                                <span className="font-mono font-medium text-lg">
+                                                    {(nativeTotal + usdtTotal).toFixed(3)} {nativeTotal > 0 ? nativeSymbol : "USDT"}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {nativeTotal > 0 && usdtTotal > 0 ? (
+                                            <>
+                                                <div className="flex justify-between items-center text-sm">
+                                                    <span className="text-muted-foreground">Released so far (NATIVE)</span>
+                                                    <span className="font-mono font-medium text-emerald-600">
+                                                        {nativeMilestones.filter(m => m.offchain_state === "released").reduce((sum, m) => sum + parseFloat(m.amount || "0"), 0).toFixed(3)} {nativeSymbol}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center text-sm">
+                                                    <span className="text-muted-foreground">Released so far (USDT)</span>
+                                                    <span className="font-mono font-medium text-emerald-600">
+                                                        {usdtMilestones.filter(m => m.offchain_state === "released").reduce((sum, m) => sum + parseFloat(m.amount || "0"), 0).toFixed(3)} USDT
+                                                    </span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-muted-foreground">Released so far</span>
+                                                <span className="font-mono font-medium text-emerald-600">
+                                                    {milestones.filter(m => m.offchain_state === "released").reduce((sum, m) => sum + parseFloat(m.amount || "0"), 0).toFixed(3)} {nativeTotal > 0 ? nativeSymbol : "USDT"}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </>
+                                );
+                            })()}
                             <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                                 {project.milestones && project.milestones.length > 0 ? (
                                     <div 
