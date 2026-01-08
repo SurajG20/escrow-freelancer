@@ -62,7 +62,7 @@ export async function createUser(user: {
   if (error) {
     if (error.code === "42501") {
       throw new Error(
-        "Permission denied: RLS policy violation. Please run the fix-rls.sql script in Supabase."
+        "Permission denied: RLS policy violation. Please run the init.sql script in Supabase."
       );
     }
     if (error.code === "PGRST116") {
