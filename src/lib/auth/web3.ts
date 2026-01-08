@@ -3,6 +3,7 @@ import { useAccount, useSignMessage } from "wagmi";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { createUser, getUserByWallet } from "../api/users";
 import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
+import type { User } from "@/types";
 
 export interface Web3AuthResult {
   user: SupabaseUser | null;
@@ -60,12 +61,8 @@ export async function signInWithWeb3(
       throw new Error("Invalid signature");
     }
 
-    await ensureUserProfile(address);
-
-    const user = await getUserByWallet(address);
-    if (!user) {
-      throw new Error("Failed to create user profile");
-    }
+    // Ensure user exists (creates if needed) and get the user
+    const user = await ensureUserProfile(address);
 
     const sessionToken = btoa(JSON.stringify({
       wallet_address: address,
@@ -129,16 +126,21 @@ export async function signInWithWeb3(
 
 async function ensureUserProfile(
   walletAddress: string
-) {
+): Promise<User> {
   try {
     const existingUser = await getUserByWallet(walletAddress);
 
-    if (!existingUser) {
-      await createUser({
-        wallet_address: walletAddress,
-        roles: ["client"],
-      });
+    if (existingUser) {
+      return existingUser;
     }
+
+    // User doesn't exist, create them
+    const newUser = await createUser({
+      wallet_address: walletAddress,
+      roles: ["client"],
+    });
+
+    return newUser;
   } catch (error) {
     console.error("Failed to ensure user profile:", error);
     throw error;

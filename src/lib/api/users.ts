@@ -7,13 +7,14 @@ export async function getUserByWallet(walletAddress: string): Promise<User | nul
     .from("users")
     .select("*")
     .eq("wallet_address", walletAddress.toLowerCase())
-    .single();
+    .maybeSingle();
 
   if (error) {
-    if (error.code === "PGRST116") {
-      return null;
-    }
     throw new Error(`Failed to fetch user: ${error.message}`);
+  }
+
+  if (!data) {
+    return null;
   }
 
   return userSchema.parse(data);
@@ -24,13 +25,14 @@ export async function getUser(id: string): Promise<User | null> {
     .from("users")
     .select("*")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
   if (error) {
-    if (error.code === "PGRST116") {
-      return null;
-    }
     throw new Error(`Failed to fetch user: ${error.message}`);
+  }
+
+  if (!data) {
+    return null;
   }
 
   return userSchema.parse(data);

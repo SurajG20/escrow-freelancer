@@ -3,10 +3,16 @@ import { useWeb3Auth, signOut } from "../auth/web3";
 import { useUserByWallet } from "./useUser";
 import { useEffect, useState } from "react";
 
+interface SessionData {
+  wallet_address: string;
+  signature?: string;
+  timestamp: number;
+}
+
 export function useAuth() {
   const queryClient = useQueryClient();
   const web3Auth = useWeb3Auth();
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,17 +22,18 @@ export function useAuth() {
 
       if (sessionToken && walletAddress) {
         try {
-          const sessionData = JSON.parse(atob(sessionToken));
+          const sessionData = JSON.parse(atob(sessionToken)) as SessionData;
           if (sessionData.wallet_address === walletAddress) {
             const expiresAt = sessionData.timestamp + 3600000;
             if (Date.now() < expiresAt) {
-              setSession({ wallet_address: walletAddress, ...sessionData });
+              // eslint-disable-next-line react-hooks/exhaustive-deps
+              setSession(sessionData);
             } else {
               localStorage.removeItem("web3_session");
               localStorage.removeItem("web3_wallet");
             }
           }
-        } catch (error) {
+        } catch {
           localStorage.removeItem("web3_session");
           localStorage.removeItem("web3_wallet");
         }
@@ -42,10 +49,32 @@ export function useAuth() {
   const signInMutation = useMutation({
     mutationFn: () => web3Auth.signIn(),
     onSuccess: (data) => {
-      if (data.session) {
-        setSession(data.session);
+      
+      if (data.error) {
+        console.error("Sign in returned error:", data.error);
+        return;
       }
+
+      if (data.session) {
+        const sessionToken = typeof window !== "undefined" ? localStorage.getItem("web3_session") : null;
+        const walletAddress = typeof window !== "undefined" ? localStorage.getItem("web3_wallet") : null;
+        
+        if (sessionToken && walletAddress) {
+          try {
+            const sessionData = JSON.parse(atob(sessionToken)) as SessionData;
+            if (sessionData.wallet_address === walletAddress) {
+              setSession(sessionData);
+            }
+          } catch (error) {
+            console.error("Failed to parse session token:", error);
+          }
+        }
+      }
+      
       queryClient.invalidateQueries({ queryKey: ["user"] });
+    },
+    onError: (error) => {
+      console.error("Sign in mutation error:", error);
     },
   });
 
