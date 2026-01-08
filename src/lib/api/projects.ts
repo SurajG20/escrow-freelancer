@@ -104,6 +104,7 @@ export async function updateProject(
     description: string;
     status: string;
     freelancer_wallet: string;
+    onchain_address: string;
   }>
 ): Promise<Project> {
   const { data, error } = await supabase

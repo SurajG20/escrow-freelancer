@@ -1,7 +1,7 @@
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { SolanaAdapter } from "@reown/appkit-adapter-solana";
 import { bsc, bscTestnet } from "wagmi/chains";
+import { getNetworkMode } from "@/lib/config/chains";
 
 const projectId = process.env.NEXT_PUBLIC_REOWN_PROJECT_ID || "";
 
@@ -26,11 +26,12 @@ const wagmiAdapter = new WagmiAdapter({
   ssr: true,
 });
 
-const solanaAdapter = new SolanaAdapter();
+// Get default network based on environment
+const defaultNetwork = getNetworkMode() === "mainnet" ? bsc : bscTestnet;
 
 export const appKit = createAppKit({
-  adapters: [wagmiAdapter, solanaAdapter],
-  networks: [bsc],
+  adapters: [wagmiAdapter],
+  networks: [defaultNetwork],
   projectId,
   metadata,
   features: {

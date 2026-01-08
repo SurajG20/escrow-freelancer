@@ -7,11 +7,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { ArrowLeft, CheckCircle2, Clock, FileText, Send, Shield, AlertTriangle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useProjectWithMilestones } from "@/lib/hooks/useProjects";
+import { useProjectWithMilestones, useUpdateProject } from "@/lib/hooks/useProjects";
 import { useUpdateMilestone } from "@/lib/hooks/useMilestones";
 import { useCreateDispute } from "@/lib/hooks/useDisputes";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useWallet } from "@/lib/hooks/useWallet";
+import { useWalletClient } from "wagmi";
+import { deployEscrowContract } from "@/lib/contracts/deploy";
+import { depositFunds } from "@/lib/contracts/escrow";
 import { format } from "date-fns";
 
 // Note: params is a Promise in newer Next.js versions (15+)
@@ -19,10 +22,13 @@ import { format } from "date-fns";
 export default function ProjectDetailPage({ params }: { params: any }) {
     const [projectId, setProjectId] = useState<string | null>(null);
     const [txPending, setTxPending] = useState(false);
+    const [depositError, setDepositError] = useState<string | null>(null);
     const { address } = useAuth();
-    const { chainConfig } = useWallet();
+    const { chainId, chainConfig } = useWallet();
+    const { data: walletClient } = useWalletClient();
     const updateMilestoneMutation = useUpdateMilestone();
     const createDisputeMutation = useCreateDispute();
+    const updateProjectMutation = useUpdateProject();
 
     useEffect(() => {
         const loadParams = async () => {
@@ -83,6 +89,97 @@ export default function ProjectDetailPage({ params }: { params: any }) {
         }
     };
 
+    const handleDepositFunds = async () => {
+        if (!project || !address || !chainId || !chainConfig) {
+            setDepositError("Please connect your wallet");
+            return;
+        }
+
+        // Check if user is the client
+        const isClient = address.toLowerCase() === project.client_wallet.toLowerCase();
+        if (!isClient) {
+            setDepositError("Only the client can deposit funds");
+            return;
+        }
+
+        // Check if project is in draft status
+        if (project.status !== "draft") {
+            setDepositError("Project is not in draft status");
+            return;
+        }
+
+        // Check if contract is already deployed
+        if (project.onchain_address && project.onchain_address !== `0x${Math.random().toString(16).substring(2, 42)}`) {
+            setDepositError("Contract already deployed");
+            return;
+        }
+
+        setTxPending(true);
+        setDepositError(null);
+
+        try {
+            const milestones = project.milestones || [];
+            
+            if (!walletClient) {
+                throw new Error("Wallet client not available");
+            }
+
+            // Step 1 - Deploy escrow smart contract via factory
+            const deployResult = await deployEscrowContract({
+                clientWallet: project.client_wallet,
+                freelancerWallet: project.freelancer_wallet || "",
+                milestones: milestones.map(m => ({
+                    amount: m.amount,
+                    currency: m.currency,
+                })),
+                chainId: chainId as number,
+            }, walletClient);
+
+            const deployedContractAddress = deployResult.contractAddress;
+            console.log("Escrow contract deployed:", deployedContractAddress);
+
+            // Step 2 - Deposit funds into contract
+            // Calculate total amounts by currency
+            const nativeTotal = milestones
+                .filter(m => m.currency === "NATIVE")
+                .reduce((sum, m) => sum + parseFloat(m.amount || "0"), 0);
+            const usdtTotal = milestones
+                .filter(m => m.currency === "USDT")
+                .reduce((sum, m) => sum + parseFloat(m.amount || "0"), 0);
+
+            // Deposit native tokens if any
+            if (nativeTotal > 0) {
+                await depositFunds(deployedContractAddress, nativeTotal.toString(), "NATIVE", walletClient);
+                console.log(`Deposited ${nativeTotal} ${chainConfig.nativeSymbol}`);
+            }
+
+            // Deposit USDT tokens if any
+            if (usdtTotal > 0) {
+                await depositFunds(deployedContractAddress, usdtTotal.toString(), "USDT", walletClient);
+                console.log(`Deposited ${usdtTotal} USDT`);
+            }
+
+            // Step 3 - Update project with contract address and status
+            await updateProjectMutation.mutateAsync({
+                id: project.id,
+                updates: {
+                    onchain_address: deployedContractAddress,
+                    status: "active",
+                },
+            });
+
+            await refetch();
+            
+            // Show success message
+            alert("Funds deposited successfully! Project is now active.");
+        } catch (error) {
+            console.error("Failed to deposit funds:", error);
+            setDepositError(error instanceof Error ? error.message : "Failed to deposit funds");
+        } finally {
+            setTxPending(false);
+        }
+    };
+
     if (isLoading || !projectId) {
         return (
             <div className="p-10 text-center">
@@ -127,10 +224,48 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                     </div>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" className="glass bg-white/40">View Contract</Button>
-                    <Button disabled={txPending}>Deposit Funds</Button>
+                    {project.onchain_address && project.onchain_address !== "Pending" && (
+                        <Button 
+                            variant="outline" 
+                            className="glass bg-white/40"
+                            onClick={() => {
+                                const explorerUrl = chainConfig?.blockExplorerUrl || "https://bscscan.com";
+                                window.open(`${explorerUrl}/address/${project.onchain_address}`, "_blank");
+                            }}
+                        >
+                            View Contract
+                        </Button>
+                    )}
+                    {project.status === "draft" && address?.toLowerCase() === project.client_wallet.toLowerCase() && (
+                        <Button 
+                            onClick={handleDepositFunds}
+                            disabled={txPending || !address}
+                            className="gap-2"
+                        >
+                            {txPending ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Depositing...
+                                </>
+                            ) : (
+                                "Deposit Funds"
+                            )}
+                        </Button>
+                    )}
+                    {project.status === "active" && (
+                        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-200">
+                            Active
+                        </Badge>
+                    )}
                 </div>
             </div>
+
+            {depositError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <span>{depositError}</span>
+                </div>
+            )}
 
             <div className="grid lg:grid-cols-3 gap-6">
                 {/* Main Content: Milestones & Description */}

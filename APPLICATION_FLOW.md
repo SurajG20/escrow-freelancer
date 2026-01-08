@@ -132,6 +132,93 @@ Redirects to /dashboard/projects/[id]
 
 ---
 
+## Deposit Funds & Smart Contract Deployment Flow
+
+### Overview
+
+When a project is created, it starts with `status: "draft"` and a placeholder `onchain_address`. The project becomes active only after funds are deposited into a deployed smart contract.
+
+### Recommended Approach: Factory Contract Pattern
+
+**Option 1: Factory Contract (Recommended)**
+- Deploy a single factory contract that creates escrow contracts per project
+- More gas efficient (factory contract deployed once)
+- Easier to upgrade/maintain
+- Each project gets its own escrow contract instance
+
+**Option 2: Individual Contracts**
+- Deploy a new escrow contract for each project
+- More gas cost per project
+- More flexibility per contract
+
+**Option 3: Shared Escrow Contract**
+- Single escrow contract managing multiple projects
+- Most gas efficient
+- More complex state management
+- Potential for contract size limits
+
+### Deposit Funds Flow
+
+```
+Project created (status: "draft", onchain_address: placeholder)
+    ↓
+User clicks "Deposit Funds" on project detail page
+    ↓
+1. Deploy Escrow Smart Contract (or create via factory)
+   - Contract parameters:
+     * client_wallet: Project client address
+     * freelancer_wallet: Project freelancer address
+     * milestones: Array of milestone amounts and currencies
+     * chain_id: Network chain ID
+    ↓
+2. Contract deployed → Get contract address
+    ↓
+3. Update project in database:
+   - onchain_address: Deployed contract address
+   - status: "draft" → "active"
+    ↓
+4. Deposit funds into contract:
+   - If NATIVE: Send native tokens (BNB, ETH, SOL)
+   - If USDT: Approve and transfer USDT tokens
+   - Total amount = sum of all milestone amounts
+    ↓
+5. Verify deposit on-chain
+    ↓
+6. Project status: "active"
+   - Milestones can now be managed
+   - Funds are locked in escrow
+```
+
+### Smart Contract Requirements
+
+The escrow contract should support:
+
+1. **Deposit**: Accept funds (NATIVE or USDT) from client
+2. **Release**: Release funds to freelancer when milestone is approved
+3. **Refund**: Allow client to cancel and refund (if project cancelled)
+4. **Dispute**: Lock funds during dispute resolution
+5. **Multi-currency**: Handle both native tokens and USDT
+6. **Milestone-based**: Track individual milestone releases
+
+### Implementation Status
+
+- ✅ Frontend deposit button and UI
+- ✅ Database schema supports onchain_address and status
+- ⏳ Smart contract deployment logic (to be implemented)
+- ⏳ On-chain deposit functionality (to be implemented)
+- ⏳ Contract verification and status updates (to be implemented)
+
+### Files
+
+- `src/app/dashboard/projects/[id]/page.tsx` - Deposit funds button
+- `src/lib/api/projects.ts` - Update project with contract address
+- `src/lib/contracts/` - Smart contract utilities (to be created)
+  - `deploy.ts` - Contract deployment logic
+  - `escrow.ts` - Escrow contract interaction
+  - `types.ts` - Contract type definitions
+
+---
+
 ## Project Detail & Milestone Workflow
 
 ### Milestone State Machine

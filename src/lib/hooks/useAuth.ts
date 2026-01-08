@@ -88,8 +88,7 @@ export function useAuth() {
 
   const isAuthenticated =
     !!session &&
-    !!web3Auth.isAuthenticated &&
-    session.wallet_address?.toLowerCase() === web3Auth.address?.toLowerCase();
+    (!web3Auth.address || session.wallet_address?.toLowerCase() === web3Auth.address?.toLowerCase());
 
   return {
     session,
