@@ -212,7 +212,7 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                 <div className="space-y-2">
                     <h1 className="text-3xl font-light tracking-tight">{project.title}</h1>
                     <div className="flex items-center gap-3">
-                        <Badge variant="outline" className="glass bg-white/50">
+                        <Badge variant="outline" className="bg-white/50">
                             {project.client_wallet.substring(0, 6)}...{project.client_wallet.substring(38)}
                         </Badge>
                         <Badge variant={project.status === "active" ? "success" : "default"} className="bg-emerald-500/10 text-emerald-600 border-none">
@@ -227,7 +227,7 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                     {project.onchain_address && project.onchain_address !== "Pending" && (
                         <Button 
                             variant="outline" 
-                            className="glass bg-white/40"
+                            className="bg-white/40"
                             onClick={() => {
                                 const explorerUrl = chainConfig?.blockExplorerUrl || "https://bscscan.com";
                                 window.open(`${explorerUrl}/address/${project.onchain_address}`, "_blank");
@@ -270,7 +270,7 @@ export default function ProjectDetailPage({ params }: { params: any }) {
             <div className="grid lg:grid-cols-3 gap-6">
                 {/* Main Content: Milestones & Description */}
                 <div className="lg:col-span-2 space-y-6">
-                    <Card className="glass-card">
+                    <Card className="">
                         <CardHeader>
                             <CardTitle className="text-lg">Description</CardTitle>
                         </CardHeader>
@@ -289,7 +289,7 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                                     const canApprove = isClient && milestone.offchain_state === "submitted";
 
                                     return (
-                                        <div key={milestone.id} className="group relative overflow-hidden rounded-xl border border-glass-border bg-glass p-5 hover:border-accent/30 transition-all duration-300">
+                                        <div key={milestone.id} className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-5 hover:border-accent/30 transition-all duration-300">
                                             <div className={cn(
                                                 "absolute left-0 top-0 h-full w-1",
                                                 milestone.offchain_state === "released" ? "bg-emerald-500" :
@@ -358,7 +358,7 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                 {/* Sidebar: State & Summary */}
                 <div className="space-y-6">
                     {/* Contract State Visualizer */}
-                    <Card className="glass-card bg-gradient-to-br from-glass to-accent/5 overflow-hidden">
+                    <Card className=" bg-gradient-to-br from-white to-accent/5 overflow-hidden">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                                 <Shield className="h-4 w-4" /> Escrow State
@@ -396,7 +396,7 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                     </Card>
 
                     {/* Summary Stats */}
-                    <Card className="glass-card">
+                    <Card className="">
                         <CardContent className="pt-6 space-y-4">
                             {(() => {
                                 const milestones = project.milestones || [];
@@ -470,7 +470,7 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                                 )}
                             </div>
 
-                            <div className="pt-4 border-t border-glass-border">
+                            <div className="pt-4 border-t border-slate-200">
                                 <Button 
                                     variant="ghost" 
                                     className="w-full text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -484,8 +484,8 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                     </Card>
 
                     {/* Chat/Activity Placeholder */}
-                    <Card className="glass-card h-64 flex flex-col">
-                        <CardHeader className="pb-2 border-b border-glass-border">
+                    <Card className=" h-64 flex flex-col">
+                        <CardHeader className="pb-2 border-b border-slate-200">
                             <CardTitle className="text-sm">Activity</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-1 overflow-y-auto pt-4 space-y-4">
@@ -497,7 +497,7 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                                 </div>
                             </div>
                         </CardContent>
-                        <div className="p-3 border-t border-glass-border">
+                        <div className="p-3 border-t border-slate-200">
                             <div className="relative">
                                 <input className="w-full bg-muted/50 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent" placeholder="Type a message..." />
                                 <Send className="absolute right-3 top-2 h-4 w-4 text-muted-foreground" />

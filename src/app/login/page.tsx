@@ -36,7 +36,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md glass-card text-center">
+      <Card className="w-full max-w-md text-center">
         <CardHeader className="pb-8">
           <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-accent/20 flex items-center justify-center text-accent">
             <Wallet className="h-6 w-6" />
@@ -52,7 +52,7 @@ export default function LoginPage() {
               <Button
                 onClick={handleConnect}
                 variant="default"
-                className="w-full h-14"
+                className="w-full h-14 "
                 size="lg"
               >
                 <Wallet className="mr-2 h-5 w-5" />
@@ -65,12 +65,12 @@ export default function LoginPage() {
           ) : (
             <>
               <div className="space-y-3">
-                <div className="rounded-lg border border-glass-border bg-glass/50 p-4 text-left">
+                <div className="rounded-lg border bg-muted/50 p-4 text-left">
                   <div className="text-sm text-muted-foreground mb-1">Wallet Address</div>
                   <div className="font-mono text-sm break-all">{address}</div>
                 </div>
                 {chainConfig && (
-                  <div className="rounded-lg border border-glass-border bg-glass/50 p-4 text-left">
+                  <div className="rounded-lg border bg-muted/50 p-4 text-left">
                     <div className="text-sm text-muted-foreground mb-1">Network</div>
                     <div className="font-medium">{chainConfig.name}</div>
                   </div>
@@ -92,7 +92,7 @@ export default function LoginPage() {
                 <Button
                   onClick={handleSignIn}
                   variant="default"
-                  className="w-full h-14"
+                  className="w-full h-14 hover:bg-accent hover:shadow-sm"
                   size="lg"
                   disabled={isLoading}
                 >
@@ -132,7 +132,7 @@ export default function LoginPage() {
               <Button
                 onClick={handleConnect}
                 variant="outline"
-                className="w-full"
+                className="w-full hover:bg-background hover:text-foreground"
                 size="sm"
               >
                 Change Wallet
@@ -146,7 +146,7 @@ export default function LoginPage() {
               href="https://ethereum.org/en/wallets/"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-foreground"
+              className="underline"
             >
               Learn how to create a wallet
             </a>

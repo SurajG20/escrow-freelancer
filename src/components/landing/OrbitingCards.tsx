@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { CheckCircle2, Lock, FileText, AlertCircle } from "lucide-react";
 
 const milestones = [
-  { id: 1, label: "Funded", icon: Lock, color: "text-cyan-400", delay: 0 },
+  { id: 1, label: "Funded", icon: Lock, color: "text-indigo-400", delay: 0 },
   { id: 2, label: "Submitted", icon: FileText, color: "text-blue-400", delay: 15 },
   { id: 3, label: "Released ✓", icon: CheckCircle2, color: "text-emerald-400", delay: 30 },
   { id: 4, label: "Resolved", icon: AlertCircle, color: "text-amber-400", delay: 45 },
@@ -32,7 +32,7 @@ export function OrbitingCards() {
         return (
           <motion.div
             key={milestone.id}
-            className="absolute glass-card w-[90px] h-[90px] md:w-[120px] md:h-[120px] rounded-2xl flex flex-col items-center justify-center gap-1 md:gap-2 pointer-events-auto cursor-pointer"
+            className="absolute w-[90px] h-[90px] md:w-[120px] md:h-[120px] rounded-2xl flex flex-col items-center justify-center gap-1 md:gap-2 pointer-events-auto cursor-pointer border border-slate-200 bg-white shadow-sm"
             initial={{
               x: Math.cos((baseAngle * Math.PI) / 180) * radius,
               y: Math.sin((baseAngle * Math.PI) / 180) * radius,

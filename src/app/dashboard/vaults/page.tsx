@@ -53,7 +53,7 @@ export default function VaultsPage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
-                <Card className="glass-card bg-gradient-to-br from-accent/10 to-glass">
+                <Card className=" bg-gradient-to-br from-accent/10 to-white">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">Total Value Locked</CardTitle>
                         <Lock className="h-4 w-4 text-accent" />
@@ -63,7 +63,7 @@ export default function VaultsPage() {
                         <p className="text-xs text-muted-foreground mt-1">Across {stats.activeProjectsCount} active projects</p>
                     </CardContent>
                 </Card>
-                <Card className="glass-card">
+                <Card className="">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">Pending Release</CardTitle>
                         <ArrowUpRight className="h-4 w-4 text-emerald-500" />
@@ -73,7 +73,7 @@ export default function VaultsPage() {
                         <p className="text-xs text-muted-foreground mt-1">Next 7 days</p>
                     </CardContent>
                 </Card>
-                <Card className="glass-card">
+                <Card className="">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">Available to Withdraw</CardTitle>
                         <Wallet className="h-4 w-4 text-blue-500" />
@@ -87,7 +87,7 @@ export default function VaultsPage() {
                 </Card>
             </div>
 
-            <Card className="glass-card">
+            <Card className="">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <History className="h-5 w-5" /> Recent Projects
@@ -102,7 +102,7 @@ export default function VaultsPage() {
                     ) : (
                         <div className="space-y-4">
                             {activeProjects.slice(0, 5).map((project) => (
-                                <div key={project.id} className="flex items-center justify-between p-4 rounded-xl border border-glass-border bg-white/40 hover:bg-white/60 transition-colors">
+                                <div key={project.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white/40 hover:bg-white/60 transition-colors">
                                     <div className="flex items-center gap-4">
                                         <div className="h-10 w-10 rounded-full flex items-center justify-center bg-blue-100 text-blue-600">
                                             <Lock className="h-5 w-5" />

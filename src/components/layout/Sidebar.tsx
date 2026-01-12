@@ -36,11 +36,11 @@ export function Sidebar() {
             onMouseLeave={() => setIsExpanded(false)}
         >
             <div className="flex h-14 items-center justify-center border-b border-slate-200/50">
-                <div className="h-7 w-7 rounded-lg bg-slate-900 flex items-center justify-center">
+                <div className="h-7 w-7 rounded-lg bg-accent flex items-center justify-center">
                     <span className="text-xs font-semibold text-white">E</span>
                 </div>
                 {isExpanded && (
-                    <span className="ml-3 text-sm font-semibold text-slate-900 tracking-tight">
+                    <span className="ml-3 text-sm font-semibold text-foreground tracking-tight">
                         Escrow
                     </span>
                 )}
@@ -56,12 +56,12 @@ export function Sidebar() {
                             className={cn(
                                 "flex items-center rounded-lg px-3 py-2.5 transition-all duration-200 group relative text-sm",
                                 isActive
-                                    ? "bg-slate-900 text-white font-semibold"
-                                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                                    ? "bg-accent text-white font-semibold"
+                                    : "text-muted-foreground hover:bg-accent/10 hover:text-accent"
                             )}
                             aria-label={item.name}
                         >
-                            <item.icon className={cn("h-4 w-4 min-w-[1rem] flex-shrink-0", isActive ? "text-white" : "text-slate-500")} />
+                            <item.icon className={cn("h-4 w-4 min-w-[1rem] flex-shrink-0", isActive ? "text-white" : "text-muted-foreground group-hover:text-accent")} />
 
                             {isExpanded && (
                                 <span className="ml-3 whitespace-nowrap">
@@ -70,7 +70,7 @@ export function Sidebar() {
                             )}
 
                             {!isExpanded && (
-                                <div className="absolute left-full ml-3 hidden rounded-md bg-slate-900 px-2 py-1.5 text-xs text-white shadow-md group-hover:block z-50 whitespace-nowrap">
+                                <div className="absolute left-full ml-3 hidden rounded-md bg-accent px-2 py-1.5 text-xs text-white shadow-md group-hover:block z-50 whitespace-nowrap">
                                     {item.name}
                                 </div>
                             )}

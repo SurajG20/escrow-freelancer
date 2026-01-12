@@ -54,7 +54,7 @@ export default function SettingsPage() {
         <div className="max-w-3xl space-y-6">
             <h1 className="text-3xl font-light tracking-tight">Settings</h1>
 
-            <Card className="glass-card">
+            <Card className="">
                 <CardHeader>
                     <CardTitle>Account Information</CardTitle>
                     <CardDescription>Manage your profile details and linked accounts.</CardDescription>
@@ -71,7 +71,7 @@ export default function SettingsPage() {
                     <div className="grid gap-2">
                         <label className="text-sm font-medium">Bio</label>
                         <textarea
-                            className="w-full min-h-[100px] px-3 py-2 rounded-lg border border-glass-border bg-white/50 focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none"
+                            className="w-full min-h-[100px] px-3 py-2 rounded-lg border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none"
                             value={bio}
                             onChange={(e) => setBio(e.target.value)}
                             placeholder="Tell us about yourself..."
@@ -116,14 +116,14 @@ export default function SettingsPage() {
                 </CardContent>
             </Card>
 
-            <Card className="glass-card">
+            <Card className="">
                 <CardHeader>
                     <CardTitle>Connected Wallets</CardTitle>
                     <CardDescription>Manage wallets used for signing transactions.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {address ? (
-                        <div className="flex items-center justify-between p-3 rounded-lg border border-glass-border bg-white/40">
+                        <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-white/40">
                             <div className="flex items-center gap-3">
                                 <div className="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center">
                                     <Wallet className="h-4 w-4 text-purple-600" />
@@ -144,7 +144,7 @@ export default function SettingsPage() {
                 </CardContent>
             </Card>
 
-            <Card className="glass-card">
+            <Card className="">
                 <CardHeader>
                     <CardTitle>Notifications</CardTitle>
                     <CardDescription>Configure how you receive updates.</CardDescription>

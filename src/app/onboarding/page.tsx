@@ -31,7 +31,7 @@ export default function OnboardingPage() {
                     <div className={cn("h-1 w-12 rounded-full transition-colors", step >= 2 ? "bg-accent" : "bg-muted")} />
                 </div>
 
-                <Card className="glass-card">
+                <Card className="">
                     {step === 1 ? (
                         <>
                             <CardHeader className="text-center">
@@ -43,7 +43,7 @@ export default function OnboardingPage() {
                                     onClick={() => setRole("client")}
                                     className={cn(
                                         "cursor-pointer rounded-xl border p-4 transition-all hover:bg-muted/50 flex items-center gap-4",
-                                        role === "client" ? "border-accent bg-accent/5 ring-1 ring-accent" : "border-glass-border hover:border-foreground/20"
+                                        role === "client" ? "border-accent bg-accent/5 ring-1 ring-accent" : "border-slate-200 hover:border-foreground/20"
                                     )}
                                 >
                                     <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
@@ -60,7 +60,7 @@ export default function OnboardingPage() {
                                     onClick={() => setRole("freelancer")}
                                     className={cn(
                                         "cursor-pointer rounded-xl border p-4 transition-all hover:bg-muted/50 flex items-center gap-4",
-                                        role === "freelancer" ? "border-accent bg-accent/5 ring-1 ring-accent" : "border-glass-border hover:border-foreground/20"
+                                        role === "freelancer" ? "border-accent bg-accent/5 ring-1 ring-accent" : "border-slate-200 hover:border-foreground/20"
                                     )}
                                 >
                                     <div className="h-10 w-10 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">

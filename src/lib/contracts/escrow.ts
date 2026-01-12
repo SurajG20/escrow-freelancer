@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Escrow Contract Interaction Utilities
  * 

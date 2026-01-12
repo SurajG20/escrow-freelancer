@@ -229,7 +229,7 @@ export default function NewProjectPage() {
             </div>
 
             {/* Step Content */}
-            <Card className="glass-card min-h-[400px] flex flex-col">
+            <Card className=" min-h-[400px] flex flex-col">
                 <div className="flex-1 p-2">
                     {step === 1 && (
                         <div className="space-y-4 max-w-lg mx-auto py-4">
@@ -252,7 +252,7 @@ export default function NewProjectPage() {
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Description *</label>
                                 <textarea
-                                    className="w-full min-h-[100px] px-3 py-2 rounded-lg border border-glass-border bg-white/50 focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none"
+                                    className="w-full min-h-[100px] px-3 py-2 rounded-lg border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none"
                                     placeholder="Describe the project scope and requirements..."
                                     value={description}
                                     onChange={(e) => {
@@ -309,7 +309,7 @@ export default function NewProjectPage() {
                                 </p>
                             </div>
                             {chainConfig && (
-                                <div className="rounded-lg border border-glass-border bg-glass/50 p-3 text-sm">
+                                <div className="rounded-lg border border-slate-200 bg-white/50 p-3 text-sm">
                                     <div className="text-muted-foreground mb-1">Network</div>
                                     <div className="font-medium">{chainConfig.name}</div>
                                 </div>
@@ -320,7 +320,7 @@ export default function NewProjectPage() {
                     {step === 2 && (
                         <div className="space-y-4">
                             {milestones.map((ms, index) => (
-                                <div key={ms.id} className="flex gap-4 items-start bg-white/40 p-3 rounded-lg border border-glass-border">
+                                <div key={ms.id} className="flex gap-4 items-start bg-white/40 p-3 rounded-lg border border-slate-200">
                                     <span className="pt-2 text-sm font-bold text-muted-foreground w-6">{index + 1}.</span>
                                     <div className="flex-1 space-y-2">
                                         <div className="space-y-1">
@@ -360,7 +360,7 @@ export default function NewProjectPage() {
                                                         }}
                                                     />
                                                     <select
-                                                        className="px-3 py-2 rounded-lg border border-glass-border bg-white/50 focus:outline-none focus:ring-2 focus:ring-accent/20 text-sm"
+                                                        className="px-3 py-2 rounded-lg border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-accent/20 text-sm"
                                                         value={ms.currency}
                                                         onChange={(e) => updateMilestone(ms.id, { currency: e.target.value as "NATIVE" | "USDT" })}
                                                     >
@@ -430,12 +430,12 @@ export default function NewProjectPage() {
                                 </div>
                                 <h3 className="text-xl font-semibold">Ready to deploy?</h3>
                                 <div className="space-y-4 text-left">
-                                    <div className="bg-glass/50 p-4 rounded-lg border border-glass-border">
+                                    <div className="bg-white/50 p-4 rounded-lg border border-slate-200">
                                         <div className="text-sm text-muted-foreground mb-2">Project Summary</div>
                                         <div className="font-medium">{title || "Untitled Project"}</div>
                                         <div className="text-sm text-muted-foreground mt-1">{description.substring(0, 100)}{description.length > 100 ? "..." : ""}</div>
                                     </div>
-                                    <div className="bg-muted/30 p-4 rounded-lg text-sm space-y-2 border border-glass-border">
+                                    <div className="bg-muted/30 p-4 rounded-lg text-sm space-y-2 border border-slate-200">
                                         <div className="flex justify-between">
                                             <span>Number of Milestones</span>
                                             <span className="font-medium">{milestones.length}</span>
@@ -514,7 +514,7 @@ export default function NewProjectPage() {
                     })()}
                 </div>
 
-                <div className="pt-6 border-t border-glass-border flex justify-between">
+                <div className="pt-6 border-t border-slate-200 flex justify-between">
                     {step > 1 ? (
                         <Button 
                             variant="ghost" 

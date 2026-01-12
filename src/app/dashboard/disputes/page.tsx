@@ -52,7 +52,7 @@ export default function DisputesPage() {
             </div>
 
             {disputesWithProjects.length === 0 ? (
-                <Card className="glass-card">
+                <Card className="">
                     <div className="p-12 text-center text-muted-foreground">
                         <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
                         <p className="text-lg font-medium mb-2">No disputes found</p>
@@ -62,7 +62,7 @@ export default function DisputesPage() {
             ) : (
                 <div className="grid gap-6">
                     {disputesWithProjects.map((dispute) => (
-                        <Card key={dispute.id} className="glass-card hover:border-accent/30 transition-all">
+                        <Card key={dispute.id} className=" hover:border-accent/30 transition-all">
                             <div className="flex flex-col md:flex-row gap-6">
                                 <div className="flex-1 space-y-4">
                                     <div className="flex items-start justify-between">
@@ -92,7 +92,7 @@ export default function DisputesPage() {
                                     </div>
 
                                     {dispute.resolution && (
-                                        <div className="bg-muted/30 p-4 rounded-lg text-sm border border-glass-border">
+                                        <div className="bg-muted/30 p-4 rounded-lg text-sm border border-slate-200">
                                             <h4 className="font-medium mb-2 flex items-center gap-2"><FileText className="h-4 w-4" /> Resolution</h4>
                                             <p className="text-muted-foreground">
                                                 {dispute.resolution.decision || "Resolution details available"}
@@ -101,7 +101,7 @@ export default function DisputesPage() {
                                     )}
                                 </div>
 
-                                <div className="w-full md:w-64 flex flex-col justify-center border-l border-glass-border pl-0 md:pl-6 space-y-3">
+                                <div className="w-full md:w-64 flex flex-col justify-center border-l border-slate-200 pl-0 md:pl-6 space-y-3">
                                     {dispute.status === "voting" ? (
                                         <>
                                             <div className="text-center mb-2">

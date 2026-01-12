@@ -36,7 +36,7 @@ export default function ProjectsPage() {
             </div>
 
             {/* Toolbar */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-between bg-glass/30 p-2 rounded-xl border border-glass-border">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-between bg-white/30 p-2 rounded-xl border border-slate-200">
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                     <div className="relative w-full sm:w-64">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -52,7 +52,7 @@ export default function ProjectsPage() {
                     </Button>
                 </div>
 
-                <div className="flex bg-muted/20 p-1 rounded-lg border border-glass-border/50">
+                <div className="flex bg-muted/20 p-1 rounded-lg border border-slate-200/50">
                     <Button
                         variant="ghost"
                         size="sm"
@@ -74,7 +74,7 @@ export default function ProjectsPage() {
 
             {/* Content */}
             {view === "list" ? (
-                <div className="rounded-xl border border-glass-border bg-glass/50 overflow-hidden">
+                <div className="rounded-xl border border-slate-200 bg-white/50 overflow-hidden">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-muted/30 text-muted-foreground font-medium">
                             <tr>
@@ -85,7 +85,7 @@ export default function ProjectsPage() {
                                 <th className="px-6 py-4 font-normal text-right">Deadline</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-glass-border/50">
+                        <tbody className="divide-y divide-slate-200/50">
                             {isLoading ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-8 text-center">
@@ -166,7 +166,7 @@ export default function ProjectsPage() {
                                     <div className="space-y-3">
                                         {colProjects.map(project => (
                                             <Link key={project.id} href={`/dashboard/projects/${project.id}`}>
-                                                <Card className="glass-card hover:border-accent/50 cursor-pointer transition-all p-4">
+                                                <Card className=" hover:border-accent/50 cursor-pointer transition-all p-4">
                                                     <div className="flex justify-between items-start mb-2">
                                                         <Badge variant="outline" className="text-[10px] h-5">
                                                             {project.freelancer_wallet 
@@ -189,7 +189,7 @@ export default function ProjectsPage() {
                                             </Link>
                                         ))}
                                         {colProjects.length === 0 && (
-                                            <div className="h-24 rounded-xl border border-dashed border-glass-border flex items-center justify-center text-xs text-muted-foreground">
+                                            <div className="h-24 rounded-xl border border-dashed border-slate-200 flex items-center justify-center text-xs text-muted-foreground">
                                                 Empty
                                             </div>
                                         )}

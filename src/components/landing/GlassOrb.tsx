@@ -34,7 +34,7 @@ export function GlassOrb() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <motion.div
-        className="glass-orb w-full h-full rounded-full relative overflow-hidden"
+        className="w-full h-full rounded-full relative overflow-hidden border-2 border-slate-200 bg-gradient-to-br from-indigo-50 to-violet-50 shadow-lg"
         animate={{
           x: mousePosition.x,
           y: mousePosition.y,
@@ -66,7 +66,7 @@ export function GlassOrb() {
           {[...Array(8)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-2 h-2 rounded-full bg-cyan-400/40"
+              className="absolute w-2 h-2 rounded-full bg-indigo-400/40"
               style={{
                 left: `${20 + i * 10}%`,
                 top: `${30 + Math.sin(i) * 20}%`,
@@ -97,7 +97,7 @@ export function GlassOrb() {
           ))}
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 via-transparent to-violet-500/20 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 via-transparent to-violet-500/20 pointer-events-none" />
       </motion.div>
     </motion.div>
   );

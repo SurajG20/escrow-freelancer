@@ -53,7 +53,7 @@ export default function ProfilePage() {
 
     return (
         <div className="max-w-4xl mx-auto space-y-8">
-            <Card className="glass-card overflow-hidden">
+            <Card className=" overflow-hidden">
                 <div className="h-32 bg-linear-to-r from-blue-500/20 to-purple-500/20 -m-6 mb-6" />
                 <div className="relative px-6">
                     <div className="absolute -top-16 left-6 h-24 w-24 rounded-full border-4 border-background bg-zinc-900 shadow-xl flex items-center justify-center text-white text-3xl font-bold overflow-hidden">
@@ -88,7 +88,7 @@ export default function ProfilePage() {
                         </Link>
                     </div>
                 </div>
-                <div className="p-6 mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 border-t border-glass-border">
+                <div className="p-6 mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 border-t border-slate-200">
                     <div className="space-y-1">
                         <div className="text-xs text-muted-foreground uppercase">Reputation Score</div>
                         <div className="text-2xl font-bold text-accent flex items-center gap-2">
@@ -111,7 +111,7 @@ export default function ProfilePage() {
             </Card>
 
             <div className="grid gap-6 md:grid-cols-3">
-                <Card className="glass-card md:col-span-1 h-fit">
+                <Card className=" md:col-span-1 h-fit">
                     <CardHeader>
                         <CardTitle className="text-lg">Roles</CardTitle>
                     </CardHeader>
@@ -142,7 +142,7 @@ export default function ProfilePage() {
                     </CardContent>
                 </Card>
 
-                <Card className="glass-card md:col-span-2">
+                <Card className=" md:col-span-2">
                     <CardHeader>
                         <CardTitle className="text-lg">Recent Projects</CardTitle>
                     </CardHeader>
@@ -156,7 +156,7 @@ export default function ProfilePage() {
                             </div>
                         ) : (
                             projects.slice(0, 5).map((project) => (
-                                <div key={project.id} className="pb-6 border-b border-glass-border last:border-0 last:pb-0">
+                                <div key={project.id} className="pb-6 border-b border-slate-200 last:border-0 last:pb-0">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
                                             <Link href={`/dashboard/projects/${project.id}`}>

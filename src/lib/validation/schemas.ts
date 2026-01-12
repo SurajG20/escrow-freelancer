@@ -28,7 +28,7 @@ export const milestoneSchema = z.object({
     "disputed",
     "released",
   ]),
-  onchain_state: z.string().nullish(),
+  onchain_state: z.string().nullish().transform((val) => val ?? undefined),
   created_at: z.string(),
   updated_at: z.string(),
 });
