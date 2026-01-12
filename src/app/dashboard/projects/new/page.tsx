@@ -196,7 +196,7 @@ export default function NewProjectPage() {
     };
 
     return (
-        <div className="max-w-3xl mx-auto space-y-8">
+        <div className="max-w-3xl mx-auto space-y-8 px-4 sm:px-6 w-full">
             <div className="flex items-center gap-4">
                 <Link href="/dashboard/projects">
                     <Button variant="ghost" size="icon" className="rounded-full">
@@ -229,8 +229,8 @@ export default function NewProjectPage() {
             </div>
 
             {/* Step Content */}
-            <Card className=" min-h-[400px] flex flex-col">
-                <div className="flex-1 p-2">
+            <Card className="min-h-[400px] flex flex-col overflow-hidden w-full max-w-full">
+                <div className="flex-1 p-6 overflow-y-auto min-w-0 max-w-full">
                     {step === 1 && (
                         <div className="space-y-4 max-w-lg mx-auto py-4">
                             <div className="space-y-2">
@@ -514,23 +514,26 @@ export default function NewProjectPage() {
                     })()}
                 </div>
 
-                <div className="pt-6 border-t border-slate-200 flex justify-between">
+                <div className="pt-6 px-6 pb-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 w-full overflow-hidden">
                     {step > 1 ? (
                         <Button 
                             variant="ghost" 
                             onClick={() => setStep(step - 1)}
                             disabled={isSubmitting}
+                            className="w-full sm:w-auto sm:min-w-[80px] flex-shrink-0"
                         >
                             Back
                         </Button>
                     ) : (
-                        <div />
+                        <div className="hidden sm:block sm:flex-1" />
                     )}
 
+                    <div className="flex-1 sm:flex-initial" />
+                    
                     {step < 3 ? (
                         <Button 
                             onClick={handleNext} 
-                            className="gap-2"
+                            className="gap-2 w-full sm:w-auto sm:min-w-[120px] flex-shrink-0"
                             disabled={isSubmitting}
                         >
                             Next Step <ChevronRight className="h-4 w-4" />
@@ -538,7 +541,7 @@ export default function NewProjectPage() {
                     ) : (
                         <Button 
                             onClick={handleSubmit} 
-                            className="gap-2 shadow-lg shadow-accent/25"
+                            className="gap-2 shadow-lg shadow-accent/25 w-full sm:w-auto sm:min-w-[140px] whitespace-nowrap flex-shrink-0"
                             disabled={isSubmitting || !address}
                         >
                             {isSubmitting ? (
