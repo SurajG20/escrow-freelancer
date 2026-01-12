@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Freelance Escrow",
-  description: "Decentralized milestone-based escrow platform.",
+  title: "Secure Crypto Escrow for Freelancers and Clients",
+  description: "Lock funds in crypto. Work with confidence. Get paid only when work is approved. Trustless escrow using smart contracts.",
 };
 
 export default function RootLayout({

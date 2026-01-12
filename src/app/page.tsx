@@ -2,172 +2,338 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { ArrowRight, Shield, Lock, Zap } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { GlassNav } from "@/components/landing/GlassNav";
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground overflow-x-hidden">
-      {/* Navbar */}
-      <nav className="fixed top-0 z-50 w-full border-b border-glass-border bg-glass/60 backdrop-blur-xl">
-        <div className="container mx-auto flex h-16 items-center justify-between px-6">
-          <div className="flex items-center gap-2 font-bold text-xl tracking-tight">
-            <div className="h-6 w-6 rounded-full bg-accent/20 flex items-center justify-center text-accent">E</div>
-            Escrow
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Sign In
-            </Link>
-            <Link href="/login">
-              <Button size="sm" variant="glass" className="hidden sm:inline-flex">
-                Launch App
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-white">
+      <GlassNav />
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-accent/20 via-background to-background opacity-40" />
-        <div className="container mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tight sm:text-7xl mb-6 bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent">
-              Milestone escrow that <br className="hidden sm:block" />
-              <span className="text-accent inline-block">actually feels good</span> to use.
+      <main>
+        {/* Hero Section */}
+        <section className="pt-32 pb-24 px-6">
+          <div className="container mx-auto max-w-4xl text-center">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-6">
+              Secure Crypto Escrow for Freelancers and Clients
             </h1>
-            <p className="mx-auto max-w-2xl text-lg text-muted-foreground mb-8 leading-relaxed">
-              Decentralized payments for freelancers and clients.
-              Trustless, minimalist, and built for modern work.
+            <p className="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto mb-12 leading-relaxed">
+              Lock funds in crypto. Work with confidence. Get paid only when work is approved.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/login">
-                <Button size="lg" className="h-12 px-8 text-base rounded-full shadow-lg shadow-accent/20">
-                  Start an Escrow <ArrowRight className="ml-2 h-4 w-4" />
+                <Button size="lg" className="text-lg px-8 py-6">
+                  Start Using Escrow
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Button size="lg" variant="ghost" className="h-12 px-8 text-base rounded-full">
-                View Demo Project
-              </Button>
+              <Link href="#how-it-works">
+                <Button variant="outline" size="lg" className="text-lg px-8 py-6">
+                  How It Works
+                </Button>
+              </Link>
             </div>
-          </motion.div>
+          </div>
+        </section>
 
-          {/* Hero Visual */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 40 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.7, ease: "easeOut" }}
-            className="mt-16 mx-auto max-w-5xl rounded-2xl border border-glass-border bg-glass/40 shadow-2xl backdrop-blur-sm p-4 sm:p-6"
-          >
-            {/* Mock Dashboard inside hero */}
-            <div className="rounded-xl bg-white/50 dark:bg-black/20 overflow-hidden border border-glass-border">
-              <div className="flex items-center gap-4 border-b border-glass-border px-4 py-3 bg-white/40 dark:bg-black/40">
-                <div className="flex gap-1.5">
-                  <div className="h-3 w-3 rounded-full bg-red-400/80" />
-                  <div className="h-3 w-3 rounded-full bg-yellow-400/80" />
-                  <div className="h-3 w-3 rounded-full bg-green-400/80" />
-                </div>
-                <div className="h-2 w-32 rounded-full bg-muted/20 mx-auto" />
+        {/* Problem Section */}
+        <section className="py-24 px-6 bg-gray-50">
+          <div className="container mx-auto max-w-4xl">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12 text-center">
+              Freelance Payments Are Broken
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <p className="text-lg text-gray-700 mb-4">
+                  Clients fear paying upfront
+                </p>
+                <p className="text-gray-600">
+                  Without guarantees, clients hesitate to commit funds before seeing results.
+                </p>
               </div>
-              <div className="p-8 grid gap-8 sm:grid-cols-3 text-left">
-                <div className="col-span-2 space-y-4">
-                  <div className="h-8 w-3/4 bg-foreground/10 rounded-md animate-pulse" />
-                  <div className="space-y-2">
-                    <div className="h-4 w-full bg-foreground/5 rounded-md" />
-                    <div className="h-4 w-5/6 bg-foreground/5 rounded-md" />
-                  </div>
-                  <div className="mt-8 flex gap-3">
-                    <div className="h-20 w-full rounded-xl border border-accent/20 bg-accent/5 p-4 flex flex-col justify-between">
-                      <div className="h-2 w-1/3 bg-accent/20 rounded-full" />
-                      <div className="h-6 w-1/2 bg-accent/10 rounded-md" />
-                    </div>
-                    <div className="h-20 w-full rounded-xl border border-border bg-glass p-4 flex flex-col justify-between">
-                      <div className="h-2 w-1/3 bg-muted-foreground/20 rounded-full" />
-                      <div className="h-6 w-1/2 bg-muted-foreground/10 rounded-md" />
-                    </div>
-                  </div>
-                </div>
-                <div className="rounded-xl border border-glass-border bg-glass p-4 space-y-4">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Shield className="h-4 w-4 text-emerald-500" />
-                    <span className="text-xs font-semibold text-emerald-600">Secure Vault</span>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Total</span>
-                      <span className="font-mono">$5,000</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Released</span>
-                      <span className="font-mono text-emerald-600">$2,000</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                      <div className="h-full w-[40%] bg-emerald-500 rounded-full" />
-                    </div>
-                  </div>
-                  <Button className="w-full mt-2" size="sm">Approve Milestone</Button>
-                </div>
+              <div>
+                <p className="text-lg text-gray-700 mb-4">
+                  Freelancers fear not getting paid
+                </p>
+                <p className="text-gray-600">
+                  Completed work can go unpaid, leaving freelancers vulnerable.
+                </p>
+              </div>
+              <div>
+                <p className="text-lg text-gray-700 mb-4">
+                  Chargebacks and disputes waste time
+                </p>
+                <p className="text-gray-600">
+                  Traditional payment methods allow reversals that create uncertainty for both parties.
+                </p>
+              </div>
+              <div>
+                <p className="text-lg text-gray-700 mb-4">
+                  International payments are slow and expensive
+                </p>
+                <p className="text-gray-600">
+                  Bank transfers and payment processors add delays and high fees to global work.
+                </p>
               </div>
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* How it Works */}
-      <section className="py-24 bg-white/50 border-t border-glass-border">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight mb-4">Escrow made simple</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">No complex DeFi jargon. Just deposit, work, and get paid.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { icon: Lock, title: "1. Deposit Funds", desc: "Client locks the project amount in a smart contract vault." },
-              { icon: Zap, title: "2. Complete Milestones", desc: "Freelancer delivers work. Client approves. Funds release instantly." },
-              { icon: Shield, title: "3. Dispute Protection", desc: "If things go wrong, neutral arbitrators resolve the dispute fairly." }
-            ].map((step, i) => (
-              <div key={i} className="relative group p-6 rounded-2xl bg-glass border border-transparent hover:border-glass-border transition-all duration-300">
-                <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-4 group-hover:scale-110 transition-transform">
-                  <step.icon className="h-6 w-6" />
+        </section>
+
+        {/* Solution Section */}
+        <section id="how-it-works" className="py-24 px-6">
+          <div className="container mx-auto max-w-4xl">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12 text-center">
+              Crypto Escrow Solves This
+            </h2>
+            <div className="space-y-8 max-w-2xl mx-auto">
+              <div className="flex gap-6">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-bold">
+                  1
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                <p className="text-muted-foreground">{step.desc}</p>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Client deposits crypto into escrow
+                  </h3>
+                  <p className="text-gray-600">
+                    Funds are locked in a secure smart contract before work begins.
+                  </p>
+                </div>
               </div>
-            ))}
+              <div className="flex gap-6">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-bold">
+                  2
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Freelancer starts work after funds are locked
+                  </h3>
+                  <p className="text-gray-600">
+                    Work begins with confidence knowing payment is secured.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-6">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-bold">
+                  3
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Client approves the work
+                  </h3>
+                  <p className="text-gray-600">
+                    Simple approval process when deliverables meet expectations.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-6">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-bold">
+                  4
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Crypto is released instantly
+                  </h3>
+                  <p className="text-gray-600">
+                    Payment happens automatically, no waiting, no intermediaries.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Trust / Footer */}
-      <section className="py-24 border-t border-glass-border">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-2xl font-semibold mb-12">Trusted by builders on</h2>
-          <div className="flex flex-wrap justify-center gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-            {['Solana', 'Ethereum', 'Base', 'Polygon'].map((chain) => (
-              <span key={chain} className="text-xl font-bold flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-foreground" />
-                {chain}
-              </span>
-            ))}
+        {/* Why This Product */}
+        <section className="py-24 px-6 bg-gray-50">
+          <div className="container mx-auto max-w-4xl">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12 text-center">
+              Built for Freelancers, Powered by Crypto
+            </h2>
+            <div className="grid md:grid-cols-2 gap-12 max-w-3xl mx-auto">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Trustless escrow using smart contracts
+                </h3>
+                <p className="text-gray-600">
+                  No need to trust a third party. The code enforces fair payment.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  No chargebacks
+                </h3>
+                <p className="text-gray-600">
+                  Once approved, payments are final. No reversals or disputes.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Instant global payments
+                </h3>
+                <p className="text-gray-600">
+                  Crypto enables fast, borderless transactions anywhere in the world.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Transparent and secure
+                </h3>
+                <p className="text-gray-600">
+                  Every transaction is verifiable on-chain with full transparency.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Lower fees than traditional platforms
+                </h3>
+                <p className="text-gray-600">
+                  Smart contracts eliminate middlemen, reducing costs significantly.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <footer className="py-12 border-t border-glass-border bg-glass/30">
-        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-          <p>© 2026 Escrow Protocol. Open Source.</p>
-          <div className="flex gap-6 mt-4 md:mt-0">
-            <Link href="#" className="hover:text-foreground">Terms</Link>
-            <Link href="#" className="hover:text-foreground">Privacy</Link>
-            <Link href="#" className="hover:text-foreground">Github</Link>
+        {/* Who It's For */}
+        <section className="py-24 px-6">
+          <div className="container mx-auto max-w-4xl">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12 text-center">
+              Who It's For
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+              <div className="flex items-start gap-4">
+                <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Freelancers working globally
+                  </h3>
+                  <p className="text-gray-600">
+                    Developers, designers, writers, and remote workers seeking secure payment.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Clients hiring remote talent
+                  </h3>
+                  <p className="text-gray-600">
+                    Businesses and individuals looking to hire with payment protection.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Web3 teams & startups
+                  </h3>
+                  <p className="text-gray-600">
+                    Crypto-native companies building in the decentralized economy.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <CheckCircle2 className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    DAOs and crypto-native companies
+                  </h3>
+                  <p className="text-gray-600">
+                    Decentralized organizations managing contributor payments.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </footer>
+        </section>
+
+        {/* Trust & Security */}
+        <section className="py-24 px-6 bg-gray-50">
+          <div className="container mx-auto max-w-4xl">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12 text-center">
+              Funds Are Safe by Design
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Funds locked in escrow until approval
+                </h3>
+                <p className="text-gray-600">
+                  Money cannot be withdrawn until work is approved by the client.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  No single party controls the money
+                </h3>
+                <p className="text-gray-600">
+                  Smart contracts ensure fair distribution without central authority.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Transparent transaction history
+                </h3>
+                <p className="text-gray-600">
+                  All escrow activity is recorded on-chain and publicly verifiable.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                  Crypto-native security principles
+                </h3>
+                <p className="text-gray-600">
+                  Built on proven blockchain technology with industry-standard security.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="py-24 px-6">
+          <div className="container mx-auto max-w-4xl text-center">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Work Without Trust Issues
+            </h2>
+            <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
+              Start using crypto escrow today. Secure payments for freelancers and clients.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/login">
+                <Button size="lg" className="text-lg px-8 py-6">
+                  Create Your First Escrow
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button variant="outline" size="lg" className="text-lg px-8 py-6">
+                  Start Secure Payments
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="py-12 px-6 border-t border-gray-200">
+          <div className="container mx-auto max-w-4xl flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
+            <p>© 2026 Escrow Protocol. Open Source.</p>
+            <div className="flex gap-6 mt-4 md:mt-0">
+              <Link href="#" className="hover:text-gray-900 transition-colors">
+                Terms
+              </Link>
+              <Link href="#" className="hover:text-gray-900 transition-colors">
+                Privacy
+              </Link>
+              <Link href="#" className="hover:text-gray-900 transition-colors">
+                Github
+              </Link>
+            </div>
+          </div>
+        </footer>
+      </main>
     </div>
   );
 }
