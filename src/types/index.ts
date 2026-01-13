@@ -1,4 +1,4 @@
-export type ProjectStatus = "draft" | "active" | "in_dispute" | "completed" | "cancelled";
+export type ProjectStatus = "draft" | "pending_approval" | "approved" | "active" | "in_dispute" | "completed" | "cancelled";
 export type MilestoneStatus = "awaiting_submission" | "submitted" | "approved" | "disputed" | "released";
 export type Currency = "NATIVE" | "USDT";
 export type UserRole = "client" | "freelancer" | "arbitrator";

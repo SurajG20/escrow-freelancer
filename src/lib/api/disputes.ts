@@ -90,7 +90,14 @@ export async function updateDispute(
     .single();
 
   if (error) {
+    if (error.code === "PGRST116") {
+      throw new Error(`Dispute with id ${id} not found or could not be updated`);
+    }
     throw new Error(`Failed to update dispute: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error(`Dispute with id ${id} not found`);
   }
 
   return disputeSchema.parse(data);

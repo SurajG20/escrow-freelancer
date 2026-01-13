@@ -4,6 +4,9 @@ import {
   getMilestone,
   createMilestones,
   updateMilestone,
+  deleteMilestone,
+  deleteMilestonesByProject,
+  replaceMilestones,
 } from "../api/milestones";
 import { Milestone } from "@/types";
 
@@ -70,4 +73,61 @@ export function useUpdateMilestone() {
   });
 }
 
+export function useDeleteMilestone() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, projectId }: { id: string; projectId: string }) => {
+      return deleteMilestone(id).then(() => ({ id, projectId }));
+    },
+    onSuccess: ({ projectId }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["milestones", projectId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["project", projectId],
+      });
+    },
+  });
+}
+
+export function useDeleteMilestonesByProject() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (projectId: string) => deleteMilestonesByProject(projectId),
+    onSuccess: (_, projectId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["milestones", projectId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["project", projectId],
+      });
+    },
+  });
+}
+
+export function useReplaceMilestones() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      projectId,
+      milestones,
+    }: {
+      projectId: string;
+      milestones: Parameters<typeof replaceMilestones>[1];
+    }) => replaceMilestones(projectId, milestones),
+    onSuccess: (data) => {
+      if (data.length > 0) {
+        queryClient.invalidateQueries({
+          queryKey: ["milestones", data[0].project_id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["project", data[0].project_id],
+        });
+      }
+    },
+  });
+}
 

@@ -103,19 +103,144 @@ export async function updateProject(
     title: string;
     description: string;
     status: string;
+    client_wallet: string;
     freelancer_wallet: string;
     onchain_address: string;
   }>
 ): Promise<Project> {
+  // First verify the project exists
+  const existingProject = await getProject(id);
+  if (!existingProject) {
+    throw new Error(`Project with id ${id} not found`);
+  }
+
+  // Filter out undefined values to avoid unnecessary updates
+  const cleanUpdates = Object.fromEntries(
+    Object.entries(updates).filter(([_, value]) => value !== undefined)
+  );
+
+  if (Object.keys(cleanUpdates).length === 0) {
+    // No actual updates, return existing project
+    return existingProject;
+  }
+
   const { data, error } = await supabase
     .from("projects")
-    .update(updates)
+    .update(cleanUpdates)
     .eq("id", id)
     .select()
     .single();
 
   if (error) {
+    console.error(`[updateProject] Error updating project ${id}:`, error);
+    if (error.code === "PGRST116") {
+      throw new Error(
+        `Project with id ${id} could not be updated. This may be due to Row Level Security policies or the project being deleted. Original error: ${error.message}`
+      );
+    }
     throw new Error(`Failed to update project: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error(
+      `Project with id ${id} update returned no data. This may be due to Row Level Security policies.`
+    );
+  }
+
+  return projectSchema.parse(data);
+}
+
+export async function sendForApproval(id: string): Promise<Project> {
+  // Verify project exists first
+  const existingProject = await getProject(id);
+  if (!existingProject) {
+    throw new Error(`Project with id ${id} not found`);
+  }
+
+  const { data, error } = await supabase
+    .from("projects")
+    .update({ status: "pending_approval" })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") {
+      throw new Error(
+        `Project with id ${id} could not be updated. This may be due to Row Level Security policies.`
+      );
+    }
+    throw new Error(`Failed to send project for approval: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error(
+      `Project with id ${id} update returned no data. This may be due to Row Level Security policies.`
+    );
+  }
+
+  return projectSchema.parse(data);
+}
+
+export async function approveProject(id: string): Promise<Project> {
+  // Verify project exists first
+  const existingProject = await getProject(id);
+  if (!existingProject) {
+    throw new Error(`Project with id ${id} not found`);
+  }
+
+  const { data, error } = await supabase
+    .from("projects")
+    .update({ status: "approved" })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") {
+      throw new Error(
+        `Project with id ${id} could not be updated. This may be due to Row Level Security policies.`
+      );
+    }
+    throw new Error(`Failed to approve project: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error(
+      `Project with id ${id} update returned no data. This may be due to Row Level Security policies.`
+    );
+  }
+
+  return projectSchema.parse(data);
+}
+
+export async function rejectProject(id: string): Promise<Project> {
+  // Verify project exists first
+  const existingProject = await getProject(id);
+  if (!existingProject) {
+    throw new Error(`Project with id ${id} not found`);
+  }
+
+  const { data, error } = await supabase
+    .from("projects")
+    .update({ status: "draft" })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") {
+      throw new Error(
+        `Project with id ${id} could not be updated. This may be due to Row Level Security policies.`
+      );
+    }
+    throw new Error(`Failed to reject project: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error(
+      `Project with id ${id} update returned no data. This may be due to Row Level Security policies.`
+    );
   }
 
   return projectSchema.parse(data);

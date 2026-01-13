@@ -1,25 +1,11 @@
 // @ts-nocheck
-/**
- * Escrow Contract Interaction Utilities
- * 
- * This file contains functions for interacting with deployed escrow contracts using viem/wagmi.
- */
-
 import { DepositResult, ReleaseFundsResult } from "./types";
 import { parseEther, parseUnits, formatEther, createPublicClient, http, type WalletClient } from "viem";
 import { bsc, bscTestnet } from "viem/chains";
 import EscrowABI from "./abis/Escrow.json";
 import ERC20ABI from "./abis/ERC20.json";
 import { getCurrentChainConfig } from "@/lib/config/chains";
-
-/**
- * Deposits funds into an escrow contract
- * 
- * @param contractAddress - Address of the deployed escrow contract
- * @param amount - Amount to deposit
- * @param currency - Currency type (NATIVE or USDT)
- * @returns Promise with deposit transaction details
- */
+import { getUserFriendlyError } from "./errorHandler";
 export async function depositFunds(
   contractAddress: string,
   amount: string,
@@ -34,49 +20,61 @@ export async function depositFunds(
   });
 
   if (!walletClient) {
-    throw new Error("Wallet not connected");
+    throw new Error("Please connect your wallet to continue.");
   }
 
   let hash: `0x${string}`;
   let blockNumber: bigint;
 
-  if (currency === "NATIVE") {
-    // Deposit native tokens (BNB)
-    hash = await walletClient.writeContract({
-      address: contractAddress as `0x${string}`,
-      abi: EscrowABI,
-      functionName: "deposit",
-      value: parseEther(amount),
-    });
+  try {
+    if (currency === "NATIVE") {
+      hash = await walletClient.writeContract({
+        address: contractAddress as `0x${string}`,
+        abi: EscrowABI,
+        functionName: "deposit",
+        value: parseEther(amount),
+      });
 
-    const receipt = await publicClient.waitForTransactionReceipt({ hash });
-    blockNumber = receipt.blockNumber;
-  } else {
-    // Deposit USDT tokens
-    if (!chainConfig.usdtContractAddress) {
-      throw new Error("USDT contract address not configured for this chain");
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      blockNumber = receipt.blockNumber;
+    } else {
+      if (!chainConfig.usdtContractAddress) {
+        throw new Error("USDT token is not configured for this network.");
+      }
+
+      let approveHash: `0x${string}`;
+      try {
+        approveHash = await walletClient.writeContract({
+          address: chainConfig.usdtContractAddress as `0x${string}`,
+          abi: ERC20ABI,
+          functionName: "approve",
+          args: [contractAddress as `0x${string}`, parseUnits(amount, 18)],
+        });
+
+        await publicClient.waitForTransactionReceipt({ hash: approveHash });
+      } catch (error) {
+        const friendlyError = getUserFriendlyError(error);
+        throw new Error(`Failed to approve USDT: ${friendlyError}`);
+      }
+
+      try {
+        hash = await walletClient.writeContract({
+          address: contractAddress as `0x${string}`,
+          abi: EscrowABI,
+          functionName: "depositUSDT",
+          args: [parseUnits(amount, 18)],
+        });
+
+        const receipt = await publicClient.waitForTransactionReceipt({ hash });
+        blockNumber = receipt.blockNumber;
+      } catch (error) {
+        const friendlyError = getUserFriendlyError(error);
+        throw new Error(`Failed to deposit USDT: ${friendlyError}`);
+      }
     }
-
-    // First, approve the escrow contract to spend USDT
-    const approveHash = await walletClient.writeContract({
-      address: chainConfig.usdtContractAddress as `0x${string}`,
-      abi: ERC20ABI,
-      functionName: "approve",
-      args: [contractAddress as `0x${string}`, parseUnits(amount, 18)],
-    });
-
-    await publicClient.waitForTransactionReceipt({ hash: approveHash });
-
-    // Then deposit USDT
-    hash = await walletClient.writeContract({
-      address: contractAddress as `0x${string}`,
-      abi: EscrowABI,
-      functionName: "depositUSDT",
-      args: [parseUnits(amount, 18)],
-    });
-
-    const receipt = await publicClient.waitForTransactionReceipt({ hash });
-    blockNumber = receipt.blockNumber;
+  } catch (error) {
+    const friendlyError = getUserFriendlyError(error);
+    throw new Error(friendlyError);
   }
 
   return {
@@ -87,13 +85,6 @@ export async function depositFunds(
   };
 }
 
-/**
- * Releases funds for a specific milestone
- * 
- * @param contractAddress - Address of the deployed escrow contract
- * @param milestoneIndex - Index of the milestone to release
- * @returns Promise with release transaction details
- */
 export async function releaseMilestoneFunds(
   contractAddress: string,
   milestoneIndex: number,
@@ -107,19 +98,24 @@ export async function releaseMilestoneFunds(
   });
 
   if (!walletClient) {
-    throw new Error("Wallet not connected");
+    throw new Error("Please connect your wallet to continue.");
   }
 
-  const hash = await walletClient.writeContract({
-    address: contractAddress as `0x${string}`,
-    abi: EscrowABI,
-    functionName: "releaseMilestone",
-    args: [BigInt(milestoneIndex)],
-  });
+  let hash: `0x${string}`;
+  try {
+    hash = await walletClient.writeContract({
+      address: contractAddress as `0x${string}`,
+      abi: EscrowABI,
+      functionName: "releaseMilestone",
+      args: [BigInt(milestoneIndex)],
+    });
+  } catch (error) {
+    const friendlyError = getUserFriendlyError(error);
+    throw new Error(friendlyError);
+  }
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-  // Get milestone amount for return value
   const milestone = await publicClient.readContract({
     address: contractAddress as `0x${string}`,
     abi: EscrowABI,
@@ -135,13 +131,6 @@ export async function releaseMilestoneFunds(
   };
 }
 
-/**
- * Gets the balance of funds in an escrow contract
- * 
- * @param contractAddress - Address of the deployed escrow contract
- * @param currency - Currency type to check
- * @returns Promise with balance amount
- */
 export async function getEscrowBalance(
   contractAddress: string,
   currency: "NATIVE" | "USDT"

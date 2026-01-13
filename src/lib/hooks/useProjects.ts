@@ -5,6 +5,9 @@ import {
   getProjectWithMilestones,
   createProject,
   updateProject,
+  sendForApproval,
+  approveProject,
+  rejectProject,
 } from "../api/projects";
 import { Project } from "@/types";
 
@@ -59,6 +62,42 @@ export function useUpdateProject() {
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Parameters<typeof updateProject>[1] }) =>
       updateProject(id, updates),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project", data.id] });
+    },
+  });
+}
+
+export function useSendForApproval() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: sendForApproval,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project", data.id] });
+    },
+  });
+}
+
+export function useApproveProject() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: approveProject,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project", data.id] });
+    },
+  });
+}
+
+export function useRejectProject() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: rejectProject,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", data.id] });

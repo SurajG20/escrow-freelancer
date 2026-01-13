@@ -1,15 +1,80 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+// OpenZeppelin IERC20 Interface (included inline)
+interface IERC20 {
+    function totalSupply() external view returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address to, uint256 amount) external returns (bool);
+    function allowance(address owner, address spender) external view returns (uint256);
+    function approve(address spender, uint256 amount) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
 
-/**
- * @title Escrow
- * @dev Escrow contract for milestone-based payments
- */
+// OpenZeppelin SafeERC20 Library (included inline)
+library SafeERC20 {
+    function safeTransfer(IERC20 token, address to, uint256 value) internal {
+        (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(token.transfer.selector, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), "SafeERC20: transfer failed");
+    }
+
+    function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
+        (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), "SafeERC20: transferFrom failed");
+    }
+}
+
+// OpenZeppelin Ownable (included inline)
+abstract contract Ownable {
+    address private _owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    constructor(address initialOwner) {
+        _transferOwnership(initialOwner);
+    }
+
+    modifier onlyOwner() {
+        _checkOwner();
+        _;
+    }
+
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    function _checkOwner() internal view virtual {
+        require(owner() == msg.sender, "Ownable: caller is not the owner");
+    }
+
+    function _transferOwnership(address newOwner) internal virtual {
+        address oldOwner = _owner;
+        _owner = newOwner;
+        emit OwnershipTransferred(oldOwner, newOwner);
+    }
+}
+
+// OpenZeppelin ReentrancyGuard (included inline)
+abstract contract ReentrancyGuard {
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+    uint256 private _status;
+
+    constructor() {
+        _status = _NOT_ENTERED;
+    }
+
+    modifier nonReentrant() {
+        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
+        _status = _ENTERED;
+        _;
+        _status = _NOT_ENTERED;
+    }
+}
+
+// Escrow Contract (included inline for factory)
 contract Escrow is ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
 
@@ -23,14 +88,14 @@ contract Escrow is ReentrancyGuard, Ownable {
 
     struct Milestone {
         uint256 amount;
-        bool isNative; // true for NATIVE (BNB), false for USDT
+        bool isNative;
         MilestoneStatus status;
         bool exists;
     }
 
     address public client;
     address public freelancer;
-    address public usdtToken; // USDT token address
+    address public usdtToken;
     bool public isCancelled;
     bool public isDisputed;
 
@@ -100,9 +165,6 @@ contract Escrow is ReentrancyGuard, Ownable {
         }
     }
 
-    /**
-     * @dev Deposit funds into escrow (both NATIVE and USDT)
-     */
     function deposit() external payable onlyClient nonReentrant notCancelled {
         require(msg.value > 0 || totalDepositedNative == 0, "Must deposit native tokens");
         
@@ -112,9 +174,6 @@ contract Escrow is ReentrancyGuard, Ownable {
         emit FundsDeposited(msg.sender, nativeAmount, 0);
     }
 
-    /**
-     * @dev Deposit USDT tokens into escrow
-     */
     function depositUSDT(uint256 amount) external onlyClient nonReentrant notCancelled {
         require(amount > 0, "Amount must be greater than 0");
         require(usdtToken != address(0), "USDT token not set");
@@ -125,9 +184,6 @@ contract Escrow is ReentrancyGuard, Ownable {
         emit FundsDeposited(msg.sender, 0, amount);
     }
 
-    /**
-     * @dev Freelancer submits work for a milestone
-     */
     function submitMilestone(uint256 milestoneIndex) external onlyFreelancer notCancelled notDisputed {
         require(milestoneIndex < milestones.length, "Invalid milestone index");
         Milestone storage milestone = milestones[milestoneIndex];
@@ -137,9 +193,6 @@ contract Escrow is ReentrancyGuard, Ownable {
         emit MilestoneSubmitted(milestoneIndex);
     }
 
-    /**
-     * @dev Client approves a milestone
-     */
     function approveMilestone(uint256 milestoneIndex) external onlyClient notCancelled notDisputed {
         require(milestoneIndex < milestones.length, "Invalid milestone index");
         Milestone storage milestone = milestones[milestoneIndex];
@@ -149,9 +202,6 @@ contract Escrow is ReentrancyGuard, Ownable {
         emit MilestoneApproved(milestoneIndex);
     }
 
-    /**
-     * @dev Release funds for an approved milestone
-     */
     function releaseMilestone(uint256 milestoneIndex) external onlyClient nonReentrant notCancelled notDisputed {
         require(milestoneIndex < milestones.length, "Invalid milestone index");
         Milestone storage milestone = milestones[milestoneIndex];
@@ -173,21 +223,16 @@ contract Escrow is ReentrancyGuard, Ownable {
         emit MilestoneReleased(milestoneIndex, milestone.amount, milestone.isNative);
     }
 
-    /**
-     * @dev Cancel project and refund remaining funds to client
-     */
     function cancel() external onlyClient nonReentrant {
         require(!isCancelled, "Already cancelled");
         isCancelled = true;
 
-        // Refund native tokens
         if (totalDepositedNative > 0) {
             (bool success, ) = payable(client).call{value: totalDepositedNative}("");
             require(success, "Refund failed");
             totalDepositedNative = 0;
         }
 
-        // Refund USDT
         if (totalDepositedUSDT > 0 && usdtToken != address(0)) {
             IERC20(usdtToken).safeTransfer(client, totalDepositedUSDT);
             totalDepositedUSDT = 0;
@@ -196,18 +241,12 @@ contract Escrow is ReentrancyGuard, Ownable {
         emit ProjectCancelled();
     }
 
-    /**
-     * @dev Raise a dispute (can be called by either party)
-     */
     function raiseDispute() external onlyParties notCancelled {
         require(!isDisputed, "Dispute already raised");
         isDisputed = true;
         emit DisputeRaised();
     }
 
-    /**
-     * @dev Resolve dispute and release funds (only owner/arbitrator)
-     */
     function resolveDispute(uint256 milestoneIndex, bool releaseToFreelancer) external onlyOwner {
         require(isDisputed, "No active dispute");
         require(milestoneIndex < milestones.length, "Invalid milestone index");
@@ -229,7 +268,6 @@ contract Escrow is ReentrancyGuard, Ownable {
             }
             emit MilestoneReleased(milestoneIndex, milestone.amount, milestone.isNative);
         } else {
-            // Refund to client
             if (milestone.isNative) {
                 require(totalDepositedNative >= milestone.amount, "Insufficient native balance");
                 totalDepositedNative -= milestone.amount;
@@ -245,16 +283,10 @@ contract Escrow is ReentrancyGuard, Ownable {
         isDisputed = false;
     }
 
-    /**
-     * @dev Get milestone count
-     */
     function getMilestoneCount() external view returns (uint256) {
         return milestones.length;
     }
 
-    /**
-     * @dev Get milestone details
-     */
     function getMilestone(uint256 index) external view returns (
         uint256 amount,
         bool isNative,
@@ -265,16 +297,60 @@ contract Escrow is ReentrancyGuard, Ownable {
         return (milestone.amount, milestone.isNative, milestone.status);
     }
 
-    /**
-     * @dev Get contract balances
-     */
     function getBalances() external view returns (uint256 nativeBalance, uint256 usdtBalance) {
         return (address(this).balance, totalDepositedUSDT);
     }
 
-    // Allow contract to receive native tokens
     receive() external payable {
         totalDepositedNative += msg.value;
     }
 }
 
+// EscrowFactory Contract
+contract EscrowFactory {
+    address public usdtToken;
+    address[] public escrows;
+    mapping(address => address[]) public userEscrows;
+
+    event EscrowCreated(address indexed escrow, address indexed client, address indexed freelancer);
+
+    constructor(address _usdtToken) {
+        usdtToken = _usdtToken;
+    }
+
+    function createEscrow(
+        address _client,
+        address _freelancer,
+        uint256[] memory _milestoneAmounts,
+        bool[] memory _milestoneIsNative
+    ) external returns (address) {
+        Escrow escrow = new Escrow(
+            _client,
+            _freelancer,
+            usdtToken,
+            _milestoneAmounts,
+            _milestoneIsNative
+        );
+
+        address escrowAddress = address(escrow);
+        escrows.push(escrowAddress);
+        userEscrows[_client].push(escrowAddress);
+        userEscrows[_freelancer].push(escrowAddress);
+
+        emit EscrowCreated(escrowAddress, _client, _freelancer);
+
+        return escrowAddress;
+    }
+
+    function getEscrowCount() external view returns (uint256) {
+        return escrows.length;
+    }
+
+    function getUserEscrows(address user) external view returns (address[] memory) {
+        return userEscrows[user];
+    }
+
+    function getAllEscrows() external view returns (address[] memory) {
+        return escrows;
+    }
+}

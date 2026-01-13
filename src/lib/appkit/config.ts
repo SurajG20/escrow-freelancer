@@ -5,12 +5,6 @@ import { getNetworkMode } from "@/lib/config/chains";
 
 const projectId = process.env.NEXT_PUBLIC_REOWN_PROJECT_ID || "";
 
-if (!projectId) {
-  console.warn(
-    "Reown AppKit project ID is not set. Wallet connection may not work."
-  );
-}
-
 const metadata = {
   name: "Escrow dApp",
   description: "Decentralized milestone-based escrow platform",
@@ -26,7 +20,6 @@ const wagmiAdapter = new WagmiAdapter({
   ssr: true,
 });
 
-// Get default network based on environment
 const defaultNetwork = getNetworkMode() === "mainnet" ? bsc : bscTestnet;
 
 export const appKit = createAppKit({

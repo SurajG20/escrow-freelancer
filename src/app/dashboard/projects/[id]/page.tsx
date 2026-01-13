@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
-import { ArrowLeft, CheckCircle2, Clock, FileText, Send, Shield, AlertTriangle, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/Input";
+import { ArrowLeft, CheckCircle2, Clock, FileText, Send, Shield, AlertTriangle, Loader2, Edit2, X, Plus, Trash2, Save } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useProjectWithMilestones, useUpdateProject } from "@/lib/hooks/useProjects";
-import { useUpdateMilestone } from "@/lib/hooks/useMilestones";
+import { useProjectWithMilestones, useUpdateProject, useSendForApproval, useApproveProject, useRejectProject } from "@/lib/hooks/useProjects";
+import { useUpdateMilestone, useCreateMilestones, useDeleteMilestone, useReplaceMilestones } from "@/lib/hooks/useMilestones";
 import { useCreateDispute } from "@/lib/hooks/useDisputes";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useWallet } from "@/lib/hooks/useWallet";
@@ -19,16 +21,39 @@ import { format } from "date-fns";
 
 // Note: params is a Promise in newer Next.js versions (15+)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MilestoneForm = {
+    id: string | number;
+    title: string;
+    amount: string;
+    deadline: string;
+    currency: "NATIVE" | "USDT";
+    isNew?: boolean;
+};
+
 export default function ProjectDetailPage({ params }: { params: any }) {
     const [projectId, setProjectId] = useState<string | null>(null);
     const [txPending, setTxPending] = useState(false);
     const [depositError, setDepositError] = useState<string | null>(null);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [editTitle, setEditTitle] = useState("");
+    const [editDescription, setEditDescription] = useState("");
+    const [editCounterpartyWallet, setEditCounterpartyWallet] = useState("");
+    const [editMilestones, setEditMilestones] = useState<MilestoneForm[]>([]);
+    const [editErrors, setEditErrors] = useState<Record<string, string>>({});
+    const [showWalletWarning, setShowWalletWarning] = useState(false);
+    const [originalCounterpartyWallet, setOriginalCounterpartyWallet] = useState("");
     const { address } = useAuth();
     const { chainId, chainConfig } = useWallet();
     const { data: walletClient } = useWalletClient();
     const updateMilestoneMutation = useUpdateMilestone();
+    const createMilestonesMutation = useCreateMilestones();
+    const deleteMilestoneMutation = useDeleteMilestone();
+    const replaceMilestonesMutation = useReplaceMilestones();
     const createDisputeMutation = useCreateDispute();
     const updateProjectMutation = useUpdateProject();
+    const sendForApprovalMutation = useSendForApproval();
+    const approveProjectMutation = useApproveProject();
+    const rejectProjectMutation = useRejectProject();
 
     useEffect(() => {
         const loadParams = async () => {
@@ -46,25 +71,60 @@ export default function ProjectDetailPage({ params }: { params: any }) {
 
     const { data: project, isLoading, refetch } = useProjectWithMilestones(projectId || "");
 
+    useEffect(() => {
+        if (project && !isEditMode) {
+            setEditTitle(project.title);
+            setEditDescription(project.description);
+            const counterpartyWallet = address?.toLowerCase() === project.client_wallet.toLowerCase() 
+                ? project.freelancer_wallet || "" 
+                : project.client_wallet;
+            setEditCounterpartyWallet(counterpartyWallet);
+            setOriginalCounterpartyWallet(counterpartyWallet);
+            setShowWalletWarning(false);
+            if (project.milestones) {
+                setEditMilestones(project.milestones.map(m => ({
+                    id: m.id,
+                    title: m.title,
+                    amount: m.amount,
+                    deadline: format(new Date(m.deadline), "yyyy-MM-dd"),
+                    currency: m.currency,
+                })));
+            }
+        }
+    }, [project, isEditMode, address]);
+
     const handleAction = async (action: string, milestoneId?: string) => {
         if (!milestoneId || !project) return;
 
         setTxPending(true);
         try {
             if (action === "submit") {
+                toast.loading("Submitting milestone...", { id: `milestone-${milestoneId}` });
                 await updateMilestoneMutation.mutateAsync({
                     id: milestoneId,
                     updates: { offchain_state: "submitted" },
                 });
+                toast.success("Milestone submitted!", {
+                    id: `milestone-${milestoneId}`,
+                    description: "Waiting for client approval",
+                });
             } else if (action === "approve") {
+                toast.loading("Approving milestone...", { id: `milestone-${milestoneId}` });
                 await updateMilestoneMutation.mutateAsync({
                     id: milestoneId,
                     updates: { offchain_state: "approved" },
                 });
+                toast.success("Milestone approved!", {
+                    id: `milestone-${milestoneId}`,
+                    description: "You can now release funds",
+                });
             }
             await refetch();
         } catch (error) {
-            console.error("Failed to update milestone:", error);
+            toast.error("Action Failed", {
+                id: `milestone-${milestoneId}`,
+                description: error instanceof Error ? error.message : "Failed to update milestone",
+            });
         } finally {
             setTxPending(false);
         }
@@ -75,15 +135,24 @@ export default function ProjectDetailPage({ params }: { params: any }) {
 
         setTxPending(true);
         try {
+            toast.loading("Creating dispute...", { id: "dispute" });
             await createDisputeMutation.mutateAsync({
                 project_id: project.id,
                 milestone_id: milestoneId,
                 opened_by: address.toLowerCase(),
                 status: "open",
             });
+            toast.success("Dispute created!", {
+                id: "dispute",
+                description: "The dispute is now open for resolution",
+                duration: 5000,
+            });
             await refetch();
         } catch (error) {
-            console.error("Failed to create dispute:", error);
+            toast.error("Failed to Create Dispute", {
+                id: "dispute",
+                description: error instanceof Error ? error.message : "Please try again",
+            });
         } finally {
             setTxPending(false);
         }
@@ -91,31 +160,42 @@ export default function ProjectDetailPage({ params }: { params: any }) {
 
     const handleDepositFunds = async () => {
         if (!project || !address || !chainId || !chainConfig) {
-            setDepositError("Please connect your wallet");
+            toast.error("Wallet Not Connected", {
+                description: "Please connect your wallet to deposit funds",
+            });
             return;
         }
 
-        // Check if user is the client
         const isClient = address.toLowerCase() === project.client_wallet.toLowerCase();
         if (!isClient) {
-            setDepositError("Only the client can deposit funds");
+            toast.error("Permission Denied", {
+                description: "Only the client can deposit funds",
+            });
             return;
         }
 
-        // Check if project is in draft status
-        if (project.status !== "draft") {
-            setDepositError("Project is not in draft status");
+        if (project.status !== "approved") {
+            toast.error("Project Not Approved", {
+                description: project.status === "pending_approval" 
+                    ? "Please wait for the freelancer to approve the project"
+                    : project.status === "draft"
+                    ? "Please send the project for approval first"
+                    : "Project must be approved before depositing funds",
+            });
             return;
         }
 
-        // Check if contract is already deployed
-        if (project.onchain_address && project.onchain_address !== `0x${Math.random().toString(16).substring(2, 42)}`) {
-            setDepositError("Contract already deployed");
+        if (project.onchain_address && 
+            project.onchain_address !== "Pending" && 
+            project.onchain_address.startsWith("0x") && 
+            project.onchain_address.length === 42) {
+            toast.error("Contract Already Deployed", {
+                description: "This project already has a deployed contract",
+            });
             return;
         }
 
         setTxPending(true);
-        setDepositError(null);
 
         try {
             const milestones = project.milestones || [];
@@ -124,7 +204,16 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                 throw new Error("Wallet client not available");
             }
 
-            // Step 1 - Deploy escrow smart contract via factory
+            if (!process.env.NEXT_PUBLIC_ESCROW_FACTORY_ADDRESS) {
+                throw new Error("Escrow contract is not configured. Please contact support.");
+            }
+
+            console.log("Starting contract deployment...");
+            console.log("Factory address:", process.env.NEXT_PUBLIC_ESCROW_FACTORY_ADDRESS);
+            console.log("USDT address:", chainConfig.usdtContractAddress);
+
+            toast.loading("Deploying escrow contract...", { id: "deploy" });
+
             const deployResult = await deployEscrowContract({
                 clientWallet: project.client_wallet,
                 freelancerWallet: project.freelancer_wallet || "",
@@ -136,10 +225,9 @@ export default function ProjectDetailPage({ params }: { params: any }) {
             }, walletClient);
 
             const deployedContractAddress = deployResult.contractAddress;
-            console.log("Escrow contract deployed:", deployedContractAddress);
 
-            // Step 2 - Deposit funds into contract
-            // Calculate total amounts by currency
+            toast.success("Escrow contract deployed!", { id: "deploy" });
+            toast.loading("Depositing funds...", { id: "deposit" });
             const nativeTotal = milestones
                 .filter(m => m.currency === "NATIVE")
                 .reduce((sum, m) => sum + parseFloat(m.amount || "0"), 0);
@@ -147,19 +235,16 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                 .filter(m => m.currency === "USDT")
                 .reduce((sum, m) => sum + parseFloat(m.amount || "0"), 0);
 
-            // Deposit native tokens if any
             if (nativeTotal > 0) {
                 await depositFunds(deployedContractAddress, nativeTotal.toString(), "NATIVE", walletClient);
-                console.log(`Deposited ${nativeTotal} ${chainConfig.nativeSymbol}`);
             }
 
-            // Deposit USDT tokens if any
             if (usdtTotal > 0) {
                 await depositFunds(deployedContractAddress, usdtTotal.toString(), "USDT", walletClient);
-                console.log(`Deposited ${usdtTotal} USDT`);
             }
 
-            // Step 3 - Update project with contract address and status
+            toast.success("Funds deposited!", { id: "deposit" });
+            toast.loading("Updating project...", { id: "update" });
             await updateProjectMutation.mutateAsync({
                 id: project.id,
                 updates: {
@@ -170,11 +255,278 @@ export default function ProjectDetailPage({ params }: { params: any }) {
 
             await refetch();
             
-            // Show success message
-            alert("Funds deposited successfully! Project is now active.");
+            toast.success("Funds deposited successfully! Project is now active.", {
+                id: "update",
+                description: `Contract: ${deployedContractAddress.substring(0, 6)}...${deployedContractAddress.substring(38)}`,
+                duration: 6000,
+            });
         } catch (error) {
-            console.error("Failed to deposit funds:", error);
-            setDepositError(error instanceof Error ? error.message : "Failed to deposit funds");
+            const errorMessage = error instanceof Error ? error.message : "Failed to deposit funds. Please try again.";
+            
+            toast.dismiss("deploy");
+            toast.dismiss("deposit");
+            toast.dismiss("update");
+            
+            toast.error("Deposit Failed", {
+                description: errorMessage,
+                duration: 6000,
+            });
+        } finally {
+            setTxPending(false);
+        }
+    };
+
+    const handleEditMode = () => {
+        if (!project) return;
+        setIsEditMode(true);
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditMode(false);
+        setEditErrors({});
+        if (project) {
+            setEditTitle(project.title);
+            setEditDescription(project.description);
+            const counterpartyWallet = address?.toLowerCase() === project.client_wallet.toLowerCase() 
+                ? project.freelancer_wallet || "" 
+                : project.client_wallet;
+            setEditCounterpartyWallet(counterpartyWallet);
+            if (project.milestones) {
+                setEditMilestones(project.milestones.map(m => ({
+                    id: m.id,
+                    title: m.title,
+                    amount: m.amount,
+                    deadline: format(new Date(m.deadline), "yyyy-MM-dd"),
+                    currency: m.currency,
+                })));
+            }
+        }
+    };
+
+    const validateEditForm = (): boolean => {
+        const newErrors: Record<string, string> = {};
+        
+        if (!editTitle.trim()) {
+            newErrors.title = "Project title is required";
+        }
+        
+        if (!editDescription.trim()) {
+            newErrors.description = "Description is required";
+        }
+        
+        if (!editCounterpartyWallet.trim()) {
+            newErrors.counterpartyWallet = "Counterparty wallet is required";
+        } else if (!editCounterpartyWallet.match(/^0x[a-fA-F0-9]{40}$/i) && !editCounterpartyWallet.includes("@")) {
+            newErrors.counterpartyWallet = "Invalid wallet address or email";
+        }
+        
+        editMilestones.forEach((m, index) => {
+            if (!m.title.trim()) {
+                newErrors[`milestone_${m.id}_title`] = `Milestone ${index + 1} title is required`;
+            }
+            if (!m.amount.trim() || parseFloat(m.amount) <= 0) {
+                newErrors[`milestone_${m.id}_amount`] = `Milestone ${index + 1} amount must be greater than 0`;
+            }
+            if (!m.deadline) {
+                newErrors[`milestone_${m.id}_deadline`] = `Milestone ${index + 1} deadline is required`;
+            } else if (new Date(m.deadline) < new Date()) {
+                newErrors[`milestone_${m.id}_deadline`] = `Milestone ${index + 1} deadline must be in the future`;
+            }
+        });
+        
+        setEditErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSaveEdit = async () => {
+        if (!project || !address || !chainId) return;
+
+        if (!validateEditForm()) {
+            return;
+        }
+
+        const isClient = address.toLowerCase() === project.client_wallet.toLowerCase();
+        const newCounterpartyWallet = editCounterpartyWallet.toLowerCase();
+        const walletChanged = originalCounterpartyWallet.toLowerCase() !== newCounterpartyWallet;
+
+        if (walletChanged && !showWalletWarning) {
+            setShowWalletWarning(true);
+            toast.warning("Wallet Address Changed", {
+                description: "You are changing the counterparty wallet address. This will require re-approval if the project was already sent for approval.",
+                duration: 5000,
+            });
+            return;
+        }
+
+        setTxPending(true);
+        setEditErrors({});
+        setShowWalletWarning(false);
+
+        try {
+            const clientWallet = isClient ? address.toLowerCase() : newCounterpartyWallet;
+            const freelancerWallet = isClient ? newCounterpartyWallet : address.toLowerCase();
+
+            await updateProjectMutation.mutateAsync({
+                id: project.id,
+                updates: {
+                    title: editTitle.trim(),
+                    description: editDescription.trim(),
+                    client_wallet: clientWallet,
+                    freelancer_wallet: freelancerWallet,
+                },
+            });
+
+            const milestonesData = editMilestones.map((m, index) => ({
+                index: index,
+                title: m.title.trim(),
+                description: "",
+                amount: m.amount,
+                currency: m.currency,
+                chain_id: typeof chainId === "string" ? 56 : chainId,
+                deadline: new Date(m.deadline).toISOString(),
+            }));
+
+            await replaceMilestonesMutation.mutateAsync({
+                projectId: project.id,
+                milestones: milestonesData,
+            });
+
+            await refetch();
+            setIsEditMode(false);
+            toast.success("Project updated successfully!");
+        } catch (error) {
+            console.error("Failed to update project:", error);
+            toast.error("Update Failed", {
+                description: error instanceof Error ? error.message : "Failed to update project",
+            });
+        } finally {
+            setTxPending(false);
+        }
+    };
+
+    const addMilestone = () => {
+        setEditMilestones([...editMilestones, { 
+            id: Date.now(), 
+            title: "", 
+            amount: "", 
+            deadline: "", 
+            currency: editMilestones[0]?.currency || "NATIVE",
+            isNew: true,
+        }]);
+    };
+
+    const removeMilestone = (id: string | number) => {
+        if (editMilestones.length > 1) {
+            setEditMilestones(editMilestones.filter(m => m.id !== id));
+        }
+    };
+
+    const updateMilestone = (id: string | number, updates: Partial<MilestoneForm>) => {
+        setEditMilestones(editMilestones.map(m => m.id === id ? { ...m, ...updates } : m));
+    };
+
+    const handleSendForApproval = async () => {
+        if (!project || !address) return;
+
+        const isClient = address.toLowerCase() === project.client_wallet.toLowerCase();
+        if (!isClient) {
+            toast.error("Permission Denied", {
+                description: "Only the client can send the project for approval",
+            });
+            return;
+        }
+
+        if (!project.freelancer_wallet) {
+            toast.error("Missing Counterparty", {
+                description: "Please set a freelancer wallet address before sending for approval",
+            });
+            return;
+        }
+
+        if (!project.milestones || project.milestones.length === 0) {
+            toast.error("No Milestones", {
+                description: "Please add at least one milestone before sending for approval",
+            });
+            return;
+        }
+
+        setTxPending(true);
+        try {
+            toast.loading("Sending project for approval...", { id: "approval" });
+            await sendForApprovalMutation.mutateAsync(project.id);
+            await refetch();
+            toast.success("Project sent for approval!", {
+                id: "approval",
+                description: "Waiting for freelancer to review and approve",
+            });
+        } catch (error) {
+            console.error("Failed to send for approval:", error);
+            toast.error("Failed to Send for Approval", {
+                id: "approval",
+                description: error instanceof Error ? error.message : "Please try again",
+            });
+        } finally {
+            setTxPending(false);
+        }
+    };
+
+    const handleApproveProject = async () => {
+        if (!project || !address) return;
+
+        const isFreelancer = address.toLowerCase() === project.freelancer_wallet?.toLowerCase();
+        if (!isFreelancer) {
+            toast.error("Permission Denied", {
+                description: "Only the freelancer can approve the project",
+            });
+            return;
+        }
+
+        setTxPending(true);
+        try {
+            toast.loading("Approving project...", { id: "approve" });
+            await approveProjectMutation.mutateAsync(project.id);
+            await refetch();
+            toast.success("Project approved!", {
+                id: "approve",
+                description: "Client can now deposit funds",
+            });
+        } catch (error) {
+            console.error("Failed to approve project:", error);
+            toast.error("Failed to Approve", {
+                id: "approve",
+                description: error instanceof Error ? error.message : "Please try again",
+            });
+        } finally {
+            setTxPending(false);
+        }
+    };
+
+    const handleRejectProject = async () => {
+        if (!project || !address) return;
+
+        const isFreelancer = address.toLowerCase() === project.freelancer_wallet?.toLowerCase();
+        if (!isFreelancer) {
+            toast.error("Permission Denied", {
+                description: "Only the freelancer can reject the project",
+            });
+            return;
+        }
+
+        setTxPending(true);
+        try {
+            toast.loading("Rejecting project...", { id: "reject" });
+            await rejectProjectMutation.mutateAsync(project.id);
+            await refetch();
+            toast.success("Project rejected", {
+                id: "reject",
+                description: "Project has been returned to draft status",
+            });
+        } catch (error) {
+            console.error("Failed to reject project:", error);
+            toast.error("Failed to Reject", {
+                id: "reject",
+                description: error instanceof Error ? error.message : "Please try again",
+            });
         } finally {
             setTxPending(false);
         }
@@ -210,12 +562,40 @@ export default function ProjectDetailPage({ params }: { params: any }) {
             {/* Header */}
             <div className="flex flex-col lg:flex-row gap-6 lg:items-start lg:justify-between">
                 <div className="space-y-2">
-                    <h1 className="text-3xl font-light tracking-tight">{project.title}</h1>
+                    {isEditMode ? (
+                        <Input
+                            value={editTitle}
+                            onChange={(e) => {
+                                setEditTitle(e.target.value);
+                                if (editErrors.title) setEditErrors({ ...editErrors, title: "" });
+                            }}
+                            className="text-3xl font-light"
+                            placeholder="Project title"
+                        />
+                    ) : (
+                        <h1 className="text-3xl font-light tracking-tight">{project.title}</h1>
+                    )}
+                    {editErrors.title && (
+                        <p className="text-xs text-red-500">{editErrors.title}</p>
+                    )}
                     <div className="flex items-center gap-3">
                         <Badge variant="outline" className="bg-white/50">
                             {project.client_wallet.substring(0, 6)}...{project.client_wallet.substring(38)}
                         </Badge>
-                        <Badge variant={project.status === "active" ? "success" : "default"} className="bg-emerald-500/10 text-emerald-600 border-none">
+                        <Badge 
+                            variant={
+                                project.status === "active" ? "success" : 
+                                project.status === "approved" ? "success" :
+                                project.status === "pending_approval" ? "warning" :
+                                project.status === "in_dispute" ? "destructive" : "default"
+                            } 
+                            className={
+                                project.status === "pending_approval" ? "bg-amber-500/10 text-amber-600 border-none" :
+                                project.status === "approved" ? "bg-emerald-500/10 text-emerald-600 border-none" :
+                                project.status === "active" ? "bg-emerald-500/10 text-emerald-600 border-none" :
+                                "bg-emerald-500/10 text-emerald-600 border-none"
+                            }
+                        >
                             {project.status.replace("_", " ")}
                         </Badge>
                         <span className="text-sm text-muted-foreground font-mono">
@@ -224,6 +604,50 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                     </div>
                 </div>
                 <div className="flex gap-3">
+                    {project.status === "draft" && address?.toLowerCase() === project.client_wallet.toLowerCase() && (
+                        <>
+                            {!isEditMode ? (
+                                <Button 
+                                    variant="outline"
+                                    onClick={handleEditMode}
+                                    disabled={txPending}
+                                    className="gap-2"
+                                >
+                                    <Edit2 className="h-4 w-4" />
+                                    Edit Project
+                                </Button>
+                            ) : (
+                                <>
+                                    <Button 
+                                        variant="outline"
+                                        onClick={handleCancelEdit}
+                                        disabled={txPending}
+                                        className="gap-2"
+                                    >
+                                        <X className="h-4 w-4" />
+                                        Cancel
+                                    </Button>
+                                    <Button 
+                                        onClick={handleSaveEdit}
+                                        disabled={txPending}
+                                        className="gap-2"
+                                    >
+                                        {txPending ? (
+                                            <>
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="h-4 w-4" />
+                                                Save Changes
+                                            </>
+                                        )}
+                                    </Button>
+                                </>
+                            )}
+                        </>
+                    )}
                     {project.onchain_address && project.onchain_address !== "Pending" && (
                         <Button 
                             variant="outline" 
@@ -236,7 +660,65 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                             View Contract
                         </Button>
                     )}
-                    {project.status === "draft" && address?.toLowerCase() === project.client_wallet.toLowerCase() && (
+                    {project.status === "draft" && address?.toLowerCase() === project.client_wallet.toLowerCase() && !isEditMode && (
+                        <Button 
+                            onClick={handleSendForApproval}
+                            disabled={txPending || !address || !project.freelancer_wallet || !project.milestones || project.milestones.length === 0}
+                            className="gap-2"
+                        >
+                            {txPending ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Sending...
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="h-4 w-4" />
+                                    Send for Approval
+                                </>
+                            )}
+                        </Button>
+                    )}
+                    {project.status === "pending_approval" && address?.toLowerCase() === project.freelancer_wallet?.toLowerCase() && (
+                        <>
+                            <Button 
+                                onClick={handleApproveProject}
+                                disabled={txPending}
+                                className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                            >
+                                {txPending ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Approving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckCircle2 className="h-4 w-4" />
+                                        Approve Project
+                                    </>
+                                )}
+                            </Button>
+                            <Button 
+                                variant="outline"
+                                onClick={handleRejectProject}
+                                disabled={txPending}
+                                className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                                {txPending ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Rejecting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <X className="h-4 w-4" />
+                                        Reject
+                                    </>
+                                )}
+                            </Button>
+                        </>
+                    )}
+                    {project.status === "approved" && address?.toLowerCase() === project.client_wallet.toLowerCase() && !isEditMode && (
                         <Button 
                             onClick={handleDepositFunds}
                             disabled={txPending || !address}
@@ -260,10 +742,40 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                 </div>
             </div>
 
-            {depositError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 flex items-start gap-2">
-                    <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                    <span>{depositError}</span>
+            {(project.status === "pending_approval" || project.status === "approved") && (
+                <div className={cn(
+                    "rounded-lg border p-4",
+                    project.status === "pending_approval" 
+                        ? "bg-amber-50 border-amber-200 text-amber-800"
+                        : "bg-emerald-50 border-emerald-200 text-emerald-800"
+                )}>
+                    <div className="flex items-start gap-3">
+                        {project.status === "pending_approval" ? (
+                            <>
+                                <Clock className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-medium">Awaiting Approval</p>
+                                    <p className="text-sm mt-1">
+                                        {address?.toLowerCase() === project.client_wallet.toLowerCase()
+                                            ? "Waiting for the freelancer to review and approve this project."
+                                            : "Please review the project details and milestones. Click 'Approve Project' to proceed or 'Reject' to send it back for changes."}
+                                    </p>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <CheckCircle2 className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-medium">Project Approved</p>
+                                    <p className="text-sm mt-1">
+                                        {address?.toLowerCase() === project.client_wallet.toLowerCase()
+                                            ? "The project has been approved. You can now deposit funds to activate the escrow contract."
+                                            : "The project has been approved. Waiting for the client to deposit funds."}
+                                    </p>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -275,13 +787,166 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                             <CardTitle className="text-lg">Description</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-muted-foreground leading-relaxed">{project.description}</p>
+                            {isEditMode ? (
+                                <div className="space-y-2">
+                                    <textarea
+                                        className="w-full min-h-[100px] px-3 py-2 rounded-lg border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none"
+                                        placeholder="Describe the project scope and requirements..."
+                                        value={editDescription}
+                                        onChange={(e) => {
+                                            setEditDescription(e.target.value);
+                                            if (editErrors.description) setEditErrors({ ...editErrors, description: "" });
+                                        }}
+                                    />
+                                    {editErrors.description && (
+                                        <p className="text-xs text-red-500">{editErrors.description}</p>
+                                    )}
+                                </div>
+                            ) : (
+                                <p className="text-muted-foreground leading-relaxed">{project.description}</p>
+                            )}
                         </CardContent>
                     </Card>
 
+                    {isEditMode && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Counterparty Wallet</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-2">
+                                    {showWalletWarning && (
+                                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 flex items-start gap-2">
+                                            <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <p className="font-medium">Wallet address changed</p>
+                                                <p className="text-xs mt-1">Changing the counterparty wallet will require re-approval if the project was already sent for approval. Click "Save Changes" again to confirm.</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <Input
+                                        value={editCounterpartyWallet}
+                                        onChange={(e) => {
+                                            const newValue = e.target.value;
+                                            setEditCounterpartyWallet(newValue);
+                                            if (editErrors.counterpartyWallet) setEditErrors({ ...editErrors, counterpartyWallet: "" });
+                                            if (originalCounterpartyWallet && newValue.toLowerCase() !== originalCounterpartyWallet.toLowerCase()) {
+                                                setShowWalletWarning(true);
+                                            } else {
+                                                setShowWalletWarning(false);
+                                            }
+                                        }}
+                                        placeholder="0x..."
+                                    />
+                                    {editErrors.counterpartyWallet && (
+                                        <p className="text-xs text-red-500">{editErrors.counterpartyWallet}</p>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
                     <div className="space-y-4">
                         <h2 className="text-xl font-semibold">Milestones</h2>
-                        {project.milestones && project.milestones.length > 0 ? (
+                        {isEditMode ? (
+                            <div className="space-y-3">
+                                {editMilestones.map((ms, index) => (
+                                    <div key={ms.id} className="flex gap-4 items-start bg-white/40 p-3 rounded-lg border border-slate-200">
+                                        <span className="pt-2 text-sm font-bold text-muted-foreground w-6">{index + 1}.</span>
+                                        <div className="flex-1 space-y-2">
+                                            <div className="space-y-1">
+                                                <label className="text-xs font-medium">Description *</label>
+                                                <Input 
+                                                    placeholder="Deliverable name" 
+                                                    value={ms.title} 
+                                                    onChange={(e) => {
+                                                        updateMilestone(ms.id, { title: e.target.value });
+                                                        if (editErrors[`milestone_${ms.id}_title`]) {
+                                                            const newErrors = { ...editErrors };
+                                                            delete newErrors[`milestone_${ms.id}_title`];
+                                                            setEditErrors(newErrors);
+                                                        }
+                                                    }}
+                                                />
+                                                {editErrors[`milestone_${ms.id}_title`] && (
+                                                    <p className="text-xs text-red-500">{editErrors[`milestone_${ms.id}_title`]}</p>
+                                                )}
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <div className="flex-1 space-y-1">
+                                                    <label className="text-xs font-medium">Amount *</label>
+                                                    <div className="flex gap-2">
+                                                        <Input 
+                                                            type="number"
+                                                            step="0.001"
+                                                            placeholder="0.0" 
+                                                            value={ms.amount} 
+                                                            onChange={(e) => {
+                                                                updateMilestone(ms.id, { amount: e.target.value });
+                                                                if (editErrors[`milestone_${ms.id}_amount`]) {
+                                                                    const newErrors = { ...editErrors };
+                                                                    delete newErrors[`milestone_${ms.id}_amount`];
+                                                                    setEditErrors(newErrors);
+                                                                }
+                                                            }}
+                                                        />
+                                                        <select
+                                                            className="px-3 py-2 rounded-lg border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-accent/20 text-sm"
+                                                            value={ms.currency}
+                                                            onChange={(e) => updateMilestone(ms.id, { currency: e.target.value as "NATIVE" | "USDT" })}
+                                                        >
+                                                            <option value="NATIVE">{chainConfig?.nativeSymbol || "NATIVE"}</option>
+                                                            {chainConfig?.supportedTokens.includes("USDT") && (
+                                                                <option value="USDT">USDT</option>
+                                                            )}
+                                                        </select>
+                                                    </div>
+                                                    {editErrors[`milestone_${ms.id}_amount`] && (
+                                                        <p className="text-xs text-red-500">{editErrors[`milestone_${ms.id}_amount`]}</p>
+                                                    )}
+                                                </div>
+                                                <div className="w-40 space-y-1">
+                                                    <label className="text-xs font-medium">Deadline *</label>
+                                                    <Input 
+                                                        type="date" 
+                                                        value={ms.deadline} 
+                                                        onChange={(e) => {
+                                                            updateMilestone(ms.id, { deadline: e.target.value });
+                                                            if (editErrors[`milestone_${ms.id}_deadline`]) {
+                                                                const newErrors = { ...editErrors };
+                                                                delete newErrors[`milestone_${ms.id}_deadline`];
+                                                                setEditErrors(newErrors);
+                                                            }
+                                                        }}
+                                                        min={new Date().toISOString().split('T')[0]}
+                                                    />
+                                                    {editErrors[`milestone_${ms.id}_deadline`] && (
+                                                        <p className="text-xs text-red-500">{editErrors[`milestone_${ms.id}_deadline`]}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {editMilestones.length > 1 && (
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                onClick={() => removeMilestone(ms.id)} 
+                                                className="text-muted-foreground hover:text-red-500 mt-6"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                ))}
+                                <Button 
+                                    variant="outline" 
+                                    onClick={addMilestone} 
+                                    className="w-full border-dashed border-muted-foreground/30 hover:border-accent hover:text-accent"
+                                >
+                                    <Plus className="h-4 w-4 mr-2" /> Add Milestone
+                                </Button>
+                            </div>
+                        ) : project.milestones && project.milestones.length > 0 ? (
                             <div className="space-y-3">
                                 {project.milestones.map((milestone) => {
                                     const isClient = address?.toLowerCase() === project.client_wallet.toLowerCase();

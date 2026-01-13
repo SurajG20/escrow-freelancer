@@ -41,7 +41,7 @@ export const projectSchema = z.object({
   chain_id: z.number().int(),
   title: z.string(),
   description: z.string(),
-  status: z.enum(["draft", "active", "in_dispute", "completed", "cancelled"]),
+  status: z.enum(["draft", "pending_approval", "approved", "active", "in_dispute", "completed", "cancelled"]),
   created_at: z.string(),
   updated_at: z.string(),
 });

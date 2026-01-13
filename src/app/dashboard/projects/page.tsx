@@ -128,8 +128,10 @@ export default function ProjectsPage() {
                                                 <Badge
                                                     variant={
                                                         project.status === "active" ? "success" :
-                                                            project.status === "in_dispute" ? "destructive" :
-                                                                project.status === "draft" ? "warning" : "default"
+                                                            project.status === "approved" ? "success" :
+                                                                project.status === "pending_approval" ? "warning" :
+                                                                    project.status === "in_dispute" ? "destructive" :
+                                                                        project.status === "draft" ? "warning" : "default"
                                                     }
                                                     className="bg-opacity-10 dark:bg-opacity-20 backdrop-blur-sm"
                                                 >

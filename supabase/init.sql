@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS projects (
     chain_id INTEGER NOT NULL,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'active', 'in_dispute', 'completed', 'cancelled')),
+    status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'pending_approval', 'approved', 'active', 'in_dispute', 'completed', 'cancelled')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -201,8 +201,11 @@ DROP POLICY IF EXISTS "Users can read own profile" ON users;
 DROP POLICY IF EXISTS "Users can read projects they're involved in" ON projects;
 DROP POLICY IF EXISTS "Anyone can create projects" ON projects;
 DROP POLICY IF EXISTS "Authenticated users can create projects" ON projects;
+DROP POLICY IF EXISTS "Users can update projects" ON projects;
 DROP POLICY IF EXISTS "Users can read milestones of their projects" ON milestones;
 DROP POLICY IF EXISTS "Users can create milestones" ON milestones;
+DROP POLICY IF EXISTS "Users can update milestones" ON milestones;
+DROP POLICY IF EXISTS "Users can delete milestones" ON milestones;
 DROP POLICY IF EXISTS "Users can read disputes of their projects" ON disputes;
 DROP POLICY IF EXISTS "Users can create disputes" ON disputes;
 DROP POLICY IF EXISTS "Users can read messages of their projects" ON messages;
@@ -237,12 +240,24 @@ CREATE POLICY "Users can read projects they're involved in" ON projects
 CREATE POLICY "Anyone can create projects" ON projects
     FOR INSERT WITH CHECK (true);
 
+-- Allow updating projects (wallet validation happens in application)
+CREATE POLICY "Users can update projects" ON projects
+    FOR UPDATE USING (true) WITH CHECK (true);
+
 -- Milestones policies
 CREATE POLICY "Users can read milestones of their projects" ON milestones
     FOR SELECT USING (true);
 
 CREATE POLICY "Users can create milestones" ON milestones
     FOR INSERT WITH CHECK (true);
+
+-- Allow updating milestones
+CREATE POLICY "Users can update milestones" ON milestones
+    FOR UPDATE USING (true) WITH CHECK (true);
+
+-- Allow deleting milestones
+CREATE POLICY "Users can delete milestones" ON milestones
+    FOR DELETE USING (true);
 
 -- Disputes policies
 CREATE POLICY "Users can read disputes of their projects" ON disputes
