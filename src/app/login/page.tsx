@@ -2,9 +2,10 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Wallet, Loader2, AlertCircle } from "lucide-react";
+import { Wallet, Loader2, AlertCircle, Home } from "lucide-react";
 import { appKit } from "@/lib/appkit/config";
 import { useWallet } from "@/lib/hooks/useWallet";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -150,6 +151,19 @@ export default function LoginPage() {
             >
               Learn how to create a wallet
             </a>
+          </div>
+
+          <div className="pt-4 border-t">
+            <Link href="/">
+              <Button
+                variant="ghost"
+                className="w-full text-muted-foreground hover:text-foreground"
+                size="sm"
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Back to Home
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>
