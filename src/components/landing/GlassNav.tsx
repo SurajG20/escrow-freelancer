@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Lock } from "lucide-react";
 
 export function GlassNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -12,11 +12,12 @@ export function GlassNav() {
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 h-16">
         <div className="container mx-auto h-full flex items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tight text-gray-900">
-            <div className="w-8 h-8 rounded-full bg-accent text-white flex items-center justify-center font-bold">
-              E
+          <Link href="/" className="flex items-center gap-3 font-bold text-xl tracking-wide text-gray-900">
+            <div className="relative w-9 h-9 flex items-center justify-center">
+              <Lock className="w-6 h-6 text-accent" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent rounded-full border-2 border-white"></div>
             </div>
-            <span>Escrow</span>
+            <span className="tracking-wide">Escrow</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
