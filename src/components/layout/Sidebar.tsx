@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
     Home,
     Layers,
@@ -36,12 +37,9 @@ export function Sidebar() {
             onMouseLeave={() => setIsExpanded(false)}
         >
             <div className="flex h-14 items-center justify-center border-b border-slate-200/50">
-                <div className="h-7 w-7 rounded-lg bg-accent flex items-center justify-center">
-                    <span className="text-xs font-semibold text-white">E</span>
-                </div>
                 {isExpanded && (
-                    <span className="ml-3 text-sm font-semibold text-foreground tracking-tight">
-                        Escrow
+                    <span className="text-sm font-semibold text-foreground tracking-tight">
+                        Custodia
                     </span>
                 )}
             </div>

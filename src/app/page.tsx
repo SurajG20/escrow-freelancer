@@ -130,7 +130,7 @@ export default function LandingPage() {
                   Fund Escrow
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Client deposits funds into a smart contract escrow.
+                  Client deposits funds into a smart contract.
                 </p>
               </div>
               <div className="text-center">
@@ -258,7 +258,7 @@ export default function LandingPage() {
         {/* Footer */}
         <footer className="py-12 px-6 border-t border-gray-200">
           <div className="container mx-auto max-w-4xl flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
-            <p>© 2026 Escrow Protocol. Open Source.</p>
+            <p>© 2026 Custodia. Open Source.</p>
             <div className="flex gap-6 mt-4 md:mt-0">
               <Link href="#" className="hover:text-gray-900 transition-colors">
                 Terms

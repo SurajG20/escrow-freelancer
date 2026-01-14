@@ -7,16 +7,31 @@ import { Shield, Star, Award, Loader2, Wallet } from "lucide-react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useProjects } from "@/lib/hooks/useProjects";
 import { useDisputes } from "@/lib/hooks/useDisputes";
+import { useWallet } from "@/lib/hooks/useWallet";
 import { useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import { getProjectWithMilestones } from "@/lib/api/projects";
 
 export default function ProfilePage() {
     const { user, address, isLoading: authLoading } = useAuth();
+    const { chainConfig } = useWallet();
     const { data: projects = [] } = useProjects(
         address ? { client_wallet: address.toLowerCase() } : undefined
     );
     const { data: disputes = [] } = useDisputes();
+
+    const projectsWithMilestones = useQuery({
+        queryKey: ["profile-projects", projects.map(p => p.id)],
+        queryFn: async () => {
+            const results = await Promise.all(
+                projects.map(p => getProjectWithMilestones(p.id))
+            );
+            return results.filter(Boolean) as Array<NonNullable<Awaited<ReturnType<typeof getProjectWithMilestones>>>>;
+        },
+        enabled: projects.length > 0,
+    });
 
     const stats = useMemo(() => {
         const completedProjects = projects.filter(p => p.status === "completed").length;
@@ -24,13 +39,50 @@ export default function ProfilePage() {
         const disputeCount = disputes.length;
         const disputeRate = totalProjects > 0 ? ((disputeCount / totalProjects) * 100).toFixed(1) : "0";
 
+        let totalVolumeNative = 0;
+        let totalVolumeUSDT = 0;
+        const projectsData = projectsWithMilestones.data || [];
+        
+        projectsData.forEach(project => {
+            const milestones = project.milestones || [];
+            milestones.forEach(milestone => {
+                const amount = parseFloat(milestone.amount || "0");
+                if (milestone.currency === "NATIVE") {
+                    totalVolumeNative += amount;
+                } else if (milestone.currency === "USDT") {
+                    totalVolumeUSDT += amount;
+                }
+            });
+        });
+
+        const formatVolume = () => {
+            const nativeSymbol = chainConfig?.nativeSymbol || "ETH";
+            if (totalVolumeNative > 0 && totalVolumeUSDT > 0) {
+                return `${totalVolumeNative.toFixed(3)} ${nativeSymbol} + ${totalVolumeUSDT.toFixed(2)} USDT`;
+            } else if (totalVolumeNative > 0) {
+                return `${totalVolumeNative.toFixed(3)} ${nativeSymbol}`;
+            } else if (totalVolumeUSDT > 0) {
+                return `${totalVolumeUSDT.toFixed(2)} USDT`;
+            }
+            return "0";
+        };
+
+        const calculateReputation = () => {
+            if (totalProjects === 0) return "N/A";
+            const completionRate = (completedProjects / totalProjects) * 100;
+            const disputePenalty = parseFloat(disputeRate);
+            const baseScore = completionRate - (disputePenalty * 2);
+            const reputation = Math.max(0, Math.min(100, baseScore));
+            return reputation.toFixed(1);
+        };
+
         return {
-            reputation: "N/A",
+            reputation: calculateReputation(),
             jobsCompleted: completedProjects,
-            totalVolume: "0 ETH",
+            totalVolume: formatVolume(),
             disputeRate: `${disputeRate}%`,
         };
-    }, [projects, disputes]);
+    }, [projects, disputes, projectsWithMilestones.data, chainConfig]);
 
     const displayName = user?.display_name || 
         (address ? `${address.substring(0, 6)}...${address.substring(38)}` : "User");

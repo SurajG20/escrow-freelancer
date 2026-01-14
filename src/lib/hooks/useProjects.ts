@@ -20,8 +20,9 @@ export function useProjects(filters?: {
   return useQuery({
     queryKey: ["projects", filters],
     queryFn: () => listProjects(filters),
-    staleTime: 1000 * 60,
+    staleTime: 0,
     refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 }
 
@@ -65,6 +66,7 @@ export function useUpdateProject() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", data.id] });
+      queryClient.invalidateQueries({ queryKey: ["project", data.id, "with-milestones"] });
     },
   });
 }

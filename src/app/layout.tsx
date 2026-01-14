@@ -11,8 +11,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Secure Crypto Escrow for Freelancers and Clients",
+  title: "Custodia - Secure Crypto Escrow for Freelancers and Clients",
   description: "Lock funds in crypto. Work with confidence. Get paid only when work is approved. Trustless escrow using smart contracts.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({

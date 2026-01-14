@@ -6,7 +6,7 @@ import { getNetworkMode } from "@/lib/config/chains";
 const projectId = process.env.NEXT_PUBLIC_REOWN_PROJECT_ID || "";
 
 const metadata = {
-  name: "Escrow dApp",
+  name: "Custodia",
   description: "Decentralized milestone-based escrow platform",
   url: typeof window !== "undefined" ? window.location.origin : "",
   icons: [],

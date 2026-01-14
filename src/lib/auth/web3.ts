@@ -165,7 +165,7 @@ export function useWeb3Auth() {
     }
 
     const nonce = await getNonce(address);
-    const message = `Sign in to Escrow dApp\n\nNonce: ${nonce}\nAddress: ${address}`;
+    const message = `Sign in to Custodia\n\nNonce: ${nonce}\nAddress: ${address}`;
 
     try {
       const signature = await signMessageAsync({ message });

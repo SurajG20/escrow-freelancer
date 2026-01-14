@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { useState } from "react";
-import { Menu, X, Lock } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 export function GlassNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -13,11 +14,7 @@ export function GlassNav() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 h-16">
         <div className="container mx-auto h-full flex items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-3 font-bold text-xl tracking-wide text-gray-900">
-            <div className="relative w-9 h-9 flex items-center justify-center">
-              <Lock className="w-6 h-6 text-accent" />
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent rounded-full border-2 border-white"></div>
-            </div>
-            <span className="tracking-wide">Escrow</span>
+            <span className="tracking-wide">Custodia</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
@@ -35,7 +32,7 @@ export function GlassNav() {
             </Link>
             <Link href="/login">
               <Button>
-                Start Escrow
+                Get Started
               </Button>
             </Link>
           </div>
@@ -74,7 +71,7 @@ export function GlassNav() {
             </Link>
             <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
               <Button className="w-full mt-4">
-                Start Escrow
+                Get Started
               </Button>
             </Link>
           </div>

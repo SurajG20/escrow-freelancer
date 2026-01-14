@@ -44,7 +44,7 @@ export default function LoginPage() {
           </div>
           <CardTitle className="text-2xl">Connect your wallet</CardTitle>
           <CardDescription>
-            Connect your wallet and sign in to access the escrow platform.
+            Connect your wallet and sign in to access Custodia.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

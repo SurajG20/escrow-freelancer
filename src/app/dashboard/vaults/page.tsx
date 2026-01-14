@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/Button";
 import { ArrowUpRight, ArrowDownLeft, Lock, History, Wallet, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useProjects } from "@/lib/hooks/useProjects";
-import { useProjectWithMilestones } from "@/lib/hooks/useProjects";
 import { useMemo } from "react";
 import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { getProjectWithMilestones } from "@/lib/api/projects";
 
 export default function VaultsPage() {
     const { address } = useAuth();
@@ -18,20 +19,71 @@ export default function VaultsPage() {
 
     const activeProjects = projects.filter(p => p.status === "active" || p.status === "in_dispute");
     
+    const projectsWithMilestones = useQuery({
+        queryKey: ["vaults-projects", activeProjects.map(p => p.id)],
+        queryFn: async () => {
+            const results = await Promise.all(
+                activeProjects.map(p => getProjectWithMilestones(p.id))
+            );
+            return results.filter(Boolean) as Array<NonNullable<Awaited<ReturnType<typeof getProjectWithMilestones>>>>;
+        },
+        enabled: activeProjects.length > 0,
+    });
+
     const stats = useMemo(() => {
-        const totalLocked = "$0.00";
-        const pendingRelease = "$0.00";
-        const availableToWithdraw = "$0.00";
+        const projectsData = projectsWithMilestones.data || [];
+        
+        let totalLockedNative = 0;
+        let totalLockedUSDT = 0;
+        let pendingReleaseNative = 0;
+        let pendingReleaseUSDT = 0;
+        let releasedNative = 0;
+        let releasedUSDT = 0;
+
+        projectsData.forEach(project => {
+            const milestones = project.milestones || [];
+            milestones.forEach(milestone => {
+                const amount = parseFloat(milestone.amount || "0");
+                
+                if (milestone.currency === "NATIVE") {
+                    totalLockedNative += amount;
+                    if (milestone.offchain_state === "approved" || milestone.offchain_state === "submitted") {
+                        pendingReleaseNative += amount;
+                    } else if (milestone.offchain_state === "released") {
+                        releasedNative += amount;
+                    }
+                } else if (milestone.currency === "USDT") {
+                    totalLockedUSDT += amount;
+                    if (milestone.offchain_state === "approved" || milestone.offchain_state === "submitted") {
+                        pendingReleaseUSDT += amount;
+                    } else if (milestone.offchain_state === "released") {
+                        releasedUSDT += amount;
+                    }
+                }
+            });
+        });
+
+        const formatCurrency = (native: number, usdt: number) => {
+            if (native > 0 && usdt > 0) {
+                return `${native.toFixed(3)} NATIVE + ${usdt.toFixed(2)} USDT`;
+            } else if (native > 0) {
+                return `$${native.toFixed(2)}`;
+            } else if (usdt > 0) {
+                return `$${usdt.toFixed(2)}`;
+            }
+            return "$0.00";
+        };
+
         
         return {
-            totalLocked,
-            pendingRelease,
-            availableToWithdraw,
+            totalLocked: formatCurrency(totalLockedNative, totalLockedUSDT),
+            pendingRelease: formatCurrency(pendingReleaseNative, pendingReleaseUSDT),
+            availableToWithdraw: formatCurrency(Math.max(0, totalLockedNative - releasedNative - pendingReleaseNative), Math.max(0, totalLockedUSDT - releasedUSDT - pendingReleaseUSDT)),
             activeProjectsCount: activeProjects.length,
         };
-    }, [activeProjects]);
+    }, [activeProjects, projectsWithMilestones.data]);
 
-    if (projectsLoading) {
+    if (projectsLoading || projectsWithMilestones.isLoading) {
         return (
             <div className="space-y-6">
                 <div className="flex flex-col gap-2">
@@ -70,7 +122,7 @@ export default function VaultsPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{stats.pendingRelease}</div>
-                        <p className="text-xs text-muted-foreground mt-1">Next 7 days</p>
+                        <p className="text-xs text-muted-foreground mt-1">Awaiting approval or release</p>
                     </CardContent>
                 </Card>
                 <Card className="">
