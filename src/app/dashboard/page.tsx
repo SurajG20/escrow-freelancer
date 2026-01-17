@@ -22,7 +22,7 @@ import Link from "next/link";
 export default function DashboardPage() {
     const { address } = useAuth();
     const { data: projects = [], isLoading } = useProjects(
-        address ? { client_wallet: address.toLowerCase() } : undefined
+        address ? { wallet_address: address.toLowerCase() } : undefined
     );
 
     const stats = useMemo(() => {

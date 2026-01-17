@@ -18,7 +18,7 @@ export default function ProfilePage() {
     const { user, address, isLoading: authLoading } = useAuth();
     const { chainConfig } = useWallet();
     const { data: projects = [] } = useProjects(
-        address ? { client_wallet: address.toLowerCase() } : undefined
+        address ? { wallet_address: address.toLowerCase() } : undefined
     );
     const { data: disputes = [] } = useDisputes();
 

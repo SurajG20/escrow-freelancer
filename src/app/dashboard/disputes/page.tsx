@@ -13,7 +13,7 @@ import Link from "next/link";
 export default function DisputesPage() {
     const { address } = useAuth();
     const { data: projects = [] } = useProjects(
-        address ? { client_wallet: address.toLowerCase() } : undefined
+        address ? { wallet_address: address.toLowerCase() } : undefined
     );
     const { data: disputes = [], isLoading } = useDisputes();
 

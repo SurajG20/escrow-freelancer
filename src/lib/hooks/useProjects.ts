@@ -14,6 +14,7 @@ import { Project } from "@/types";
 export function useProjects(filters?: {
   client_wallet?: string;
   freelancer_wallet?: string;
+  wallet_address?: string;
   chain_id?: number;
   status?: string;
 }) {

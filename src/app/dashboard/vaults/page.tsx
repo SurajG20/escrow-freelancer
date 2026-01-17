@@ -14,7 +14,7 @@ import { getProjectWithMilestones } from "@/lib/api/projects";
 export default function VaultsPage() {
     const { address } = useAuth();
     const { data: projects = [], isLoading: projectsLoading } = useProjects(
-        address ? { client_wallet: address.toLowerCase() } : undefined
+        address ? { wallet_address: address.toLowerCase() } : undefined
     );
 
     const activeProjects = projects.filter(p => p.status === "active" || p.status === "in_dispute");

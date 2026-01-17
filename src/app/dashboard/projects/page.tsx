@@ -17,7 +17,7 @@ export default function ProjectsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const { address } = useAuth();
     const { data: projects = [], isLoading } = useProjects(
-        address ? { client_wallet: address.toLowerCase() } : undefined
+        address ? { wallet_address: address.toLowerCase() } : undefined
     );
 
     return (

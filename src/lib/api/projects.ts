@@ -5,16 +5,22 @@ import { projectSchema, projectsArraySchema, milestoneSchema, milestonesArraySch
 export async function listProjects(filters?: {
   client_wallet?: string;
   freelancer_wallet?: string;
+  wallet_address?: string;
   chain_id?: number;
   status?: string;
 }): Promise<Project[]> {
   let query = supabase.from("projects").select("*");
 
-  if (filters?.client_wallet) {
-    query = query.eq("client_wallet", filters.client_wallet);
-  }
-  if (filters?.freelancer_wallet) {
-    query = query.eq("freelancer_wallet", filters.freelancer_wallet);
+  if (filters?.wallet_address) {
+    const wallet = filters.wallet_address.toLowerCase();
+    query = query.or(`client_wallet.eq.${wallet},freelancer_wallet.eq.${wallet}`);
+  } else {
+    if (filters?.client_wallet) {
+      query = query.eq("client_wallet", filters.client_wallet);
+    }
+    if (filters?.freelancer_wallet) {
+      query = query.eq("freelancer_wallet", filters.freelancer_wallet);
+    }
   }
   if (filters?.chain_id) {
     query = query.eq("chain_id", filters.chain_id);
