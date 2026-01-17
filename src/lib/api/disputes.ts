@@ -80,7 +80,7 @@ export async function updateDispute(
       decision?: string;
       votes?: Record<string, string>;
     };
-  }>
+  }>,
 ): Promise<Dispute> {
   const { data, error } = await supabase
     .from("disputes")
@@ -91,7 +91,9 @@ export async function updateDispute(
 
   if (error) {
     if (error.code === "PGRST116") {
-      throw new Error(`Dispute with id ${id} not found or could not be updated`);
+      throw new Error(
+        `Dispute with id ${id} not found or could not be updated`,
+      );
     }
     throw new Error(`Failed to update dispute: ${error.message}`);
   }
@@ -102,5 +104,3 @@ export async function updateDispute(
 
   return disputeSchema.parse(data);
 }
-
-

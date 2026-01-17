@@ -1,5 +1,9 @@
 import { useAccount, useChainId, useDisconnect } from "wagmi";
-import { isSupportedChain, getChainConfig, getSupportedTokens } from "../config/chains";
+import {
+  isSupportedChain,
+  getChainConfig,
+  getSupportedTokens,
+} from "../config/chains";
 
 export function useWallet() {
   const { address, isConnected } = useAccount();
@@ -20,5 +24,3 @@ export function useWallet() {
     disconnect,
   };
 }
-
-

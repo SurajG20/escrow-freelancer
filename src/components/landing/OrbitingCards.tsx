@@ -6,9 +6,27 @@ import { CheckCircle2, Lock, FileText, AlertCircle } from "lucide-react";
 
 const milestones = [
   { id: 1, label: "Funded", icon: Lock, color: "text-indigo-400", delay: 0 },
-  { id: 2, label: "Submitted", icon: FileText, color: "text-blue-400", delay: 15 },
-  { id: 3, label: "Released ✓", icon: CheckCircle2, color: "text-emerald-400", delay: 30 },
-  { id: 4, label: "Resolved", icon: AlertCircle, color: "text-amber-400", delay: 45 },
+  {
+    id: 2,
+    label: "Submitted",
+    icon: FileText,
+    color: "text-blue-400",
+    delay: 15,
+  },
+  {
+    id: 3,
+    label: "Released ✓",
+    icon: CheckCircle2,
+    color: "text-emerald-400",
+    delay: 30,
+  },
+  {
+    id: 4,
+    label: "Resolved",
+    icon: AlertCircle,
+    color: "text-amber-400",
+    delay: 45,
+  },
 ];
 
 export function OrbitingCards() {
@@ -91,4 +109,3 @@ export function OrbitingCards() {
     </div>
   );
 }
-

@@ -5,7 +5,8 @@ import { Message } from "@/types";
 export function useMessages(projectId: string, milestoneId?: string) {
   return useQuery({
     queryKey: ["messages", projectId, milestoneId],
-    queryFn: () => listMessages({ project_id: projectId, milestone_id: milestoneId }),
+    queryFn: () =>
+      listMessages({ project_id: projectId, milestone_id: milestoneId }),
     enabled: !!projectId,
     staleTime: 1000 * 30,
     refetchOnWindowFocus: true,
@@ -40,7 +41,7 @@ export function useSendMessage() {
 
       queryClient.setQueryData<Message[]>(
         ["messages", newMessage.project_id, newMessage.milestone_id],
-        (old = []) => [...old, optimisticMessage]
+        (old = []) => [...old, optimisticMessage],
       );
 
       return { previousMessages };
@@ -49,7 +50,7 @@ export function useSendMessage() {
       if (context?.previousMessages) {
         queryClient.setQueryData(
           ["messages", newMessage.project_id, newMessage.milestone_id],
-          context.previousMessages
+          context.previousMessages,
         );
       }
     },
@@ -60,5 +61,3 @@ export function useSendMessage() {
     },
   });
 }
-
-

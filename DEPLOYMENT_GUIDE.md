@@ -10,6 +10,7 @@ This guide shows how to deploy the Escrow contracts using Remix IDE with OpenZep
 - **Escrow.sol** - Main escrow contract with milestone management
 
 Both contracts use OpenZeppelin libraries for security:
+
 - `ReentrancyGuard` - Prevents reentrancy attacks
 - `Ownable` - Access control for dispute resolution
 - `SafeERC20` - Safe ERC20 token transfers
@@ -74,8 +75,8 @@ Before deploying, get testnet BNB for gas fees:
 1. In **Deploy & Run Transactions** tab:
    - Select **EscrowFactory** from the contract dropdown (from EscrowFactory_Standalone.sol)
    - In the deploy section, you'll see a constructor parameter field
-   
 2. Enter the USDT token address for BSC Testnet:
+
    ```
    0x337610d27c682E347C9cD60BD4b3b107C9d34dD
    ```
@@ -119,10 +120,12 @@ NEXT_PUBLIC_USDT_TOKEN_ADDRESS=0x337610d27c682E347C9cD60BD4b3b107C9d34dD
 ## Important Addresses
 
 ### BSC Testnet
+
 - **USDT Token**: `0x337610d27c682E347C9cD60BD4b3b107C9d34dD`
 - **EscrowFactory**: (Deploy to get address)
 
 ### BSC Mainnet (For Production)
+
 - **USDT Token**: `0x55d398326f99059fF775485246999027B3197955`
 - **EscrowFactory**: (Deploy when ready for production)
 
@@ -131,44 +134,53 @@ NEXT_PUBLIC_USDT_TOKEN_ADDRESS=0x337610d27c682E347C9cD60BD4b3b107C9d34dD
 The contracts use OpenZeppelin libraries for security:
 
 ### ReentrancyGuard
+
 - Prevents reentrancy attacks on deposit and release functions
 - Uses the checks-effects-interactions pattern
 
 ### Ownable
+
 - Allows dispute resolution by contract owner
 - Only owner can call `resolveDispute()`
 
 ### SafeERC20
+
 - Safe ERC20 token transfers
 - Handles tokens that don't return boolean values
 - Prevents common ERC20 transfer issues
 
 ### IERC20
+
 - Standard ERC20 interface
 - Ensures compatibility with all ERC20 tokens
 
 ## Troubleshooting
 
 ### "Insufficient funds for gas"
+
 - Get testnet BNB from the faucet: https://testnet.bnbchain.org/faucet-smart
 - Make sure you have at least 0.01 BNB for deployment
 
 ### "Contract compilation failed"
+
 - Ensure OpenZeppelin plugin is activated
 - Check compiler version is 0.8.20
 - Verify all imports are correct
 - Make sure `Escrow.sol` is compiled before `EscrowFactory.sol`
 
 ### "OpenZeppelin contracts not found"
+
 - **Solution:** Use `EscrowFactory_Standalone.sol` instead - it includes all OpenZeppelin code inline
 - No plugin or manual setup needed!
 
 ### "Transaction failed"
+
 - Check you're on BSC Testnet (Chain ID: 97)
 - Verify you have enough BNB for gas
 - Ensure the USDT address is correct: `0x337610d27c682E347C9cD60BD4b3b107C9d34dD`
 
 ### "Invalid USDT address"
+
 - For BSC Testnet: `0x337610d27c682E347C9cD60BD4b3b107C9d34dD`
 - For BSC Mainnet: `0x55d398326f99059fF775485246999027B3197955`
 
@@ -202,6 +214,7 @@ After deployment, test the factory:
 ## Support
 
 If you encounter issues:
+
 1. Check the Remix console for error messages
 2. Verify all addresses are correct
 3. Ensure you're on the correct network

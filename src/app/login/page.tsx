@@ -4,7 +4,13 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
 import { Wallet, Loader2, AlertCircle, Home } from "lucide-react";
 import { appKit } from "@/lib/appkit/config";
 import { useWallet } from "@/lib/hooks/useWallet";
@@ -33,7 +39,8 @@ export default function LoginPage() {
     }
   };
 
-  const canSignIn = isConnected && address && isSupportedChain && !isAuthenticated;
+  const canSignIn =
+    isConnected && address && isSupportedChain && !isAuthenticated;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -67,12 +74,16 @@ export default function LoginPage() {
             <>
               <div className="space-y-3">
                 <div className="rounded-lg border bg-muted/50 p-4 text-left">
-                  <div className="text-sm text-muted-foreground mb-1">Wallet Address</div>
+                  <div className="text-sm text-muted-foreground mb-1">
+                    Wallet Address
+                  </div>
                   <div className="font-mono text-sm break-all">{address}</div>
                 </div>
                 {chainConfig && (
                   <div className="rounded-lg border bg-muted/50 p-4 text-left">
-                    <div className="text-sm text-muted-foreground mb-1">Network</div>
+                    <div className="text-sm text-muted-foreground mb-1">
+                      Network
+                    </div>
                     <div className="font-medium">{chainConfig.name}</div>
                   </div>
                 )}
@@ -80,9 +91,12 @@ export default function LoginPage() {
                   <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-left flex items-start gap-2">
                     <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
                     <div>
-                      <div className="text-sm font-medium text-yellow-800">Unsupported Chain</div>
+                      <div className="text-sm font-medium text-yellow-800">
+                        Unsupported Chain
+                      </div>
                       <div className="text-xs text-yellow-700 mt-1">
-                        Please switch to BSC Mainnet, BSC Testnet, Solana, or Solana Devnet
+                        Please switch to BSC Mainnet, BSC Testnet, Solana, or
+                        Solana Devnet
                       </div>
                     </div>
                   </div>
@@ -115,9 +129,13 @@ export default function LoginPage() {
                 <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-left flex items-start gap-2">
                   <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
                   <div>
-                    <div className="text-sm font-medium text-red-800">Sign In Failed</div>
+                    <div className="text-sm font-medium text-red-800">
+                      Sign In Failed
+                    </div>
                     <div className="text-xs text-red-700 mt-1">
-                      {error instanceof Error ? error.message : "An error occurred"}
+                      {error instanceof Error
+                        ? error.message
+                        : "An error occurred"}
                     </div>
                   </div>
                 </div>
@@ -125,8 +143,12 @@ export default function LoginPage() {
 
               {isAuthenticated && (
                 <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-                  <div className="text-sm font-medium text-green-800">Successfully signed in!</div>
-                  <div className="text-xs text-green-700 mt-1">Redirecting to dashboard...</div>
+                  <div className="text-sm font-medium text-green-800">
+                    Successfully signed in!
+                  </div>
+                  <div className="text-xs text-green-700 mt-1">
+                    Redirecting to dashboard...
+                  </div>
                 </div>
               )}
 

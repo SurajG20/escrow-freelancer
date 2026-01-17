@@ -62,12 +62,19 @@ export function useUpdateProject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Parameters<typeof updateProject>[1] }) =>
-      updateProject(id, updates),
+    mutationFn: ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: Parameters<typeof updateProject>[1];
+    }) => updateProject(id, updates),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", data.id] });
-      queryClient.invalidateQueries({ queryKey: ["project", data.id, "with-milestones"] });
+      queryClient.invalidateQueries({
+        queryKey: ["project", data.id, "with-milestones"],
+      });
     },
   });
 }
@@ -107,5 +114,3 @@ export function useRejectProject() {
     },
   });
 }
-
-

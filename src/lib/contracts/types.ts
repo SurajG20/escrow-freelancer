@@ -1,6 +1,6 @@
 /**
  * Smart Contract Type Definitions
- * 
+ *
  * This file contains TypeScript types for smart contract interactions.
  * Update these types when you implement the actual smart contracts.
  */
@@ -34,5 +34,3 @@ export interface ReleaseFundsResult {
   milestoneIndex: number;
   amount: string;
 }
-
-

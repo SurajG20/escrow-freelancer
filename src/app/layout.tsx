@@ -12,7 +12,8 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Custodia - Secure Crypto Escrow for Freelancers and Clients",
-  description: "Lock funds in crypto. Work with confidence. Get paid only when work is approved. Trustless escrow using smart contracts.",
+  description:
+    "Lock funds in crypto. Work with confidence. Get paid only when work is approved. Trustless escrow using smart contracts.",
   icons: {
     icon: "/icon.png",
     shortcut: "/icon.png",
@@ -27,10 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased font-sans text-foreground bg-background selection:bg-accent/20`}>
-        <AppProviders>
-          {children}
-        </AppProviders>
+      <body
+        className={`${inter.variable} antialiased font-sans text-foreground bg-background selection:bg-accent/20`}
+      >
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

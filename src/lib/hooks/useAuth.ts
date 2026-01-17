@@ -26,7 +26,7 @@ export function useAuth() {
           if (sessionData.wallet_address === walletAddress) {
             const expiresAt = sessionData.timestamp + 3600000;
             if (Date.now() < expiresAt) {
-              // eslint-disable-next-line react-hooks/exhaustive-deps
+               
               setSession(sessionData);
             } else {
               localStorage.removeItem("web3_session");
@@ -43,22 +43,27 @@ export function useAuth() {
   }, []);
 
   const { data: user } = useUserByWallet(
-    web3Auth.address || session?.wallet_address || undefined
+    web3Auth.address || session?.wallet_address || undefined,
   );
 
   const signInMutation = useMutation({
     mutationFn: () => web3Auth.signIn(),
     onSuccess: (data) => {
-      
       if (data.error) {
         console.error("Sign in returned error:", data.error);
         return;
       }
 
       if (data.session) {
-        const sessionToken = typeof window !== "undefined" ? localStorage.getItem("web3_session") : null;
-        const walletAddress = typeof window !== "undefined" ? localStorage.getItem("web3_wallet") : null;
-        
+        const sessionToken =
+          typeof window !== "undefined"
+            ? localStorage.getItem("web3_session")
+            : null;
+        const walletAddress =
+          typeof window !== "undefined"
+            ? localStorage.getItem("web3_wallet")
+            : null;
+
         if (sessionToken && walletAddress) {
           try {
             const sessionData = JSON.parse(atob(sessionToken)) as SessionData;
@@ -70,7 +75,7 @@ export function useAuth() {
           }
         }
       }
-      
+
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },
     onError: (error) => {
@@ -88,7 +93,9 @@ export function useAuth() {
 
   const isAuthenticated =
     !!session &&
-    (!web3Auth.address || session.wallet_address?.toLowerCase() === web3Auth.address?.toLowerCase());
+    (!web3Auth.address ||
+      session.wallet_address?.toLowerCase() ===
+        web3Auth.address?.toLowerCase());
 
   return {
     session,
@@ -102,4 +109,3 @@ export function useAuth() {
     error: signInMutation.error || signOutMutation.error,
   };
 }
-

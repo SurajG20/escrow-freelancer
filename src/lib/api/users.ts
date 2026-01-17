@@ -2,7 +2,9 @@ import { supabase } from "../supabase/client";
 import { User } from "@/types";
 import { userSchema } from "../validation/schemas";
 
-export async function getUserByWallet(walletAddress: string): Promise<User | null> {
+export async function getUserByWallet(
+  walletAddress: string,
+): Promise<User | null> {
   const { data, error } = await supabase
     .from("users")
     .select("*")
@@ -56,7 +58,7 @@ export async function createUser(user: {
       {
         onConflict: "wallet_address",
         ignoreDuplicates: false,
-      }
+      },
     )
     .select()
     .single();
@@ -64,7 +66,7 @@ export async function createUser(user: {
   if (error) {
     if (error.code === "42501") {
       throw new Error(
-        "Permission denied: RLS policy violation. Please run the init.sql script in Supabase."
+        "Permission denied: RLS policy violation. Please run the init.sql script in Supabase.",
       );
     }
     if (error.code === "PGRST116") {
@@ -74,7 +76,9 @@ export async function createUser(user: {
       }
       throw new Error("User not found after creation");
     }
-    throw new Error(`Failed to create user: ${error.message} (code: ${error.code})`);
+    throw new Error(
+      `Failed to create user: ${error.message} (code: ${error.code})`,
+    );
   }
 
   if (!data) {
@@ -95,7 +99,7 @@ export async function updateUser(
     bio: string;
     avatar_url: string;
     roles: ("client" | "freelancer" | "arbitrator")[];
-  }>
+  }>,
 ): Promise<User> {
   const { data, error } = await supabase
     .from("users")
@@ -110,5 +114,3 @@ export async function updateUser(
 
   return userSchema.parse(data);
 }
-
-

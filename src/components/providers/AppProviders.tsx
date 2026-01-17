@@ -18,22 +18,15 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
             refetchOnMount: true,
           },
         },
-      })
+      }),
   );
 
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         {children}
-        <Toaster 
-          position="top-right"
-          richColors
-          closeButton
-          duration={5000}
-        />
+        <Toaster position="top-right" richColors closeButton duration={5000} />
       </QueryClientProvider>
     </WagmiProvider>
   );
 }
-
-

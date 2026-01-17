@@ -26,7 +26,7 @@ async function getNonce(address: string): Promise<string> {
 async function verifySignature(
   address: string,
   message: string,
-  signature: string
+  signature: string,
 ): Promise<boolean> {
   try {
     const { data, error } = await supabase.rpc("verify_web3_signature", {
@@ -51,7 +51,7 @@ export async function signInWithWeb3(
   walletAddress: string,
   chainId: number | string,
   signature: string,
-  message: string
+  message: string,
 ): Promise<Web3AuthResult> {
   try {
     const address = walletAddress.toLowerCase();
@@ -64,11 +64,13 @@ export async function signInWithWeb3(
     // Ensure user exists (creates if needed) and get the user
     const user = await ensureUserProfile(address);
 
-    const sessionToken = btoa(JSON.stringify({
-      wallet_address: address,
-      signature: signature.substring(0, 20),
-      timestamp: Date.now(),
-    }));
+    const sessionToken = btoa(
+      JSON.stringify({
+        wallet_address: address,
+        signature: signature.substring(0, 20),
+        timestamp: Date.now(),
+      }),
+    );
 
     if (typeof window !== "undefined") {
       localStorage.setItem("web3_session", sessionToken);
@@ -124,9 +126,7 @@ export async function signInWithWeb3(
   }
 }
 
-async function ensureUserProfile(
-  walletAddress: string
-): Promise<User> {
+async function ensureUserProfile(walletAddress: string): Promise<User> {
   try {
     const existingUser = await getUserByWallet(walletAddress);
 
@@ -172,7 +172,7 @@ export function useWeb3Auth() {
       return signInWithWeb3(address, chainId || 1, signature, message);
     } catch (error) {
       throw new Error(
-        error instanceof Error ? error.message : "Failed to sign message"
+        error instanceof Error ? error.message : "Failed to sign message",
       );
     }
   };
@@ -185,4 +185,3 @@ export function useWeb3Auth() {
     chainId: chainId || 1,
   };
 }
-

@@ -43,7 +43,7 @@ export async function createMilestones(
     currency: "NATIVE" | "USDT";
     chain_id: number;
     deadline: string;
-  }>
+  }>,
 ): Promise<Milestone[]> {
   const { data, error } = await supabase
     .from("milestones")
@@ -51,7 +51,7 @@ export async function createMilestones(
       milestones.map((m) => ({
         ...m,
         offchain_state: "awaiting_submission",
-      }))
+      })),
     )
     .select();
 
@@ -73,7 +73,7 @@ export async function updateMilestone(
     index: number;
     offchain_state: string;
     onchain_state: string;
-  }>
+  }>,
 ): Promise<Milestone> {
   // First verify the milestone exists
   const existingMilestone = await getMilestone(id);
@@ -83,7 +83,7 @@ export async function updateMilestone(
 
   // Filter out undefined values
   const cleanUpdates = Object.fromEntries(
-    Object.entries(updates).filter(([_, value]) => value !== undefined)
+    Object.entries(updates).filter(([_, value]) => value !== undefined),
   );
 
   if (Object.keys(cleanUpdates).length === 0) {
@@ -100,7 +100,7 @@ export async function updateMilestone(
   if (error) {
     if (error.code === "PGRST116") {
       throw new Error(
-        `Milestone with id ${id} could not be updated. This may be due to Row Level Security policies or the milestone being deleted.`
+        `Milestone with id ${id} could not be updated. This may be due to Row Level Security policies or the milestone being deleted.`,
       );
     }
     throw new Error(`Failed to update milestone: ${error.message}`);
@@ -108,7 +108,7 @@ export async function updateMilestone(
 
   if (!data) {
     throw new Error(
-      `Milestone with id ${id} update returned no data. This may be due to Row Level Security policies.`
+      `Milestone with id ${id} update returned no data. This may be due to Row Level Security policies.`,
     );
   }
 
@@ -116,17 +116,16 @@ export async function updateMilestone(
 }
 
 export async function deleteMilestone(id: string): Promise<void> {
-  const { error } = await supabase
-    .from("milestones")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("milestones").delete().eq("id", id);
 
   if (error) {
     throw new Error(`Failed to delete milestone: ${error.message}`);
   }
 }
 
-export async function deleteMilestonesByProject(projectId: string): Promise<void> {
+export async function deleteMilestonesByProject(
+  projectId: string,
+): Promise<void> {
   const { error } = await supabase
     .from("milestones")
     .delete()
@@ -147,7 +146,7 @@ export async function replaceMilestones(
     currency: "NATIVE" | "USDT";
     chain_id: number;
     deadline: string;
-  }>
+  }>,
 ): Promise<Milestone[]> {
   const { error: deleteError } = await supabase
     .from("milestones")
@@ -155,7 +154,9 @@ export async function replaceMilestones(
     .eq("project_id", projectId);
 
   if (deleteError) {
-    throw new Error(`Failed to delete existing milestones: ${deleteError.message}`);
+    throw new Error(
+      `Failed to delete existing milestones: ${deleteError.message}`,
+    );
   }
 
   const { data, error: insertError } = await supabase
@@ -165,7 +166,7 @@ export async function replaceMilestones(
         project_id: projectId,
         ...m,
         offchain_state: "awaiting_submission",
-      }))
+      })),
     )
     .select();
 
@@ -175,4 +176,3 @@ export async function replaceMilestones(
 
   return milestonesArraySchema.parse(data);
 }
-

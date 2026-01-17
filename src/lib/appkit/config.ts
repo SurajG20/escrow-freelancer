@@ -35,4 +35,3 @@ export const appKit = createAppKit({
 });
 
 export const wagmiConfig = wagmiAdapter.wagmiConfig;
-

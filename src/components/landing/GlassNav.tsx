@@ -13,7 +13,10 @@ export function GlassNav() {
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 h-16">
         <div className="container mx-auto h-full flex items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-3 font-bold text-xl tracking-wide text-gray-900">
+          <Link
+            href="/"
+            className="flex items-center gap-3 font-bold text-xl tracking-wide text-gray-900"
+          >
             <span className="tracking-wide">Custodia</span>
           </Link>
 
@@ -53,7 +56,11 @@ export function GlassNav() {
             className="md:hidden text-gray-700 hover:text-gray-900 transition-colors"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
       </nav>

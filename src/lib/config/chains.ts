@@ -27,9 +27,11 @@ export const BSC_MAINNET: ChainConfig = {
   chainId: 56,
   name: "Binance Smart Chain",
   nativeSymbol: "BNB",
-  usdtContractAddress: process.env.NEXT_PUBLIC_NETWORK_MODE === "mainnet" 
-    ? (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS || "0x55d398326f99059fF775485246999027B3197955")
-    : null,
+  usdtContractAddress:
+    process.env.NEXT_PUBLIC_NETWORK_MODE === "mainnet"
+      ? process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS ||
+        "0x55d398326f99059fF775485246999027B3197955"
+      : null,
   rpcUrl: "https://bsc-dataseed1.binance.org",
   blockExplorerUrl: "https://bscscan.com",
   supportedTokens: ["NATIVE", "USDT"],
@@ -67,7 +69,7 @@ export function setNetworkMode(mode: NetworkMode) {
 export function getCurrentChainConfig(): ChainConfig {
   const mode = getNetworkMode();
   const config = mode === "mainnet" ? BSC_MAINNET : BSC_TESTNET;
-  
+
   // Override USDT address from environment if set
   if (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS) {
     return {
@@ -75,14 +77,16 @@ export function getCurrentChainConfig(): ChainConfig {
       usdtContractAddress: process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS,
     };
   }
-  
+
   return config;
 }
 
 export function getEscrowFactoryAddress(): string {
   const factoryAddress = process.env.NEXT_PUBLIC_ESCROW_FACTORY_ADDRESS;
   if (!factoryAddress) {
-    throw new Error("EscrowFactory address not configured. Please set NEXT_PUBLIC_ESCROW_FACTORY_ADDRESS in .env.local");
+    throw new Error(
+      "EscrowFactory address not configured. Please set NEXT_PUBLIC_ESCROW_FACTORY_ADDRESS in .env.local",
+    );
   }
   return factoryAddress;
 }
@@ -101,5 +105,3 @@ export function getSupportedTokens(chainId: ChainId): ("NATIVE" | "USDT")[] {
   const chain = getChainConfig(chainId);
   return chain?.supportedTokens || ["NATIVE"];
 }
-
-

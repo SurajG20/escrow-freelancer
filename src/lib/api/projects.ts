@@ -1,6 +1,11 @@
 import { supabase } from "../supabase/client";
 import { Project, Milestone } from "@/types";
-import { projectSchema, projectsArraySchema, milestoneSchema, milestonesArraySchema } from "../validation/schemas";
+import {
+  projectSchema,
+  projectsArraySchema,
+  milestoneSchema,
+  milestonesArraySchema,
+} from "../validation/schemas";
 
 export async function listProjects(filters?: {
   client_wallet?: string;
@@ -12,8 +17,11 @@ export async function listProjects(filters?: {
   let query = supabase.from("projects").select("*");
 
   if (filters?.wallet_address) {
+    // Auto-match: Show projects where user is either client or freelancer
     const wallet = filters.wallet_address.toLowerCase();
-    query = query.or(`client_wallet.eq.${wallet},freelancer_wallet.eq.${wallet}`);
+    query = query.or(
+      `client_wallet.eq.${wallet},freelancer_wallet.eq.${wallet}`,
+    );
   } else {
     if (filters?.client_wallet) {
       query = query.eq("client_wallet", filters.client_wallet);
@@ -55,13 +63,17 @@ export async function getProject(id: string): Promise<Project | null> {
   return projectSchema.parse(data);
 }
 
-export async function getProjectWithMilestones(id: string): Promise<Project & { milestones: Milestone[] } | null> {
+export async function getProjectWithMilestones(
+  id: string,
+): Promise<(Project & { milestones: Milestone[] }) | null> {
   const { data, error } = await supabase
     .from("projects")
-    .select(`
+    .select(
+      `
       *,
       milestones (*)
-    `)
+    `,
+    )
     .eq("id", id)
     .single();
 
@@ -112,7 +124,7 @@ export async function updateProject(
     client_wallet: string;
     freelancer_wallet: string;
     onchain_address: string;
-  }>
+  }>,
 ): Promise<Project> {
   // First verify the project exists
   const existingProject = await getProject(id);
@@ -122,7 +134,7 @@ export async function updateProject(
 
   // Filter out undefined values to avoid unnecessary updates
   const cleanUpdates = Object.fromEntries(
-    Object.entries(updates).filter(([_, value]) => value !== undefined)
+    Object.entries(updates).filter(([_, value]) => value !== undefined),
   );
 
   if (Object.keys(cleanUpdates).length === 0) {
@@ -141,7 +153,7 @@ export async function updateProject(
     console.error(`[updateProject] Error updating project ${id}:`, error);
     if (error.code === "PGRST116") {
       throw new Error(
-        `Project with id ${id} could not be updated. This may be due to Row Level Security policies or the project being deleted. Original error: ${error.message}`
+        `Project with id ${id} could not be updated. This may be due to Row Level Security policies or the project being deleted. Original error: ${error.message}`,
       );
     }
     throw new Error(`Failed to update project: ${error.message}`);
@@ -149,7 +161,7 @@ export async function updateProject(
 
   if (!data) {
     throw new Error(
-      `Project with id ${id} update returned no data. This may be due to Row Level Security policies.`
+      `Project with id ${id} update returned no data. This may be due to Row Level Security policies.`,
     );
   }
 
@@ -173,7 +185,7 @@ export async function sendForApproval(id: string): Promise<Project> {
   if (error) {
     if (error.code === "PGRST116") {
       throw new Error(
-        `Project with id ${id} could not be updated. This may be due to Row Level Security policies.`
+        `Project with id ${id} could not be updated. This may be due to Row Level Security policies.`,
       );
     }
     throw new Error(`Failed to send project for approval: ${error.message}`);
@@ -181,7 +193,7 @@ export async function sendForApproval(id: string): Promise<Project> {
 
   if (!data) {
     throw new Error(
-      `Project with id ${id} update returned no data. This may be due to Row Level Security policies.`
+      `Project with id ${id} update returned no data. This may be due to Row Level Security policies.`,
     );
   }
 
@@ -205,7 +217,7 @@ export async function approveProject(id: string): Promise<Project> {
   if (error) {
     if (error.code === "PGRST116") {
       throw new Error(
-        `Project with id ${id} could not be updated. This may be due to Row Level Security policies.`
+        `Project with id ${id} could not be updated. This may be due to Row Level Security policies.`,
       );
     }
     throw new Error(`Failed to approve project: ${error.message}`);
@@ -213,7 +225,7 @@ export async function approveProject(id: string): Promise<Project> {
 
   if (!data) {
     throw new Error(
-      `Project with id ${id} update returned no data. This may be due to Row Level Security policies.`
+      `Project with id ${id} update returned no data. This may be due to Row Level Security policies.`,
     );
   }
 
@@ -237,7 +249,7 @@ export async function rejectProject(id: string): Promise<Project> {
   if (error) {
     if (error.code === "PGRST116") {
       throw new Error(
-        `Project with id ${id} could not be updated. This may be due to Row Level Security policies.`
+        `Project with id ${id} could not be updated. This may be due to Row Level Security policies.`,
       );
     }
     throw new Error(`Failed to reject project: ${error.message}`);
@@ -245,11 +257,9 @@ export async function rejectProject(id: string): Promise<Project> {
 
   if (!data) {
     throw new Error(
-      `Project with id ${id} update returned no data. This may be due to Row Level Security policies.`
+      `Project with id ${id} update returned no data. This may be due to Row Level Security policies.`,
     );
   }
 
   return projectSchema.parse(data);
 }
-
-

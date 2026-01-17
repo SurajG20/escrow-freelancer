@@ -102,4 +102,3 @@ export function GlassOrb() {
     </motion.div>
   );
 }
-

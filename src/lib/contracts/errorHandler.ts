@@ -41,8 +41,9 @@ export function getUserFriendlyError(error: unknown): string {
   }
 
   if (
-    errorString.includes("contract") && 
-    (errorString.includes("not found") || errorString.includes("does not exist"))
+    errorString.includes("contract") &&
+    (errorString.includes("not found") ||
+      errorString.includes("does not exist"))
   ) {
     return "Contract address not found. Please verify the contract is deployed correctly.";
   }
@@ -75,10 +76,7 @@ export function getUserFriendlyError(error: unknown): string {
     return "Please connect your wallet to continue.";
   }
 
-  if (
-    errorString.includes("timeout") ||
-    errorString.includes("timed out")
-  ) {
+  if (errorString.includes("timeout") || errorString.includes("timed out")) {
     return "Transaction timed out. Please try again.";
   }
 
@@ -89,7 +87,10 @@ export function getUserFriendlyError(error: unknown): string {
     return "Contract configuration error. Please contact support.";
   }
 
-  if (errorString.includes("only client") || errorString.includes("only freelancer")) {
+  if (
+    errorString.includes("only client") ||
+    errorString.includes("only freelancer")
+  ) {
     return "You don't have permission to perform this action.";
   }
 
@@ -97,11 +98,14 @@ export function getUserFriendlyError(error: unknown): string {
     return "Invalid milestone state. Please check the milestone status.";
   }
 
-  if (errorString.includes("project is cancelled") || errorString.includes("project is in dispute")) {
+  if (
+    errorString.includes("project is cancelled") ||
+    errorString.includes("project is in dispute")
+  ) {
     return "This project cannot be modified in its current state.";
   }
 
-  return errorMessage.length > 200 
+  return errorMessage.length > 200
     ? "An error occurred. Please check the console for details."
     : errorMessage;
 }

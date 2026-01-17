@@ -12,7 +12,7 @@
 
   --color-muted: #f1f5f9;
   --color-muted-foreground: #64748b;
-  
+
   --color-primary: #0d9488;
   --color-primary-hover: #0f766e;
   --color-secondary: #f97316;
@@ -31,29 +31,55 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-
 /* Animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-4px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
 }
 
 @keyframes orbit {
-  from { transform: rotate(0deg) translateX(300px) rotate(0deg); }
-  to { transform: rotate(360deg) translateX(300px) rotate(-360deg); }
+  from {
+    transform: rotate(0deg) translateX(300px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(300px) rotate(-360deg);
+  }
 }
 
 @keyframes particle-float {
-  0% { transform: translateY(100vh) translateX(0); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+  0% {
+    transform: translateY(100vh) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(100px);
+    opacity: 0;
+  }
 }
 
 @keyframes light-sweep {
-  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
-  50% { opacity: 0.3; }
-  100% { transform: translateX(200%) translateY(200%) rotate(45deg); opacity: 0; }
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(200%) translateY(200%) rotate(45deg);
+    opacity: 0;
+  }
 }
 
 .animate-float {
@@ -103,7 +129,9 @@ body {
 }
 
 .hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .hover-lift:hover {

@@ -1,6 +1,13 @@
 // @ts-nocheck
 import { DepositResult, ReleaseFundsResult } from "./types";
-import { parseEther, parseUnits, formatEther, createPublicClient, http, type WalletClient } from "viem";
+import {
+  parseEther,
+  parseUnits,
+  formatEther,
+  createPublicClient,
+  http,
+  type WalletClient,
+} from "viem";
 import { bsc, bscTestnet } from "viem/chains";
 import EscrowABI from "./abis/Escrow.json";
 import ERC20ABI from "./abis/ERC20.json";
@@ -10,7 +17,7 @@ export async function depositFunds(
   contractAddress: string,
   amount: string,
   currency: "NATIVE" | "USDT",
-  walletClient: WalletClient
+  walletClient: WalletClient,
 ): Promise<DepositResult> {
   const chainConfig = getCurrentChainConfig();
   const chain = chainConfig.network === "mainnet" ? bsc : bscTestnet;
@@ -88,7 +95,7 @@ export async function depositFunds(
 export async function releaseMilestoneFunds(
   contractAddress: string,
   milestoneIndex: number,
-  walletClient: WalletClient
+  walletClient: WalletClient,
 ): Promise<ReleaseFundsResult> {
   const chainConfig = getCurrentChainConfig();
   const chain = chainConfig.network === "mainnet" ? bsc : bscTestnet;
@@ -116,12 +123,12 @@ export async function releaseMilestoneFunds(
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-  const milestone = await publicClient.readContract({
+  const milestone = (await publicClient.readContract({
     address: contractAddress as `0x${string}`,
     abi: EscrowABI,
     functionName: "getMilestone",
     args: [BigInt(milestoneIndex)],
-  }) as [bigint, boolean, number];
+  })) as [bigint, boolean, number];
 
   return {
     transactionHash: hash,
@@ -133,7 +140,7 @@ export async function releaseMilestoneFunds(
 
 export async function getEscrowBalance(
   contractAddress: string,
-  currency: "NATIVE" | "USDT"
+  currency: "NATIVE" | "USDT",
 ): Promise<string> {
   const chainConfig = getCurrentChainConfig();
   const chain = chainConfig.network === "mainnet" ? bsc : bscTestnet;
@@ -142,11 +149,11 @@ export async function getEscrowBalance(
     transport: http(chainConfig.rpcUrl),
   });
 
-  const balances = await publicClient.readContract({
+  const balances = (await publicClient.readContract({
     address: contractAddress as `0x${string}`,
     abi: EscrowABI,
     functionName: "getBalances",
-  }) as [bigint, bigint];
+  })) as [bigint, bigint];
 
   if (currency === "NATIVE") {
     return formatEther(balances[0]);
@@ -155,4 +162,60 @@ export async function getEscrowBalance(
   }
 }
 
+export async function submitMilestoneOnChain(
+  contractAddress: string,
+  milestoneIndex: number,
+  walletClient: WalletClient,
+): Promise<{ transactionHash: `0x${string}` }> {
+  const chainConfig = getCurrentChainConfig();
+  const chain = chainConfig.network === "mainnet" ? bsc : bscTestnet;
 
+  const publicClient = createPublicClient({
+    chain,
+    transport: http(chainConfig.rpcUrl),
+  });
+
+  if (!walletClient) {
+    throw new Error("Wallet not connected");
+  }
+
+  const hash = await walletClient.writeContract({
+    address: contractAddress as `0x${string}`,
+    abi: EscrowABI,
+    functionName: "submitMilestone",
+    args: [BigInt(milestoneIndex)],
+  });
+
+  await publicClient.waitForTransactionReceipt({ hash });
+
+  return { transactionHash: hash };
+}
+
+export async function approveMilestoneOnChain(
+  contractAddress: string,
+  milestoneIndex: number,
+  walletClient: WalletClient,
+): Promise<{ transactionHash: `0x${string}` }> {
+  const chainConfig = getCurrentChainConfig();
+  const chain = chainConfig.network === "mainnet" ? bsc : bscTestnet;
+
+  const publicClient = createPublicClient({
+    chain,
+    transport: http(chainConfig.rpcUrl),
+  });
+
+  if (!walletClient) {
+    throw new Error("Wallet not connected");
+  }
+
+  const hash = await walletClient.writeContract({
+    address: contractAddress as `0x${string}`,
+    abi: EscrowABI,
+    functionName: "approveMilestone",
+    args: [BigInt(milestoneIndex)],
+  });
+
+  await publicClient.waitForTransactionReceipt({ hash });
+
+  return { transactionHash: hash };
+}

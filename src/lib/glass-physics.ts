@@ -7,12 +7,14 @@ export const glassPhysics = {
   },
   hover: {
     transform: "scale(1.05)",
-    boxShadow: "0 35px 55px -10px rgb(0 0% 0% / 0.6), 0 0 40px hsl(188 100% 50% / 0.3)",
+    boxShadow:
+      "0 35px 55px -10px rgb(0 0% 0% / 0.6), 0 0 40px hsl(188 100% 50% / 0.3)",
     borderColor: "hsl(0 0% 100% / 0.4)",
   },
   active: {
     transform: "scale(1.1)",
-    boxShadow: "0 45px 65px -10px rgb(0 0% 0% / 0.8), 0 0 60px hsl(188 100% 50% / 0.4)",
+    boxShadow:
+      "0 45px 65px -10px rgb(0 0% 0% / 0.8), 0 0 60px hsl(188 100% 50% / 0.4)",
     borderColor: "hsl(0 0% 100% / 0.6)",
   },
   transition: {
@@ -42,4 +44,3 @@ export const glassOrbPhysics = {
     },
   },
 };
-

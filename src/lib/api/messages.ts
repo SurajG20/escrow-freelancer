@@ -47,5 +47,3 @@ export async function sendMessage(message: {
 
   return messageSchema.parse(data);
 }
-
-
