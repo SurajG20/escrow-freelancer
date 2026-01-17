@@ -18,21 +18,22 @@ import { useAuth } from "@/lib/hooks/useAuth";
 import { useProjects } from "@/lib/hooks/useProjects";
 import { useMemo } from "react";
 import Link from "next/link";
+import { WalletAddress } from "@/components/wallet/WalletAddress";
 
 export default function DashboardPage() {
   const { address } = useAuth();
   const { data: projects = [], isLoading } = useProjects(
-    address ? { wallet_address: address.toLowerCase() } : undefined,
+    address ? { wallet_address: address.toLowerCase() } : undefined
   );
 
   const stats = useMemo(() => {
     const activeProjects = projects.filter((p) => p.status === "active").length;
     const inDisputeProjects = projects.filter(
-      (p) => p.status === "in_dispute",
+      (p) => p.status === "in_dispute"
     ).length;
     const draftProjects = projects.filter((p) => p.status === "draft").length;
     const completedProjects = projects.filter(
-      (p) => p.status === "completed",
+      (p) => p.status === "completed"
     ).length;
 
     const totalProjects = projects.length;
@@ -58,7 +59,7 @@ export default function DashboardPage() {
     return [...projects]
       .sort(
         (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )
       .slice(0, 5);
   }, [projects]);
@@ -71,8 +72,9 @@ export default function DashboardPage() {
           <h1 className="text-base font-semibold text-slate-900 mb-1">
             Dashboard
           </h1>
-          <p className="text-sm text-slate-500">
-            Welcome back, {address?.substring(0, 6)}...
+          <p className="text-sm text-slate-500 flex items-center gap-1">
+            Welcome back,
+            {address && <WalletAddress address={address} />}
           </p>
         </div>
         <Badge variant="outline" className="text-xs border-slate-200/50">
