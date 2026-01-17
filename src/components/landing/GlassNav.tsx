@@ -19,19 +19,31 @@ export function GlassNav() {
 
           <div className="hidden md:flex items-center gap-8">
             <Link
+              href="/"
+              className="text-sm font-medium text-gray-700 hover:text-teal-700 transition-colors"
+            >
+              Home
+            </Link>
+            <Link
+              href="#features"
+              className="text-sm font-medium text-gray-700 hover:text-teal-700 transition-colors"
+            >
+              Features
+            </Link>
+            <Link
               href="#how-it-works"
-              className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+              className="text-sm font-medium text-gray-700 hover:text-teal-700 transition-colors"
             >
               How It Works
             </Link>
             <Link
               href="/login"
-              className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+              className="text-sm font-medium text-gray-700 hover:text-teal-700 transition-colors"
             >
               Sign In
             </Link>
             <Link href="/login">
-              <Button>
+              <Button className="bg-teal-600 hover:bg-teal-700">
                 Get Started
               </Button>
             </Link>
@@ -56,21 +68,35 @@ export function GlassNav() {
             onClick={(e) => e.stopPropagation()}
           >
             <Link
+              href="/"
+              className="block text-gray-900 hover:text-teal-700 transition-colors font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              href="#features"
+              className="block text-gray-900 hover:text-teal-700 transition-colors font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Features
+            </Link>
+            <Link
               href="#how-it-works"
-              className="block text-gray-900 hover:text-gray-700 transition-colors font-medium"
+              className="block text-gray-900 hover:text-teal-700 transition-colors font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
               How It Works
             </Link>
             <Link
               href="/login"
-              className="block text-gray-900 hover:text-gray-700 transition-colors font-medium"
+              className="block text-gray-900 hover:text-teal-700 transition-colors font-medium"
               onClick={() => setMobileMenuOpen(false)}
             >
               Sign In
             </Link>
             <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-              <Button className="w-full mt-4">
+              <Button className="w-full mt-4 bg-teal-600 hover:bg-teal-700">
                 Get Started
               </Button>
             </Link>
