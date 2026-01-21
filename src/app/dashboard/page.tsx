@@ -19,41 +19,30 @@ import { useProjects } from "@/lib/hooks/useProjects";
 import { useMemo } from "react";
 import Link from "next/link";
 import { WalletAddress } from "@/components/wallet/WalletAddress";
+import { useProjectStats } from "@/lib/hooks/useProjectStats";
 
 export default function DashboardPage() {
   const { address } = useAuth();
   const { data: projects = [], isLoading } = useProjects(
     address ? { wallet_address: address.toLowerCase() } : undefined
   );
+  const { data: rawStats, isLoading: statsLoading } = useProjectStats(
+    address?.toLowerCase()
+  );
 
-  const stats = useMemo(() => {
-    const activeProjects = projects.filter((p) => p.status === "active").length;
-    const inDisputeProjects = projects.filter(
-      (p) => p.status === "in_dispute"
-    ).length;
-    const draftProjects = projects.filter((p) => p.status === "draft").length;
-    const completedProjects = projects.filter(
-      (p) => p.status === "completed"
-    ).length;
-
-    const totalProjects = projects.length;
-    const pendingActions = inDisputeProjects + draftProjects;
-
-    const totalValue = projects.reduce((sum, p) => {
-      const milestones = p.milestones || [];
-      return (
-        sum +
-        milestones.reduce((mSum, m) => mSum + parseFloat(m.amount || "0"), 0)
-      );
-    }, 0);
-
-    return {
-      totalLocked: totalValue > 0 ? `$${totalValue.toLocaleString()}` : "$0.00",
-      activeProjects: totalProjects,
-      pendingActions,
-      completedProjects,
-    };
-  }, [projects]);
+  const stats = rawStats
+    ? {
+        totalLocked: `$${rawStats.total_locked.toLocaleString()}`,
+        activeProjects: rawStats.active_projects,
+        pendingActions: rawStats.pending_actions,
+        completedProjects: rawStats.completed_projects,
+      }
+    : {
+        totalLocked: "$0.00",
+        activeProjects: 0,
+        pendingActions: 0,
+        completedProjects: 0,
+      };
 
   const recentProjects = useMemo(() => {
     return [...projects]
@@ -84,7 +73,7 @@ export default function DashboardPage() {
 
       {/* Hero Metrics */}
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-        {isLoading ? (
+        {isLoading || statsLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
             <Card
               key={i}
@@ -190,7 +179,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="p-0 space-y-4">
-              {isLoading ? (
+              {isLoading || statsLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
@@ -280,7 +269,7 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 space-y-6">
-              {isLoading ? (
+              {isLoading || statsLoading ? (
                 <div className="space-y-4">
                   <Skeleton className="h-12 w-full" />
                   <Skeleton className="h-12 w-full" />
@@ -357,7 +346,7 @@ export default function DashboardPage() {
                 className="flex items-center gap-3 p-3 rounded-lg border border-slate-200/50 hover:bg-slate-50/50 transition-colors group"
                 aria-label="Create new project"
               >
-                <div className="h-8 w-8 rounded-lg bg-slate-900 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                   <FileText className="h-4 w-4 text-white" />
                 </div>
                 <div className="flex-1">
