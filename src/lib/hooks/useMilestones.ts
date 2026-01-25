@@ -8,7 +8,6 @@ import {
   deleteMilestonesByProject,
   replaceMilestones,
 } from "../api/milestones";
-import { Milestone } from "@/types";
 
 export function useMilestones(projectId: string) {
   return useQuery({

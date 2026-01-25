@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { DepositResult, ReleaseFundsResult } from "./types";
 import {
   parseEther,

@@ -1,26 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import {
   ArrowRight,
   Lock,
   Shield,
   CheckCircle2,
-  FileCheck,
   Users,
   Globe,
   BarChart3,
   Smartphone,
   TrendingUp,
   Clock,
-  AlertCircle,
   Star,
   Zap,
-  DollarSign,
   Award,
   Play,
   Check,
@@ -424,10 +419,10 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <p className="text-gray-700 mb-6 leading-relaxed">
-                    "This platform has completely transformed how we manage
+                    &quot;This platform has completely transformed how we manage
                     freelance projects. Payment disputes are now a thing of the
                     past, and our project completion rate increased
-                    significantly."
+                    significantly.&quot;
                   </p>
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center font-bold text-teal-700">
@@ -454,9 +449,9 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <p className="text-gray-700 mb-6 leading-relaxed">
-                    "As a freelancer, getting paid on time was always a
+                    &quot;As a freelancer, getting paid on time was always a
                     struggle. Now I have peace of mind knowing funds are secured
-                    before I start work. Game changer!"
+                    before I start work. Game changer!&quot;
                   </p>
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center font-bold text-orange-700">
@@ -483,9 +478,9 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <p className="text-gray-700 mb-6 leading-relaxed">
-                    "The milestone tracking and automated payments have saved us
-                    countless hours. We've scaled our operations significantly
-                    without adding administrative overhead."
+                    &quot;The milestone tracking and automated payments have saved us
+                    countless hours. We&apos;ve scaled our operations significantly
+                    without adding administrative overhead.&quot;
                   </p>
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-cyan-100 flex items-center justify-center font-bold text-cyan-700">

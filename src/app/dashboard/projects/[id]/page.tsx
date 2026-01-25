@@ -32,8 +32,6 @@ import {
 } from "@/lib/hooks/useProjects";
 import {
   useUpdateMilestone,
-  useCreateMilestones,
-  useDeleteMilestone,
   useReplaceMilestones,
 } from "@/lib/hooks/useMilestones";
 import { useCreateDispute } from "@/lib/hooks/useDisputes";
@@ -61,7 +59,7 @@ type MilestoneForm = {
   isNew?: boolean;
 };
 
-export default function ProjectDetailPage({ params }: { params: any }) {
+export default function ProjectDetailPage({ params }: { params: { id: string } }) {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [loadingStates, setLoadingStates] = useState({
     submit: {} as Record<string, boolean>,
@@ -73,7 +71,6 @@ export default function ProjectDetailPage({ params }: { params: any }) {
     createDispute: false,
     saveEdit: false,
   });
-  const [depositError, setDepositError] = useState<string | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -87,8 +84,6 @@ export default function ProjectDetailPage({ params }: { params: any }) {
   const { chainId, chainConfig } = useWallet();
   const { data: walletClient } = useWalletClient();
   const updateMilestoneMutation = useUpdateMilestone();
-  const createMilestonesMutation = useCreateMilestones();
-  const deleteMilestoneMutation = useDeleteMilestone();
   const replaceMilestonesMutation = useReplaceMilestones();
   const createDisputeMutation = useCreateDispute();
   const updateProjectMutation = useUpdateProject();
@@ -1130,7 +1125,7 @@ export default function ProjectDetailPage({ params }: { params: any }) {
                         <p className="text-xs mt-1">
                           Changing the counterparty wallet will require
                           re-approval if the project was already sent for
-                          approval. Click "Save Changes" again to confirm.
+                          approval. Click &quot;Save Changes&quot; again to confirm.
                         </p>
                       </div>
                     </div>

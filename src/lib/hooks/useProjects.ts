@@ -9,7 +9,6 @@ import {
   approveProject,
   rejectProject,
 } from "../api/projects";
-import { Project } from "@/types";
 
 export function useProjects(filters?: {
   client_wallet?: string;

@@ -20,7 +20,7 @@ export function WalletAddress({ address, className }: WalletAddressProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
       toast.success("Copied to clipboard");
-    } catch (error) {
+    } catch {
       toast.error("Failed to copy to clipboard");
     }
   };

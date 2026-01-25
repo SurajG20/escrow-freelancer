@@ -83,7 +83,7 @@ export async function updateMilestone(
 
   // Filter out undefined values
   const cleanUpdates = Object.fromEntries(
-    Object.entries(updates).filter(([_, value]) => value !== undefined),
+    Object.entries(updates).filter(([, value]) => value !== undefined),
   );
 
   if (Object.keys(cleanUpdates).length === 0) {

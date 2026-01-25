@@ -1,13 +1,12 @@
 import { supabase } from "../supabase/client";
-import { useAccount, useSignMessage } from "wagmi";
+import { useAccount } from "wagmi";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { createUser, getUserByWallet } from "../api/users";
-import type { User as SupabaseUser, Session } from "@supabase/supabase-js";
 import type { User } from "@/types";
 
 export interface Web3AuthResult {
-  user: SupabaseUser | null;
-  session: Session | null;
+  user: User | null;
+  sessionToken: string | null;
   error: Error | null;
 }
 
@@ -77,50 +76,15 @@ export async function signInWithWeb3(
       localStorage.setItem("web3_wallet", address);
     }
 
-    const mockUser = {
-      id: user.id,
-      email: null,
-      phone: null,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
-      app_metadata: {},
-      user_metadata: {
-        wallet_address: address,
-      },
-      aud: "authenticated",
-      confirmation_sent_at: null,
-      recovery_sent_at: null,
-      email_change_sent_at: null,
-      new_email: null,
-      invited_at: null,
-      action_link: null,
-      email_change: null,
-      phone_change: null,
-      phone_confirmed_at: null,
-      email_confirmed_at: null,
-      confirmed_at: new Date().toISOString(),
-      last_sign_in_at: new Date().toISOString(),
-      role: "authenticated",
-    } as unknown as SupabaseUser;
-
-    const mockSession = {
-      access_token: sessionToken,
-      refresh_token: sessionToken,
-      expires_in: 3600,
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
-      token_type: "bearer",
-      user: mockUser,
-    } as unknown as Session;
-
     return {
-      user: mockUser,
-      session: mockSession,
+      user,
+      sessionToken,
       error: null,
     };
   } catch (error) {
     return {
       user: null,
-      session: null,
+      sessionToken: null,
       error: error instanceof Error ? error : new Error(String(error)),
     };
   }
@@ -157,7 +121,6 @@ export async function signOut() {
 export function useWeb3Auth() {
   const { address, chainId } = useAccount();
   const { isConnected } = useAppKitAccount();
-  const { signMessageAsync } = useSignMessage();
 
   const signIn = async () => {
     if (!address || !isConnected) {
@@ -168,7 +131,29 @@ export function useWeb3Auth() {
     const message = `Sign in to Custodia\n\nNonce: ${nonce}\nAddress: ${address}`;
 
     try {
-      const signature = await signMessageAsync({ message });
+      // Direct MetaMask call using window.ethereum.request
+      if (!window.ethereum) {
+        throw new Error("MetaMask not found");
+      }
+
+      // Ensure accounts are available
+      const accounts = (await window.ethereum.request({
+        method: "eth_requestAccounts",
+      })) as string[];
+
+      if (!accounts.length) {
+        throw new Error("No accounts available");
+      }
+
+      // Use personal_sign for reliable signing across browsers
+      const signature = (await window.ethereum.request({
+        method: "personal_sign",
+        params: [
+          `0x${Buffer.from(message, "utf8").toString("hex")}`,
+          accounts[0],
+        ],
+      })) as string;
+
       return signInWithWeb3(address, chainId || 1, signature, message);
     } catch (error) {
       throw new Error(

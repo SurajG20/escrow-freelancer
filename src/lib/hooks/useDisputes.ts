@@ -5,7 +5,6 @@ import {
   createDispute,
   updateDispute,
 } from "../api/disputes";
-import { Dispute } from "@/types";
 
 export function useDisputes(filters?: {
   project_id?: string;

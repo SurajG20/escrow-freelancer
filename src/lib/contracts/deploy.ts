@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EscrowContractConfig, DeployContractResult } from "./types";
 import {
   parseEther,
@@ -72,7 +71,7 @@ export async function deployEscrowContract(
           });
 
           if (decoded.eventName === "EscrowCreated") {
-            escrowAddress = (decoded.args as any).escrow as `0x${string}`;
+            escrowAddress = (decoded.args as { escrow: `0x${string}` }).escrow;
             break;
           }
         } catch {

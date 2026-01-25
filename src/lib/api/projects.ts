@@ -3,7 +3,6 @@ import { Project, Milestone } from "@/types";
 import {
   projectSchema,
   projectsArraySchema,
-  milestoneSchema,
   milestonesArraySchema,
 } from "../validation/schemas";
 
@@ -134,7 +133,7 @@ export async function updateProject(
 
   // Filter out undefined values to avoid unnecessary updates
   const cleanUpdates = Object.fromEntries(
-    Object.entries(updates).filter(([_, value]) => value !== undefined),
+    Object.entries(updates).filter(([, value]) => value !== undefined),
   );
 
   if (Object.keys(cleanUpdates).length === 0) {

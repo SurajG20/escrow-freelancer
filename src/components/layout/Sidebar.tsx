@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { Home, Layers, Shield, User, Settings, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 

@@ -10,7 +10,6 @@ import {
   DollarSign,
   TrendingUp,
   ArrowUpRight,
-  Loader2,
   FileText,
   Clock,
 } from "lucide-react";

@@ -66,7 +66,7 @@ export default function DisputesPage() {
             <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
             <p className="text-lg font-medium mb-2">No disputes found</p>
             <p className="text-sm">
-              You don't have any active disputes at the moment.
+              You don&apos;t have any active disputes at the moment.
             </p>
           </div>
         </Card>

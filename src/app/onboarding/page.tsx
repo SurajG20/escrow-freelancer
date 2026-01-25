@@ -55,7 +55,7 @@ export default function OnboardingPage() {
                   Choose your primary role
                 </CardTitle>
                 <CardDescription>
-                  Don't worry, you can switch or do both later.
+                  Don&apos;t worry, you can switch or do both later.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-4 pt-4">

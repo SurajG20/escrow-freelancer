@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
   ArrowUpRight,
-  ArrowDownLeft,
   Lock,
   History,
   Wallet,

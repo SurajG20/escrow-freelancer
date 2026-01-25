@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserByWallet, getUser, createUser, updateUser } from "../api/users";
-import { User } from "@/types";
 
 export function useUserByWallet(walletAddress: string | undefined) {
   return useQuery({

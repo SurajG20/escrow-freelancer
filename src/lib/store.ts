@@ -1,4 +1,4 @@
-import { Project, Milestone, MilestoneStatus, ProjectStatus } from "@/types";
+import { Project, MilestoneStatus } from "@/types";
 
 type MockMilestone = {
   id: number;
