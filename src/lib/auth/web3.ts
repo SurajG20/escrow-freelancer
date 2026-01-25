@@ -1,5 +1,5 @@
 import { supabase } from "../supabase/client";
-import { useAccount } from "wagmi";
+import { useConnection, useSignMessage } from "wagmi";         
 import { useAppKitAccount } from "@reown/appkit/react";
 import { createUser, getUserByWallet } from "../api/users";
 import type { User } from "@/types";
@@ -10,6 +10,7 @@ export interface Web3AuthResult {
   error: Error | null;
 }
 
+// getNonce and verifySignature remain unchanged
 async function getNonce(address: string): Promise<string> {
   const { data, error } = await supabase.rpc("get_nonce", {
     wallet_address: address.toLowerCase(),
@@ -60,7 +61,6 @@ export async function signInWithWeb3(
       throw new Error("Invalid signature");
     }
 
-    // Ensure user exists (creates if needed) and get the user
     const user = await ensureUserProfile(address);
 
     const sessionToken = btoa(
@@ -98,7 +98,6 @@ async function ensureUserProfile(walletAddress: string): Promise<User> {
       return existingUser;
     }
 
-    // User doesn't exist, create them
     const newUser = await createUser({
       wallet_address: walletAddress,
       roles: ["client"],
@@ -119,11 +118,13 @@ export async function signOut() {
 }
 
 export function useWeb3Auth() {
-  const { address, chainId } = useAccount();
-  const { isConnected } = useAppKitAccount();
+  const { address, chainId, isConnected: isWagmiConnected } = useConnection(); 
+  const { isConnected: isAppKitConnected } = useAppKitAccount();
+
+  const { mutateAsync: signMessage } = useSignMessage(); 
 
   const signIn = async () => {
-    if (!address || !isConnected) {
+    if (!address || !isWagmiConnected || !isAppKitConnected) {
       throw new Error("Wallet not connected");
     }
 
@@ -131,33 +132,13 @@ export function useWeb3Auth() {
     const message = `Sign in to Custodia\n\nNonce: ${nonce}\nAddress: ${address}`;
 
     try {
-      // Direct MetaMask call using window.ethereum.request
-      if (!window.ethereum) {
-        throw new Error("MetaMask not found");
-      }
-
-      // Ensure accounts are available
-      const accounts = (await window.ethereum.request({
-        method: "eth_requestAccounts",
-      })) as string[];
-
-      if (!accounts.length) {
-        throw new Error("No accounts available");
-      }
-
-      // Use personal_sign for reliable signing across browsers
-      const signature = (await window.ethereum.request({
-        method: "personal_sign",
-        params: [
-          `0x${Buffer.from(message, "utf8").toString("hex")}`,
-          accounts[0],
-        ],
-      })) as string;
+      const signature = await signMessage({ message });
 
       return signInWithWeb3(address, chainId || 1, signature, message);
     } catch (error) {
+      console.error("Signing failed:", error);
       throw new Error(
-        error instanceof Error ? error.message : "Failed to sign message",
+        error instanceof Error ? error.message : "Failed to sign message"
       );
     }
   };
@@ -165,7 +146,7 @@ export function useWeb3Auth() {
   return {
     signIn,
     signOut,
-    isAuthenticated: isConnected && !!address,
+    isAuthenticated: isWagmiConnected && isAppKitConnected && !!address,
     address,
     chainId: chainId || 1,
   };

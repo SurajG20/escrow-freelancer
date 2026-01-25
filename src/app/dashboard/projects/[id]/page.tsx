@@ -1047,7 +1047,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
           <div className="flex items-start gap-3">
             {project.status === "pending_approval" ? (
               <>
-                <Clock className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                <Clock className="h-5 w-5 mt-0.5 shrink-0" />
                 <div>
                   <p className="font-medium">Awaiting Approval</p>
                   <p className="text-sm mt-1">
@@ -1060,7 +1060,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
               </>
             ) : (
               <>
-                <CheckCircle2 className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0" />
                 <div>
                   <p className="font-medium">Project Approved</p>
                   <p className="text-sm mt-1">
@@ -1087,7 +1087,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
               {isEditMode ? (
                 <div className="space-y-2">
                   <textarea
-                    className="w-full min-h-[100px] px-3 py-2 rounded-lg border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none"
+                    className="w-full min-h-25 px-3 py-2 rounded-lg border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-accent/20 resize-none"
                     placeholder="Describe the project scope and requirements..."
                     value={editDescription}
                     onChange={(e) => {
@@ -1119,7 +1119,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 <div className="space-y-2">
                   {showWalletWarning && (
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 flex items-start gap-2">
-                      <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
                       <div>
                         <p className="font-medium">Wallet address changed</p>
                         <p className="text-xs mt-1">
@@ -1478,7 +1478,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
         {/* Sidebar: State & Summary */}
         <div className="space-y-6">
           {/* Contract State Visualizer */}
-          <Card className=" bg-gradient-to-br from-white to-accent/5 overflow-hidden">
+          <Card className=" bg-linear-to-br from-white to-accent/5 overflow-hidden">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Shield className="h-4 w-4" /> Escrow State
@@ -1487,7 +1487,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
             <CardContent>
               {/* Simplified State Machine Viz */}
               <div className="relative flex flex-col gap-6 py-2">
-                <div className="absolute left-[15px] top-2 h-full w-0.5 bg-border -z-10" />
+                <div className="absolute left-3.75 top-2 h-full w-0.5 bg-border -z-10" />
 
                 {[
                   "Deposited",

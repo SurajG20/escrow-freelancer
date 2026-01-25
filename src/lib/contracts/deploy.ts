@@ -40,6 +40,7 @@ export async function deployEscrowContract(
   let hash: `0x${string}`;
   try {
     hash = await walletClient.writeContract({
+      account: walletClient.account!,
       address: factoryAddress as `0x${string}`,
       abi: EscrowFactoryABI,
       functionName: "createEscrow",
@@ -71,7 +72,7 @@ export async function deployEscrowContract(
           });
 
           if (decoded.eventName === "EscrowCreated") {
-            escrowAddress = (decoded.args as { escrow: `0x${string}` }).escrow;
+            escrowAddress = (decoded.args as unknown as { escrow: `0x${string}` }).escrow;
             break;
           }
         } catch {
