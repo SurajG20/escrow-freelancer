@@ -3,7 +3,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Home, Layers, Shield, User, Settings, Wallet } from "lucide-react";
+import { Home, Layers, Shield, User, Settings, Wallet, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -29,15 +29,28 @@ export function Sidebar({ expanded, onExpandedChange }: SidebarProps) {
         "fixed left-0 top-0 z-40 h-screen border-r border-slate-200/50 bg-white/80 backdrop-blur-sm transition-all duration-200 ease-in-out",
         expanded ? "w-64" : "w-16",
       )}
-      onMouseEnter={() => onExpandedChange(true)}
-      onMouseLeave={() => onExpandedChange(false)}
     >
-      <div className="flex h-14 items-center justify-center border-b border-slate-200/50">
+      <div className={cn(
+          "flex h-14 items-center border-b border-slate-200/50 px-3",
+          expanded ? "justify-between" : "justify-center"
+        )}>
         {expanded && (
           <span className="text-sm font-semibold text-foreground tracking-tight">
             Custodia
           </span>
         )}
+        <button
+          type="button"
+          onClick={() => onExpandedChange(!expanded)}
+          className="rounded-lg p-2 text-muted-foreground hover:bg-accent/10 hover:text-accent transition-colors"
+          aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
+        >
+          {expanded ? (
+            <ChevronLeft className="h-5 w-5" />
+          ) : (
+            <ChevronRight className="h-5 w-5" />
+          )}
+        </button>
       </div>
 
       <nav className="flex flex-col gap-1 p-3 mt-2">
