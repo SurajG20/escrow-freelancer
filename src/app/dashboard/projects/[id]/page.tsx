@@ -56,6 +56,7 @@ import {
 } from "@/components/deployment/DeploymentModal";
 
 import { format } from "date-fns";
+import { errorMonitor } from "stream";
 
 // Note: params is a Promise in newer Next.js versions (15+)
 
@@ -434,10 +435,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
         {
           clientWallet: project.client_wallet,
           freelancerWallet: project.freelancer_wallet || "",
-          milestones: milestones.map((m) => ({
-            amount: m.amount,
-            currency: m.currency,
-          })),
+          milestones: milestones.map((m) => ({ amount: m.amount, currency: m.currency })),
           chainId: chainId as number,
         },
         walletClient

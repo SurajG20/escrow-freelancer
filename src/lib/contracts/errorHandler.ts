@@ -105,7 +105,8 @@ export function getUserFriendlyError(error: unknown): string {
     return "This project cannot be modified in its current state.";
   }
 
-  return errorMessage.length > 200
-    ? "An error occurred. Please check the console for details."
-    : errorMessage;
+  if (errorMessage.length > 300) {
+    return errorMessage.slice(0, 300) + "...";
+  }
+  return errorMessage;
 }

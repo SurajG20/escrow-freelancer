@@ -93,6 +93,7 @@ export async function deployEscrowContract(
   const milestoneIsNative = config.milestones.map(
     (m) => m.currency === "NATIVE",
   );
+
   let hash: `0x${string}`;
   try {
     hash = await walletClient.writeContract({
@@ -149,9 +150,7 @@ export async function deployEscrowContract(
       if (allEscrows && allEscrows.length > 0) {
         escrowAddress = allEscrows[allEscrows.length - 1];
       }
-    } catch (error) {
-      console.error("Failed to retrieve escrow address:", error);
-    }
+    } catch {}
   }
 
   if (!escrowAddress || escrowAddress === "0x" || escrowAddress.length !== 42) {

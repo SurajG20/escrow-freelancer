@@ -12,6 +12,21 @@ import EscrowABI from "./abis/Escrow.json";
 import ERC20ABI from "./abis/ERC20.json";
 import { getCurrentChainConfig } from "@/lib/config/chains";
 import { getUserFriendlyError } from "./errorHandler";
+
+async function getFeeParams(publicClient: ReturnType<typeof createPublicClient>): Promise<
+  { gasPrice: bigint } | { maxFeePerGas: bigint; maxPriorityFeePerGas: bigint }
+> {
+  try {
+    const fees = await publicClient.estimateFeesPerGas();
+    if (fees?.maxFeePerGas && fees?.maxPriorityFeePerGas) {
+      return { maxFeePerGas: fees.maxFeePerGas, maxPriorityFeePerGas: fees.maxPriorityFeePerGas };
+    }
+    return { gasPrice: await publicClient.getGasPrice() };
+  } catch {
+    return { gasPrice: await publicClient.getGasPrice() };
+  }
+}
+
 export async function depositFunds(
   contractAddress: string,
   amount: string,
@@ -32,6 +47,8 @@ export async function depositFunds(
   let hash: `0x${string}`;
   let blockNumber: bigint;
 
+  const feeParams = await getFeeParams(publicClient);
+
   try {
     if (currency === "NATIVE") {
       hash = await walletClient.writeContract({
@@ -41,6 +58,7 @@ export async function depositFunds(
         abi: EscrowABI,
         functionName: "deposit",
         value: parseEther(amount),
+        ...feeParams,
       });
 
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
@@ -59,6 +77,7 @@ export async function depositFunds(
           abi: ERC20ABI,
           functionName: "approve",
           args: [contractAddress as `0x${string}`, parseUnits(amount, 18)],
+          ...feeParams,
         });
 
         await publicClient.waitForTransactionReceipt({ hash: approveHash });
@@ -75,6 +94,7 @@ export async function depositFunds(
           abi: EscrowABI,
           functionName: "depositUSDT",
           args: [parseUnits(amount, 18)],
+          ...feeParams,
         });
 
         const receipt = await publicClient.waitForTransactionReceipt({ hash });

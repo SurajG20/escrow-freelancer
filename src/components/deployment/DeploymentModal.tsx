@@ -92,16 +92,11 @@ export function DeploymentModal({
     const config = {
       clientWallet: project.client_wallet,
       freelancerWallet: project.freelancer_wallet || "",
-      milestones: project.milestones.map((m) => ({
-        amount: m.amount,
-        currency: m.currency,
-      })),
+      milestones: project.milestones.map((m) => ({ amount: m.amount, currency: m.currency })),
       chainId: project.chain_id,
     };
     estimateDeployGas(config, walletClient as import("viem").WalletClient)
-      .then((est) => {
-        setGasEstimate(est);
-      })
+      .then((est) => setGasEstimate(est))
       .finally(() => setGasLoading(false));
   }, [open, project?.id, project?.client_wallet, project?.freelancer_wallet, project?.milestones, project?.chain_id, walletClient]);
 
@@ -110,7 +105,7 @@ export function DeploymentModal({
     setPhase("deploying");
     setProgress({ step: "deploying" });
     try {
-      await onDeploy((p) => setProgress(p));
+      await onDeploy(setProgress);
       setPhase("success");
     } catch (e) {
       setProgress({
