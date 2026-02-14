@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { getProjectStatusBadgeVariant, formatProjectStatus } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import {
   ArrowUpRight,
@@ -217,10 +218,10 @@ export default function VaultsPage() {
                   </div>
                   <div className="text-right">
                     <Badge
-                      variant="outline"
-                      className="text-xs text-muted-foreground border-transparent bg-muted/50"
+                      variant={getProjectStatusBadgeVariant(project.status)}
+                      className="text-xs"
                     >
-                      {project.status.replace("_", " ")}
+                      {formatProjectStatus(project.status)}
                     </Badge>
                   </div>
                 </div>

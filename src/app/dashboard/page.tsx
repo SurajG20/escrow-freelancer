@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { getProjectStatusBadgeVariant, formatProjectStatus } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Progress } from "@/components/ui/Progress";
 import {
@@ -205,18 +206,10 @@ export default function DashboardPage() {
                           {project.title}
                         </h3>
                         <Badge
-                          variant={
-                            project.status === "active"
-                              ? "success"
-                              : project.status === "in_dispute"
-                                ? "destructive"
-                                : project.status === "draft"
-                                  ? "warning"
-                                  : "default"
-                          }
+                          variant={getProjectStatusBadgeVariant(project.status)}
                           className="text-xs"
                         >
-                          {project.status.replace("_", " ")}
+                          {formatProjectStatus(project.status)}
                         </Badge>
                       </div>
                       <p className="text-xs text-slate-500 truncate">

@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { getProjectStatusBadgeVariant, formatProjectStatus } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Shield, Star, Award, Loader2, Wallet } from "lucide-react";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -280,8 +281,11 @@ export default function ProfilePage() {
                         {new Date(project.created_at).toLocaleDateString()}
                       </div>
                     </div>
-                    <Badge variant="outline" className="text-xs">
-                      {project.status.replace("_", " ")}
+                    <Badge
+                      variant={getProjectStatusBadgeVariant(project.status)}
+                      className="text-xs"
+                    >
+                      {formatProjectStatus(project.status)}
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground line-clamp-2">

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
+import { getProjectStatusBadgeVariant, formatProjectStatus } from "@/lib/utils";
 import { Card } from "@/components/ui/Card";
 import { LayoutGrid, List, Plus, Search, Filter, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -159,22 +160,10 @@ export default function ProjectsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <Badge
-                          variant={
-                            project.status === "active"
-                              ? "success"
-                              : project.status === "approved"
-                                ? "success"
-                                : project.status === "pending_approval"
-                                  ? "warning"
-                                  : project.status === "in_dispute"
-                                    ? "destructive"
-                                    : project.status === "draft"
-                                      ? "warning"
-                                      : "default"
-                          }
+                          variant={getProjectStatusBadgeVariant(project.status)}
                           className="bg-opacity-10 dark:bg-opacity-20 backdrop-blur-sm"
                         >
-                          {project.status.replace("_", " ")}
+                          {formatProjectStatus(project.status)}
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-right text-muted-foreground text-sm">
