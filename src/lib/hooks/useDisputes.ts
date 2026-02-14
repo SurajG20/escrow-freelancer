@@ -40,6 +40,7 @@ export function useCreateDispute() {
       queryClient.invalidateQueries({
         queryKey: ["project", data.project_id],
       });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
     },
   });
 }
@@ -61,6 +62,7 @@ export function useUpdateDispute() {
       queryClient.invalidateQueries({
         queryKey: ["project", data.project_id],
       });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
     },
   });
 }

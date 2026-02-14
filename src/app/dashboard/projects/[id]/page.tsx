@@ -37,6 +37,7 @@ import {
   useRejectMilestone,
 } from "@/lib/hooks/useMilestones";
 import { useCreateDispute } from "@/lib/hooks/useDisputes";
+import { useMessages, useSendMessage } from "@/lib/hooks/useMessages";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useWallet } from "@/lib/hooks/useWallet";
 import { useWalletClient } from "wagmi";
@@ -57,7 +58,6 @@ import {
 } from "@/components/deployment/DeploymentModal";
 
 import { format } from "date-fns";
-import { errorMonitor } from "stream";
 
 // Note: params is a Promise in newer Next.js versions (15+)
 
@@ -99,6 +99,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const [milestoneRejectingId, setMilestoneRejectingId] = useState<
     string | null
   >(null);
+  const [messageInput, setMessageInput] = useState("");
   const searchParams = useSearchParams();
   const projectsView = searchParams.get("fromView") === "board" ? "board" : "list";
   const backToProjectsHref = `/dashboard/projects?view=${projectsView}`;
@@ -113,6 +114,10 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const sendForApprovalMutation = useSendForApproval();
   const approveProjectMutation = useApproveProject();
   const rejectProjectMutation = useRejectProject();
+  const { data: messages = [], isLoading: messagesLoading } = useMessages(
+    projectId ?? ""
+  );
+  const sendMessageMutation = useSendMessage();
 
   useEffect(() => {
     const loadParams = async () => {
@@ -1833,30 +1838,98 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
             </CardContent>
           </Card>
 
-          {/* Chat/Activity Placeholder */}
-          <Card className=" h-64 flex flex-col">
+          <Card className="h-64 flex flex-col">
             <CardHeader className="pb-2 border-b border-slate-200">
               <CardTitle className="text-sm">Activity</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto pt-4 space-y-4">
-              <div className="text-xs text-muted-foreground text-center">
-                Today
-              </div>
-              <div className="flex gap-2">
-                <div className="h-6 w-6 rounded-full bg-blue-200" />
-                <div className="bg-white/50 p-2 rounded-r-lg rounded-bl-lg text-sm max-w-[80%]">
-                  Submitting the UI mocks for review.
+            <CardContent className="flex-1 overflow-y-auto pt-4 space-y-3 min-h-0">
+              {messagesLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 </div>
-              </div>
+              ) : messages.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4">
+                  No messages yet. Send one below.
+                </p>
+              ) : (
+                messages.map((msg) => {
+                  const isYou =
+                    address?.toLowerCase() === msg.sender_id?.toLowerCase();
+                  return (
+                    <div
+                      key={msg.id}
+                      className={cn(
+                        "flex gap-2",
+                        isYou && "flex-row-reverse"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "h-6 w-6 rounded-full flex-shrink-0",
+                          isYou ? "bg-accent" : "bg-muted"
+                        )}
+                      />
+                      <div
+                        className={cn(
+                          "p-2 rounded-lg text-sm max-w-[85%]",
+                          isYou
+                            ? "bg-accent/10 text-foreground rounded-tr-none"
+                            : "bg-white/50 rounded-tl-none"
+                        )}
+                      >
+                        <p className="text-xs text-muted-foreground mb-0.5">
+                          {isYou ? "You" : `${msg.sender_id.slice(0, 6)}...${msg.sender_id.slice(-4)}`}
+                        </p>
+                        <p className="text-foreground">{msg.content}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {format(new Date(msg.created_at), "MMM d, HH:mm")}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </CardContent>
             <div className="p-3 border-t border-slate-200">
-              <div className="relative">
+              <form
+                className="relative flex gap-2"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const content = messageInput.trim();
+                  if (!content || !project || !address || sendMessageMutation.isPending) return;
+                  try {
+                    await sendMessageMutation.mutateAsync({
+                      project_id: project.id,
+                      sender_id: address.toLowerCase(),
+                      content,
+                    });
+                    setMessageInput("");
+                  } catch {
+                    toast.error("Failed to send message");
+                  }
+                }}
+              >
                 <input
-                  className="w-full bg-muted/50 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="flex-1 bg-muted/50 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-accent"
                   placeholder="Type a message..."
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  disabled={sendMessageMutation.isPending}
                 />
-                <Send className="absolute right-3 top-2 h-4 w-4 text-muted-foreground" />
-              </div>
+                <Button
+                  type="submit"
+                  size="icon"
+                  variant="ghost"
+                  className="rounded-full shrink-0"
+                  disabled={!messageInput.trim() || sendMessageMutation.isPending}
+                >
+                  {sendMessageMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </form>
             </div>
           </Card>
         </div>

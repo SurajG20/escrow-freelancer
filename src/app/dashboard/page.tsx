@@ -2,7 +2,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { getProjectStatusBadgeVariant, formatProjectStatus } from "@/lib/utils";
+import {
+  getProjectStatusBadgeVariant,
+  formatProjectStatus,
+  formatTimeAgo,
+} from "@/lib/utils";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Progress } from "@/components/ui/Progress";
 import {
@@ -23,12 +27,20 @@ import { useProjectStats } from "@/lib/hooks/useProjectStats";
 
 export default function DashboardPage() {
   const { address } = useAuth();
-  const { data: projects = [], isLoading } = useProjects(
+  const {
+    data: projects = [],
+    isLoading,
+    dataUpdatedAt: projectsUpdatedAt,
+  } = useProjects(
     address ? { wallet_address: address.toLowerCase() } : undefined
   );
-  const { data: rawStats, isLoading: statsLoading } = useProjectStats(
-    address?.toLowerCase()
-  );
+  const {
+    data: rawStats,
+    isLoading: statsLoading,
+    dataUpdatedAt: statsUpdatedAt,
+  } = useProjectStats(address?.toLowerCase());
+
+  const dataUpdatedAt = Math.max(projectsUpdatedAt ?? 0, statsUpdatedAt ?? 0);
 
   const stats = rawStats
     ? {
@@ -53,6 +65,17 @@ export default function DashboardPage() {
       .slice(0, 5);
   }, [projects]);
 
+  const recentActivity = useMemo(() => {
+    const events: { type: "created" | "updated"; at: number; project: (typeof projects)[0] }[] = [];
+    for (const p of projects) {
+      events.push({ type: "created", at: new Date(p.created_at).getTime(), project: p });
+      if (p.updated_at && p.updated_at !== p.created_at) {
+        events.push({ type: "updated", at: new Date(p.updated_at).getTime(), project: p });
+      }
+    }
+    return events.sort((a, b) => b.at - a.at).slice(0, 7);
+  }, [projects]);
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -67,7 +90,9 @@ export default function DashboardPage() {
           </p>
         </div>
         <Badge variant="outline" className="text-xs border-slate-200/50">
-          Updated just now
+          {address && dataUpdatedAt
+            ? `Updated ${formatTimeAgo(dataUpdatedAt)}`
+            : "Live"}
         </Badge>
       </div>
 
@@ -179,7 +204,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="p-0 space-y-4">
-              {isLoading || statsLoading ? (
+              {isLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
@@ -234,7 +259,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Activity Chart Placeholder */}
           <Card className="border border-slate-200/50 rounded-xl shadow-sm p-8">
             <CardHeader className="p-0 pb-6">
               <CardTitle className="text-base font-semibold text-slate-900">
@@ -242,12 +266,39 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="h-64 flex items-center justify-center border border-slate-100 rounded-lg bg-slate-50/50">
-                <div className="text-center">
-                  <Activity className="h-8 w-8 text-slate-300 mx-auto mb-2" />
-                  <p className="text-sm text-slate-400">Chart placeholder</p>
+              {isLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-10 w-full" />
+                  ))}
                 </div>
-              </div>
+              ) : recentActivity.length > 0 ? (
+                <ul className="space-y-2">
+                  {recentActivity.map((e, i) => (
+                    <li key={`${e.project.id}-${e.type}-${e.at}-${i}`}>
+                      <Link
+                        href={`/dashboard/projects/${e.project.id}`}
+                        className="flex items-center justify-between gap-2 py-2 px-2 -mx-2 rounded-lg hover:bg-slate-50/50 transition-colors text-left"
+                      >
+                        <span className="text-sm text-slate-900 truncate flex-1">
+                          <span className="font-medium">{e.project.title}</span>
+                          <span className="text-slate-500 font-normal">
+                            {" "}
+                            {e.type === "created" ? "created" : "updated"}
+                          </span>
+                        </span>
+                        <span className="text-xs text-slate-400 shrink-0">
+                          {formatTimeAgo(e.at)}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="h-32 flex items-center justify-center border border-slate-100 rounded-lg bg-slate-50/50">
+                  <p className="text-sm text-slate-400">No activity yet</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -261,8 +312,9 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 space-y-6">
-              {isLoading || statsLoading ? (
+              {isLoading ? (
                 <div className="space-y-4">
+                  <Skeleton className="h-12 w-full" />
                   <Skeleton className="h-12 w-full" />
                   <Skeleton className="h-12 w-full" />
                   <Skeleton className="h-12 w-full" />
@@ -295,6 +347,26 @@ export default function DashboardPage() {
                     <Progress
                       value={
                         (projects.filter((p) => p.status === "draft").length /
+                          Math.max(projects.length, 1)) *
+                        100
+                      }
+                      className="h-1"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500">In Dispute</span>
+                      <span className="font-semibold text-slate-900">
+                        {
+                          projects.filter((p) => p.status === "in_dispute")
+                            .length
+                        }
+                      </span>
+                    </div>
+                    <Progress
+                      value={
+                        (projects.filter((p) => p.status === "in_dispute")
+                          .length /
                           Math.max(projects.length, 1)) *
                         100
                       }

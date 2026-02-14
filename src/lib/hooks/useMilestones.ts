@@ -43,6 +43,7 @@ export function useCreateMilestones() {
         queryClient.invalidateQueries({
           queryKey: ["project", data[0].project_id],
         });
+        queryClient.invalidateQueries({ queryKey: ["project-stats"] });
       }
     },
   });
@@ -72,6 +73,7 @@ export function useUpdateMilestone() {
       queryClient.invalidateQueries({
         queryKey: ["project", data.project_id, "with-milestones"],
       });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
     },
   });
 }
@@ -100,6 +102,7 @@ export function useRejectMilestone() {
       queryClient.invalidateQueries({
         queryKey: ["project", data.project_id, "with-milestones"],
       });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
     },
   });
 }
@@ -118,6 +121,7 @@ export function useDeleteMilestone() {
       queryClient.invalidateQueries({
         queryKey: ["project", projectId],
       });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
     },
   });
 }
@@ -134,6 +138,7 @@ export function useDeleteMilestonesByProject() {
       queryClient.invalidateQueries({
         queryKey: ["project", projectId],
       });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
     },
   });
 }
@@ -157,6 +162,7 @@ export function useReplaceMilestones() {
         queryClient.invalidateQueries({
           queryKey: ["project", data[0].project_id],
         });
+        queryClient.invalidateQueries({ queryKey: ["project-stats"] });
       }
     },
   });

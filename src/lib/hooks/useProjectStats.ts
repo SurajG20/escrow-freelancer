@@ -8,5 +8,6 @@ export function useProjectStats(wallet?: string) {
     enabled: !!wallet,
     staleTime: 30_000,
     refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
   });
 }

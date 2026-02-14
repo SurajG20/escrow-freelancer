@@ -23,6 +23,7 @@ export function useProjects(filters?: {
     staleTime: 0,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+    refetchInterval: 60_000,
   });
 }
 
@@ -43,6 +44,7 @@ export function useProjectWithMilestones(id: string) {
     enabled: !!id,
     staleTime: 1000 * 60,
     refetchOnWindowFocus: true,
+    refetchInterval: 60_000,
   });
 }
 
@@ -53,6 +55,7 @@ export function useCreateProject() {
     mutationFn: createProject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
     },
   });
 }
@@ -74,6 +77,7 @@ export function useUpdateProject() {
       queryClient.invalidateQueries({
         queryKey: ["project", data.id, "with-milestones"],
       });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
     },
   });
 }
@@ -86,6 +90,7 @@ export function useSendForApproval() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", data.id] });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
     },
   });
 }
@@ -98,6 +103,7 @@ export function useApproveProject() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", data.id] });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
     },
   });
 }
@@ -119,6 +125,7 @@ export function useRejectProject() {
       queryClient.invalidateQueries({
         queryKey: ["project", data.id, "with-milestones"],
       });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
     },
   });
 }
