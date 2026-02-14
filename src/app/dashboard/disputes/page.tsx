@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -7,6 +8,7 @@ import { AlertTriangle, Gavel, FileText, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useDisputes } from "@/lib/hooks/useDisputes";
 import { useProjects } from "@/lib/hooks/useProjects";
+import { useUsersByWallets, displayNameForUser } from "@/lib/hooks/useUser";
 import { format } from "date-fns";
 import Link from "next/link";
 
@@ -16,6 +18,12 @@ export default function DisputesPage() {
     address ? { wallet_address: address.toLowerCase() } : undefined,
   );
   const { data: disputes = [], isLoading } = useDisputes();
+
+  const openedByWallets = useMemo(
+    () => [...new Set(disputes.map((d) => d.opened_by).filter(Boolean))],
+    [disputes],
+  );
+  const { data: usersByWallet = new Map() } = useUsersByWallets(openedByWallets);
 
   const disputesWithProjects = disputes
     .filter((dispute) => {
@@ -103,8 +111,13 @@ export default function DisputesPage() {
                       </h3>
                       <p className="text-muted-foreground flex items-center gap-2 mt-1">
                         <AlertTriangle className="h-4 w-4 text-amber-500" />
-                        Opened by: {dispute.opened_by.substring(0, 6)}...
-                        {dispute.opened_by.substring(38)}
+                        Opened by:{" "}
+                        {address?.toLowerCase() === dispute.opened_by.toLowerCase()
+                          ? "You"
+                          : displayNameForUser(
+                              usersByWallet.get(dispute.opened_by.toLowerCase()),
+                              dispute.opened_by,
+                            )}
                       </p>
                     </div>
                     <div className="text-right">

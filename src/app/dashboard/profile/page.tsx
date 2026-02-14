@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getProjectWithMilestones } from "@/lib/api/projects";
 
 export default function ProfilePage() {
-  const { user, address, isLoading: authLoading } = useAuth();
+  const { user, address, isLoading: authLoading, isUserLoading } = useAuth();
   const { chainConfig } = useWallet();
   const { data: projects = [] } = useProjects(
     address ? { wallet_address: address.toLowerCase() } : undefined,
@@ -105,7 +105,7 @@ export default function ProfilePage() {
       .toUpperCase()
       .substring(0, 2) || "U";
 
-  if (authLoading) {
+  if (authLoading || isUserLoading) {
     return (
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex items-center justify-center py-12">

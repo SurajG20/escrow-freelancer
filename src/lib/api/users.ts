@@ -40,6 +40,54 @@ export async function getUser(id: string): Promise<User | null> {
   return userSchema.parse(data);
 }
 
+export async function getUsersByWallets(
+  walletAddresses: string[],
+): Promise<Map<string, User>> {
+  const normalized = [...new Set(walletAddresses.map((w) => w.toLowerCase()).filter(Boolean))];
+  if (normalized.length === 0) return new Map();
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .in("wallet_address", normalized);
+
+  if (error) {
+    throw new Error(`Failed to fetch users: ${error.message}`);
+  }
+
+  const map = new Map<string, User>();
+  for (const row of data ?? []) {
+    const user = userSchema.safeParse(row);
+    if (user.success && user.data.wallet_address) {
+      map.set(user.data.wallet_address.toLowerCase(), user.data);
+    }
+  }
+  return map;
+}
+
+export async function getUsersByIds(ids: string[]): Promise<Map<string, User>> {
+  const unique = [...new Set(ids.filter(Boolean))];
+  if (unique.length === 0) return new Map();
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .in("id", unique);
+
+  if (error) {
+    throw new Error(`Failed to fetch users: ${error.message}`);
+  }
+
+  const map = new Map<string, User>();
+  for (const row of data ?? []) {
+    const user = userSchema.safeParse(row);
+    if (user.success && user.data.id) {
+      map.set(user.data.id, user.data);
+    }
+  }
+  return map;
+}
+
 export async function createUser(user: {
   wallet_address: string;
   display_name?: string;
@@ -99,6 +147,8 @@ export async function updateUser(
     bio: string;
     avatar_url: string;
     roles: ("client" | "freelancer" | "arbitrator")[];
+    email_notifications: boolean;
+    push_notifications: boolean;
   }>,
 ): Promise<User> {
   const { data, error } = await supabase

@@ -23,6 +23,8 @@ export interface User {
   bio?: string | null;
   avatar_url?: string | null;
   roles: UserRole[];
+  email_notifications?: boolean;
+  push_notifications?: boolean;
   created_at: string;
   updated_at: string;
 }

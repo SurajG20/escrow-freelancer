@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useProjects } from "@/lib/hooks/useProjects";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { useUsersByWallets, displayNameForUser } from "@/lib/hooks/useUser";
 import { format } from "date-fns";
 
 export default function ProjectsPage() {
@@ -29,6 +30,12 @@ export default function ProjectsPage() {
   const { data: projects = [], isLoading } = useProjects(
     address ? { wallet_address: address.toLowerCase() } : undefined,
   );
+  const participantWallets = useMemo(
+    () =>
+      [...new Set(projects.flatMap((p) => [p.client_wallet, p.freelancer_wallet].filter(Boolean) as string[]))],
+    [projects],
+  );
+  const { data: usersByWallet = new Map() } = useUsersByWallets(participantWallets);
 
   return (
     <div className="space-y-6">
@@ -159,9 +166,14 @@ export default function ProjectsPage() {
                       <td className="px-6 py-4 font-medium text-foreground">
                         {project.title}
                       </td>
-                      <td className="px-6 py-4 text-muted-foreground font-mono text-xs">
+                      <td className="px-6 py-4 text-muted-foreground text-sm">
                         {project.freelancer_wallet
-                          ? `${project.freelancer_wallet.substring(0, 6)}...${project.freelancer_wallet.substring(38)}`
+                          ? address?.toLowerCase() === project.freelancer_wallet.toLowerCase()
+                            ? "You"
+                            : displayNameForUser(
+                                usersByWallet.get(project.freelancer_wallet.toLowerCase()),
+                                project.freelancer_wallet,
+                              )
                           : "Not assigned"}
                       </td>
                       <td className="px-6 py-4 font-mono text-sm">
@@ -239,7 +251,12 @@ export default function ProjectsPage() {
                               className="text-[10px] h-5"
                             >
                               {project.freelancer_wallet
-                                ? `${project.freelancer_wallet.substring(0, 4)}...`
+                                ? address?.toLowerCase() === project.freelancer_wallet.toLowerCase()
+                                  ? "You"
+                                  : displayNameForUser(
+                                      usersByWallet.get(project.freelancer_wallet.toLowerCase()),
+                                      project.freelancer_wallet,
+                                    )
                                 : "Unassigned"}
                             </Badge>
                             <span className="text-xs text-muted-foreground">

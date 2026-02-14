@@ -7,6 +7,8 @@ export const userSchema = z.object({
   bio: z.string().nullable(),
   avatar_url: z.union([z.string().url(), z.null(), z.literal("")]),
   roles: z.array(z.enum(["client", "freelancer", "arbitrator"])),
+  email_notifications: z.boolean().optional().default(false),
+  push_notifications: z.boolean().optional().default(false),
   created_at: z.string(),
   updated_at: z.string(),
 });

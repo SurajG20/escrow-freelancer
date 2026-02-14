@@ -39,7 +39,7 @@ export function useAuth() {
     return null;
   });
 
-  const { data: user } = useUserByWallet(
+  const { data: user, isLoading: isUserLoading } = useUserByWallet(
     web3Auth.address || session?.wallet_address || undefined,
   );
 
@@ -102,6 +102,7 @@ export function useAuth() {
     chainId: web3Auth.chainId,
     isAuthenticated,
     isLoading: signInMutation.isPending,
+    isUserLoading,
     signIn: () => signInMutation.mutate(),
     signOut: () => signOutMutation.mutate(),
     error: signInMutation.error || signOutMutation.error,

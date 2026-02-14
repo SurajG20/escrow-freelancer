@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -24,18 +24,28 @@ import { useUpdateUser } from "@/lib/hooks/useUser";
 import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
-  const { user, address } = useAuth();
+  const { user, address, isLoading: authLoading, isUserLoading } = useAuth();
   const router = useRouter();
   const updateUserMutation = useUpdateUser();
 
-  const [displayName, setDisplayName] = useState(user?.display_name || "");
-  const [bio, setBio] = useState(user?.bio || "");
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || "");
+  const [displayName, setDisplayName] = useState("");
+  const [bio, setBio] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [emailNotifications, setEmailNotifications] = useState(false);
+  const [pushNotifications, setPushNotifications] = useState(false);
+
+  useEffect(() => {
+    setDisplayName(user?.display_name ?? "");
+    setBio(user?.bio ?? "");
+    setAvatarUrl(user?.avatar_url ?? "");
+    setEmailNotifications(user?.email_notifications ?? false);
+    setPushNotifications(user?.push_notifications ?? false);
+  }, [user?.display_name, user?.bio, user?.avatar_url, user?.email_notifications, user?.push_notifications]);
 
   const handleSave = async () => {
     if (!user) return;
@@ -54,11 +64,9 @@ export default function SettingsPage() {
       });
       setSaveMessage({
         type: "success",
-        text: "Profile updated successfully!",
+        text: "Profile updated successfully. Your display name and details are now visible across projects and to other users.",
       });
-      setTimeout(() => {
-        router.refresh();
-      }, 1000);
+      router.refresh();
     } catch (error) {
       setSaveMessage({
         type: "error",
@@ -69,6 +77,17 @@ export default function SettingsPage() {
       setIsSaving(false);
     }
   };
+
+  if (authLoading || isUserLoading) {
+    return (
+      <div className="max-w-3xl space-y-6">
+        <h1 className="text-3xl font-light tracking-tight">Settings</h1>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -180,39 +199,76 @@ export default function SettingsPage() {
           <CardDescription>Configure how you receive updates.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {[
-            {
-              title: "Email Notifications",
-              desc: "Receive daily digests and major alerts",
-              icon: Mail,
-              on: false,
-            },
-            {
-              title: "Push Notifications",
-              desc: "Real-time updates on milestones",
-              icon: Smartphone,
-              on: false,
-            },
-          ].map((item, i) => (
-            <div key={i} className="flex items-center justify-between">
-              <div className="flex gap-3">
-                <item.icon className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <div className="text-sm font-medium">{item.title}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {item.desc}
-                  </div>
+          <div className="flex items-center justify-between">
+            <div className="flex gap-3">
+              <Mail className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <div className="text-sm font-medium">Email Notifications</div>
+                <div className="text-xs text-muted-foreground">
+                  Receive daily digests and major alerts
                 </div>
               </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={emailNotifications}
+              disabled={!user || updateUserMutation.isPending}
+              onClick={async () => {
+                if (!user) return;
+                const next = !emailNotifications;
+                setEmailNotifications(next);
+                try {
+                  await updateUserMutation.mutateAsync({
+                    id: user.id,
+                    updates: { email_notifications: next },
+                  });
+                } catch {
+                  setEmailNotifications(emailNotifications);
+                }
+              }}
+              className={`h-6 w-11 rounded-full p-1 cursor-pointer transition-colors disabled:opacity-50 ${emailNotifications ? "bg-accent" : "bg-muted"}`}
+            >
               <div
-                className={`h-6 w-11 rounded-full p-1 cursor-pointer transition-colors ${item.on ? "bg-accent" : "bg-muted"}`}
-              >
-                <div
-                  className={`h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${item.on ? "translate-x-5" : "translate-x-0"}`}
-                />
+                className={`h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${emailNotifications ? "translate-x-5" : "translate-x-0"}`}
+              />
+            </button>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex gap-3">
+              <Smartphone className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <div className="text-sm font-medium">Push Notifications</div>
+                <div className="text-xs text-muted-foreground">
+                  Real-time updates on milestones
+                </div>
               </div>
             </div>
-          ))}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={pushNotifications}
+              disabled={!user || updateUserMutation.isPending}
+              onClick={async () => {
+                if (!user) return;
+                const next = !pushNotifications;
+                setPushNotifications(next);
+                try {
+                  await updateUserMutation.mutateAsync({
+                    id: user.id,
+                    updates: { push_notifications: next },
+                  });
+                } catch {
+                  setPushNotifications(pushNotifications);
+                }
+              }}
+              className={`h-6 w-11 rounded-full p-1 cursor-pointer transition-colors disabled:opacity-50 ${pushNotifications ? "bg-accent" : "bg-muted"}`}
+            >
+              <div
+                className={`h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${pushNotifications ? "translate-x-5" : "translate-x-0"}`}
+              />
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>

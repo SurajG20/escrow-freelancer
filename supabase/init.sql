@@ -20,9 +20,12 @@ CREATE TABLE IF NOT EXISTS users (
     bio TEXT,
     avatar_url TEXT,
     roles TEXT[] DEFAULT ARRAY['client']::TEXT[],
+    email_notifications BOOLEAN DEFAULT false,
+    push_notifications BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
 
 -- Projects table
 CREATE TABLE IF NOT EXISTS projects (

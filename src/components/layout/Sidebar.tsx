@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Home, Layers, Shield, User, Settings, Wallet } from "lucide-react";
@@ -15,21 +15,25 @@ const navItems = [
   { name: "Settings", icon: Settings, href: "/dashboard/settings" },
 ];
 
-export function Sidebar() {
-  const [isExpanded, setIsExpanded] = useState(false);
+interface SidebarProps {
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
+}
+
+export function Sidebar({ expanded, onExpandedChange }: SidebarProps) {
   const pathname = usePathname();
 
   return (
     <aside
       className={cn(
         "fixed left-0 top-0 z-40 h-screen border-r border-slate-200/50 bg-white/80 backdrop-blur-sm transition-all duration-200 ease-in-out",
-        isExpanded ? "w-64" : "w-16",
+        expanded ? "w-64" : "w-16",
       )}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
+      onMouseEnter={() => onExpandedChange(true)}
+      onMouseLeave={() => onExpandedChange(false)}
     >
       <div className="flex h-14 items-center justify-center border-b border-slate-200/50">
-        {isExpanded && (
+        {expanded && (
           <span className="text-sm font-semibold text-foreground tracking-tight">
             Custodia
           </span>
@@ -62,11 +66,11 @@ export function Sidebar() {
                 )}
               />
 
-              {isExpanded && (
+              {expanded && (
                 <span className="ml-3 whitespace-nowrap">{item.name}</span>
               )}
 
-              {!isExpanded && (
+              {!expanded && (
                 <div className="absolute left-full ml-3 hidden rounded-md bg-accent px-2 py-1.5 text-xs text-white shadow-md group-hover:block z-50 whitespace-nowrap">
                   {item.name}
                 </div>

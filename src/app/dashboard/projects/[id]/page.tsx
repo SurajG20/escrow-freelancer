@@ -40,6 +40,11 @@ import { useCreateDispute } from "@/lib/hooks/useDisputes";
 import { useMessages, useSendMessage } from "@/lib/hooks/useMessages";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useWallet } from "@/lib/hooks/useWallet";
+import {
+  useUsersByWallets,
+  useUsersByIds,
+  displayNameForUser,
+} from "@/lib/hooks/useUser";
 import { useWalletClient } from "wagmi";
 import { deployEscrowContract } from "@/lib/contracts/deploy";
 import {
@@ -103,7 +108,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const searchParams = useSearchParams();
   const projectsView = searchParams.get("fromView") === "board" ? "board" : "list";
   const backToProjectsHref = `/dashboard/projects?view=${projectsView}`;
-  const { address } = useAuth();
+  const { address, user: currentUser } = useAuth();
   const { chainId, chainConfig } = useWallet();
   const { data: walletClient } = useWalletClient();
   const updateMilestoneMutation = useUpdateMilestone();
@@ -138,6 +143,15 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     isLoading,
     refetch,
   } = useProjectWithMilestones(projectId || "");
+
+  const participantWallets =
+    project ? [project.client_wallet, project.freelancer_wallet].filter(Boolean) as string[] : [];
+  const { data: usersByWallet = new Map() } = useUsersByWallets(participantWallets);
+  const messageSenderIds =
+    messages.length > 0
+      ? [...new Set(messages.map((m) => m.sender_id).filter(Boolean))]
+      : [];
+  const { data: usersById = new Map() } = useUsersByIds(messageSenderIds);
 
   const isAnyActionLoading = () => {
     return (
@@ -971,11 +985,27 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
           {editErrors.title && (
             <p className="text-xs text-red-500">{editErrors.title}</p>
           )}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <Badge variant="outline" className="bg-white/50">
-              {project.client_wallet.substring(0, 6)}...
-              {project.client_wallet.substring(38)}
+              Client:{" "}
+              {address?.toLowerCase() === project.client_wallet.toLowerCase()
+                ? "You"
+                : displayNameForUser(
+                    usersByWallet.get(project.client_wallet.toLowerCase()),
+                    project.client_wallet,
+                  )}
             </Badge>
+            {project.freelancer_wallet && (
+              <Badge variant="outline" className="bg-white/50">
+                Freelancer:{" "}
+                {address?.toLowerCase() === project.freelancer_wallet.toLowerCase()
+                  ? "You"
+                  : displayNameForUser(
+                      usersByWallet.get(project.freelancer_wallet.toLowerCase()),
+                      project.freelancer_wallet,
+                    )}
+              </Badge>
+            )}
             <Badge variant={getProjectStatusBadgeVariant(project.status)}>
               {formatProjectStatus(project.status)}
             </Badge>
@@ -1853,8 +1883,11 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 </p>
               ) : (
                 messages.map((msg) => {
-                  const isYou =
-                    address?.toLowerCase() === msg.sender_id?.toLowerCase();
+                  const isYou = currentUser?.id === msg.sender_id;
+                  const sender = usersById.get(msg.sender_id);
+                  const senderLabel = isYou
+                    ? "You"
+                    : displayNameForUser(sender ?? undefined);
                   return (
                     <div
                       key={msg.id}
@@ -1878,7 +1911,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                         )}
                       >
                         <p className="text-xs text-muted-foreground mb-0.5">
-                          {isYou ? "You" : `${msg.sender_id.slice(0, 6)}...${msg.sender_id.slice(-4)}`}
+                          {senderLabel}
                         </p>
                         <p className="text-foreground">{msg.content}</p>
                         <p className="text-xs text-muted-foreground mt-1">
@@ -1896,11 +1929,11 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 onSubmit={async (e) => {
                   e.preventDefault();
                   const content = messageInput.trim();
-                  if (!content || !project || !address || sendMessageMutation.isPending) return;
+                  if (!content || !project || !currentUser?.id || sendMessageMutation.isPending) return;
                   try {
                     await sendMessageMutation.mutateAsync({
                       project_id: project.id,
-                      sender_id: address.toLowerCase(),
+                      sender_id: currentUser.id,
                       content,
                     });
                     setMessageInput("");
@@ -1921,7 +1954,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                   size="icon"
                   variant="ghost"
                   className="rounded-full shrink-0"
-                  disabled={!messageInput.trim() || sendMessageMutation.isPending}
+                  disabled={!messageInput.trim() || sendMessageMutation.isPending || !currentUser?.id}
                 >
                   {sendMessageMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
