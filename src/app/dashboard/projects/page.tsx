@@ -9,12 +9,21 @@ import { Card } from "@/components/ui/Card";
 import { LayoutGrid, List, Plus, Search, Filter, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useProjects } from "@/lib/hooks/useProjects";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { format } from "date-fns";
 
 export default function ProjectsPage() {
-  const [view, setView] = useState<"list" | "board">("list");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const view = searchParams.get("view") === "board" ? "board" : "list";
+  const setView = (v: "list" | "board") => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", v);
+    router.replace(pathname + "?" + params.toString());
+  };
   const [searchQuery, setSearchQuery] = useState("");
   const { address } = useAuth();
   const { data: projects = [], isLoading } = useProjects(
@@ -135,16 +144,16 @@ export default function ProjectsPage() {
                       project.title
                         .toLowerCase()
                         .includes(searchQuery.toLowerCase()) ||
-                      project.description
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()),
+                      (project.description?.toLowerCase() ?? "").includes(
+                        searchQuery.toLowerCase(),
+                      ),
                   )
                   .map((project) => (
                     <tr
                       key={project.id}
                       className="hover:bg-white/40 transition-colors group cursor-pointer"
                       onClick={() =>
-                        (window.location.href = `/dashboard/projects/${project.id}`)
+                        (window.location.href = `/dashboard/projects/${project.id}?fromView=${view}`)
                       }
                     >
                       <td className="px-6 py-4 font-medium text-foreground">
@@ -192,6 +201,7 @@ export default function ProjectsPage() {
               "active",
               "in_dispute",
               "completed",
+              "cancelled",
             ].map((col) => {
               const filteredProjects = projects.filter(
                 (project) =>
@@ -199,9 +209,9 @@ export default function ProjectsPage() {
                   project.title
                     .toLowerCase()
                     .includes(searchQuery.toLowerCase()) ||
-                  project.description
-                    .toLowerCase()
-                    .includes(searchQuery.toLowerCase()),
+                  (project.description?.toLowerCase() ?? "").includes(
+                    searchQuery.toLowerCase(),
+                  ),
               );
               const colProjects = filteredProjects.filter(
                 (p) => p.status === col,
@@ -220,7 +230,7 @@ export default function ProjectsPage() {
                     {colProjects.map((project) => (
                       <Link
                         key={project.id}
-                        href={`/dashboard/projects/${project.id}`}
+                        href={`/dashboard/projects/${project.id}?fromView=${view}`}
                       >
                         <Card className=" hover:border-accent/50 cursor-pointer transition-all p-4">
                           <div className="flex justify-between items-start mb-2">

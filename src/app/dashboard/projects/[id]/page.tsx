@@ -21,6 +21,7 @@ import {
   Save,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { cn, getProjectStatusBadgeVariant, formatProjectStatus } from "@/lib/utils";
 import {
@@ -98,6 +99,9 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const [milestoneRejectingId, setMilestoneRejectingId] = useState<
     string | null
   >(null);
+  const searchParams = useSearchParams();
+  const projectsView = searchParams.get("fromView") === "board" ? "board" : "list";
+  const backToProjectsHref = `/dashboard/projects?view=${projectsView}`;
   const { address } = useAuth();
   const { chainId, chainConfig } = useWallet();
   const { data: walletClient } = useWalletClient();
@@ -889,7 +893,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       <div className="p-10 text-center">
         <p className="text-muted-foreground">Project not found</p>
         <Link
-          href="/dashboard/projects"
+          href={backToProjectsHref}
           className="text-accent hover:underline mt-2 inline-block"
         >
           Back to Projects
@@ -934,7 +938,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       )}
       {/* Back Link */}
       <Link
-        href="/dashboard/projects"
+        href={backToProjectsHref}
         className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <ArrowLeft className="h-4 w-4 mr-2" /> Back to Projects
