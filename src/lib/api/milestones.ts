@@ -1,6 +1,7 @@
 import { supabase } from "../supabase/client";
 import { Milestone } from "@/types";
 import { milestoneSchema, milestonesArraySchema } from "../validation/schemas";
+import { getProject } from "./projects";
 
 export async function listMilestones(projectId: string): Promise<Milestone[]> {
   const { data, error } = await supabase
@@ -88,6 +89,32 @@ export async function updateMilestone(
 
   if (Object.keys(cleanUpdates).length === 0) {
     return existingMilestone;
+  }
+
+  if (cleanUpdates.offchain_state === "submitted") {
+    const project = await getProject(existingMilestone.project_id);
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    if (project.status !== "active") {
+      throw new Error(
+        project.status === "pending_approval"
+          ? "Project must be approved before submitting milestones"
+          : project.status === "approved"
+            ? "Funds must be deposited to activate the project before submitting milestones"
+            : "Project must be approved and funds deposited before submitting milestones"
+      );
+    }
+    const hasValidContract =
+      project.onchain_address &&
+      project.onchain_address !== "Pending" &&
+      project.onchain_address.startsWith("0x") &&
+      project.onchain_address.length === 42;
+    if (!hasValidContract) {
+      throw new Error(
+        "Funds must be deposited to the escrow contract before submitting milestones"
+      );
+    }
   }
 
   const { data, error } = await supabase
