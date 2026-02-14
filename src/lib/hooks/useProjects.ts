@@ -106,10 +106,19 @@ export function useRejectProject() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: rejectProject,
+    mutationFn: ({
+      id,
+      rejection_reason,
+    }: {
+      id: string;
+      rejection_reason?: string | null;
+    }) => rejectProject(id, rejection_reason),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", data.id] });
+      queryClient.invalidateQueries({
+        queryKey: ["project", data.id, "with-milestones"],
+      });
     },
   });
 }

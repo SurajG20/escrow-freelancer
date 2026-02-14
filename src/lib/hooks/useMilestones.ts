@@ -7,6 +7,7 @@ import {
   deleteMilestone,
   deleteMilestonesByProject,
   replaceMilestones,
+  rejectMilestone,
 } from "../api/milestones";
 
 export function useMilestones(projectId: string) {
@@ -67,6 +68,37 @@ export function useUpdateMilestone() {
       });
       queryClient.invalidateQueries({
         queryKey: ["project", data.project_id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["project", data.project_id, "with-milestones"],
+      });
+    },
+  });
+}
+
+export function useRejectMilestone() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      rejection_reason,
+    }: {
+      id: string;
+      rejection_reason: string;
+    }) => rejectMilestone(id, rejection_reason),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["milestones", data.project_id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["milestone", data.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["project", data.project_id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["project", data.project_id, "with-milestones"],
       });
     },
   });

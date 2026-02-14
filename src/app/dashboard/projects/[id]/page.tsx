@@ -33,6 +33,7 @@ import {
 import {
   useUpdateMilestone,
   useReplaceMilestones,
+  useRejectMilestone,
 } from "@/lib/hooks/useMilestones";
 import { useCreateDispute } from "@/lib/hooks/useDisputes";
 import { useAuth } from "@/lib/hooks/useAuth";
@@ -47,6 +48,8 @@ import {
 } from "@/lib/contracts/escrow";
 import { MilestoneEditor } from "@/components/milestones/MilestoneEditor";
 import { MilestoneDisplay } from "@/components/milestones/MilestoneDisplay";
+import { MilestoneRejectionModal } from "@/components/milestones/MilestoneRejectionModal";
+import { ProjectRejectionModal } from "@/components/projects/ProjectRejectionModal";
 import {
   DeploymentModal,
   type DeploymentProgress,
@@ -71,6 +74,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const [loadingStates, setLoadingStates] = useState({
     submit: {} as Record<string, boolean>,
     approve: {} as Record<string, boolean>,
+    reject: {} as Record<string, boolean>,
     deposit: false,
     sendApproval: false,
     approveProject: false,
@@ -88,11 +92,17 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const [originalCounterpartyWallet, setOriginalCounterpartyWallet] =
     useState("");
   const [showDeploymentModal, setShowDeploymentModal] = useState(false);
+  const [showProjectRejectionModal, setShowProjectRejectionModal] =
+    useState(false);
+  const [milestoneRejectingId, setMilestoneRejectingId] = useState<
+    string | null
+  >(null);
   const { address } = useAuth();
   const { chainId, chainConfig } = useWallet();
   const { data: walletClient } = useWalletClient();
   const updateMilestoneMutation = useUpdateMilestone();
   const replaceMilestonesMutation = useReplaceMilestones();
+  const rejectMilestoneMutation = useRejectMilestone();
   const createDisputeMutation = useCreateDispute();
   const updateProjectMutation = useUpdateProject();
   const sendForApprovalMutation = useSendForApproval();
@@ -128,7 +138,8 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       loadingStates.createDispute ||
       loadingStates.saveEdit ||
       Object.values(loadingStates.submit).some(Boolean) ||
-      Object.values(loadingStates.approve).some(Boolean)
+      Object.values(loadingStates.approve).some(Boolean) ||
+      Object.values(loadingStates.reject).some(Boolean)
     );
   };
 
@@ -777,9 +788,8 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     }
   };
 
-  const handleRejectProject = async () => {
+  const handleRejectProjectClick = () => {
     if (!project || !address) return;
-
     const isFreelancer =
       address.toLowerCase() === project.freelancer_wallet?.toLowerCase();
     if (!isFreelancer) {
@@ -788,16 +798,24 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       });
       return;
     }
+    setShowProjectRejectionModal(true);
+  };
 
+  const handleRejectProjectConfirm = async (reason: string) => {
+    if (!project) return;
     setLoadingStates((prev) => ({ ...prev, rejectProject: true }));
     try {
       toast.loading("Rejecting project...", { id: "reject" });
-      await rejectProjectMutation.mutateAsync(project.id);
+      await rejectProjectMutation.mutateAsync({
+        id: project.id,
+        rejection_reason: reason || null,
+      });
       await refetch();
       toast.success("Project rejected", {
         id: "reject",
         description: "Project has been returned to draft status",
       });
+      setShowProjectRejectionModal(false);
     } catch (error) {
       console.error("Failed to reject project:", error);
       toast.error("Failed to Reject", {
@@ -807,6 +825,41 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       });
     } finally {
       setLoadingStates((prev) => ({ ...prev, rejectProject: false }));
+    }
+  };
+
+  const handleRejectMilestoneConfirm = async (
+    milestoneId: string,
+    reason: string,
+  ) => {
+    setLoadingStates((prev) => ({
+      ...prev,
+      reject: { ...prev.reject, [milestoneId]: true },
+    }));
+    try {
+      toast.loading("Rejecting milestone...", { id: `reject-ms-${milestoneId}` });
+      await rejectMilestoneMutation.mutateAsync({
+        id: milestoneId,
+        rejection_reason: reason,
+      });
+      await refetch();
+      toast.success("Milestone rejected", {
+        id: `reject-ms-${milestoneId}`,
+        description: "Freelancer can update and resubmit",
+      });
+      setMilestoneRejectingId(null);
+    } catch (error) {
+      console.error("Failed to reject milestone:", error);
+      toast.error("Failed to Reject Milestone", {
+        id: `reject-ms-${milestoneId}`,
+        description:
+          error instanceof Error ? error.message : "Please try again",
+      });
+    } finally {
+      setLoadingStates((prev) => ({
+        ...prev,
+        reject: { ...prev.reject, [milestoneId]: false },
+      }));
     }
   };
 
@@ -845,6 +898,28 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
           await runDepositFlow(onProgress);
         }}
       />
+      <ProjectRejectionModal
+        open={showProjectRejectionModal}
+        onClose={() => setShowProjectRejectionModal(false)}
+        onConfirm={handleRejectProjectConfirm}
+        loading={loadingStates.rejectProject}
+      />
+      {milestoneRejectingId && project?.milestones && (
+        <MilestoneRejectionModal
+          open={!!milestoneRejectingId}
+          milestoneTitle={
+            project.milestones.find((m) => m.id === milestoneRejectingId)
+              ?.title ?? "Milestone"
+          }
+          onClose={() => setMilestoneRejectingId(null)}
+          onConfirm={(reason) =>
+            handleRejectMilestoneConfirm(milestoneRejectingId, reason)
+          }
+          loading={
+            loadingStates.reject[milestoneRejectingId] ?? false
+          }
+        />
+      )}
       {/* Back Link */}
       <Link
         href="/dashboard/projects"
@@ -1024,7 +1099,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={handleRejectProject}
+                  onClick={handleRejectProjectClick}
                   disabled={loadingStates.rejectProject || isAnyActionLoading()}
                   className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
@@ -1072,6 +1147,23 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
           )}
         </div>
       </div>
+
+      {project.status === "draft" &&
+        project.rejection_reason &&
+        address?.toLowerCase() === project.client_wallet.toLowerCase() && (
+          <div className="rounded-lg border p-4 bg-red-50 border-red-200 text-red-800">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium">Project Rejected</p>
+                <p className="text-sm mt-1">{project.rejection_reason}</p>
+                <p className="text-sm mt-2 text-red-700">
+                  Update the project or milestones above, then click &quot;Send for Approval&quot; to resubmit.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
       {(project.status === "pending_approval" ||
         project.status === "approved") && (
@@ -1410,6 +1502,17 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                                   : "Waiting for project activation"}
                             </p>
                           )}
+                          {milestone.offchain_state === "awaiting_submission" &&
+                            milestone.rejection_reason &&
+                            !isClient && (
+                              <div className="mt-2 rounded-lg bg-red-50 border border-red-200 p-2 text-sm text-red-800">
+                                <p className="font-medium">Rejection reason</p>
+                                <p className="mt-0.5">{milestone.rejection_reason}</p>
+                                <p className="text-xs text-red-700 mt-1">
+                                  Update your work and resubmit when ready.
+                                </p>
+                              </div>
+                            )}
                         </div>
                         <div className="ml-3 sm:ml-0 flex gap-2">
                           {(canSubmit || canSubmitButDisabled) && (
@@ -1443,26 +1546,49 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                             </Button>
                           )}
                           {canApprove && (
-                            <Button
-                              size="sm"
-                              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white"
-                              onClick={() =>
-                                handleAction("approve", milestone.id)
-                              }
-                              disabled={
-                                loadingStates.approve[milestone.id] ||
-                                isAnyActionLoading()
-                              }
-                            >
-                              {loadingStates.approve[milestone.id] ? (
-                                <>
-                                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                                  Approving...
-                                </>
-                              ) : (
-                                "Approve & Pay"
-                              )}
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white"
+                                onClick={() =>
+                                  handleAction("approve", milestone.id)
+                                }
+                                disabled={
+                                  loadingStates.approve[milestone.id] ||
+                                  isAnyActionLoading()
+                                }
+                              >
+                                {loadingStates.approve[milestone.id] ? (
+                                  <>
+                                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                    Approving...
+                                  </>
+                                ) : (
+                                  "Approve & Pay"
+                                )}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full sm:w-auto text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() =>
+                                  setMilestoneRejectingId(milestone.id)
+                                }
+                                disabled={
+                                  loadingStates.reject[milestone.id] ||
+                                  isAnyActionLoading()
+                                }
+                              >
+                                {loadingStates.reject[milestone.id] ? (
+                                  <>
+                                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                    Rejecting...
+                                  </>
+                                ) : (
+                                  "Reject"
+                                )}
+                              </Button>
+                            </>
                           )}
                           {milestone.offchain_state === "released" && (
                             <Badge

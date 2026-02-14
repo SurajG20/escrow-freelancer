@@ -32,6 +32,7 @@ export const milestoneSchema = z.object({
     .string()
     .nullish()
     .transform((val) => val ?? undefined),
+  rejection_reason: z.string().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -56,6 +57,7 @@ export const projectSchema = z.object({
     "completed",
     "cancelled",
   ]),
+  rejection_reason: z.string().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });

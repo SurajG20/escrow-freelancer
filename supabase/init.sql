@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS projects (
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'pending_approval', 'approved', 'active', 'in_dispute', 'completed', 'cancelled')),
+    rejection_reason TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -51,6 +52,7 @@ CREATE TABLE IF NOT EXISTS milestones (
     deadline TIMESTAMP WITH TIME ZONE NOT NULL,
     offchain_state TEXT NOT NULL DEFAULT 'awaiting_submission' CHECK (offchain_state IN ('awaiting_submission', 'submitted', 'approved', 'disputed', 'released')),
     onchain_state TEXT,
+    rejection_reason TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(project_id, index)

@@ -74,6 +74,7 @@ export async function updateMilestone(
     index: number;
     offchain_state: string;
     onchain_state: string;
+    rejection_reason: string | null;
   }>,
 ): Promise<Milestone> {
   // First verify the milestone exists
@@ -92,6 +93,7 @@ export async function updateMilestone(
   }
 
   if (cleanUpdates.offchain_state === "submitted") {
+    cleanUpdates.rejection_reason = null;
     const project = await getProject(existingMilestone.project_id);
     if (!project) {
       throw new Error("Project not found");
@@ -133,6 +135,40 @@ export async function updateMilestone(
     throw new Error(`Failed to update milestone: ${error.message}`);
   }
 
+  if (!data) {
+    throw new Error(
+      `Milestone with id ${id} update returned no data. This may be due to Row Level Security policies.`,
+    );
+  }
+
+  return milestoneSchema.parse(data);
+}
+
+export async function rejectMilestone(
+  id: string,
+  rejection_reason: string,
+): Promise<Milestone> {
+  const existing = await getMilestone(id);
+  if (!existing) {
+    throw new Error(`Milestone with id ${id} not found`);
+  }
+  if (existing.offchain_state !== "submitted") {
+    throw new Error("Only submitted milestones can be rejected");
+  }
+
+  const { data, error } = await supabase
+    .from("milestones")
+    .update({
+      offchain_state: "awaiting_submission",
+      rejection_reason: rejection_reason || null,
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to reject milestone: ${error.message}`);
+  }
   if (!data) {
     throw new Error(
       `Milestone with id ${id} update returned no data. This may be due to Row Level Security policies.`,

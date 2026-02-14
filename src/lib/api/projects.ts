@@ -123,6 +123,7 @@ export async function updateProject(
     client_wallet: string;
     freelancer_wallet: string;
     onchain_address: string;
+    rejection_reason: string | null;
   }>,
 ): Promise<Project> {
   // First verify the project exists
@@ -168,7 +169,6 @@ export async function updateProject(
 }
 
 export async function sendForApproval(id: string): Promise<Project> {
-  // Verify project exists first
   const existingProject = await getProject(id);
   if (!existingProject) {
     throw new Error(`Project with id ${id} not found`);
@@ -176,7 +176,7 @@ export async function sendForApproval(id: string): Promise<Project> {
 
   const { data, error } = await supabase
     .from("projects")
-    .update({ status: "pending_approval" })
+    .update({ status: "pending_approval", rejection_reason: null })
     .eq("id", id)
     .select()
     .single();
@@ -231,8 +231,10 @@ export async function approveProject(id: string): Promise<Project> {
   return projectSchema.parse(data);
 }
 
-export async function rejectProject(id: string): Promise<Project> {
-  // Verify project exists first
+export async function rejectProject(
+  id: string,
+  rejection_reason?: string | null,
+): Promise<Project> {
   const existingProject = await getProject(id);
   if (!existingProject) {
     throw new Error(`Project with id ${id} not found`);
@@ -240,7 +242,10 @@ export async function rejectProject(id: string): Promise<Project> {
 
   const { data, error } = await supabase
     .from("projects")
-    .update({ status: "draft" })
+    .update({
+      status: "draft",
+      rejection_reason: rejection_reason ?? null,
+    })
     .eq("id", id)
     .select()
     .single();

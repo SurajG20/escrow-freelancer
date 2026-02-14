@@ -39,6 +39,7 @@ export interface Milestone {
   deadline: string;
   offchain_state: MilestoneStatus;
   onchain_state?: string;
+  rejection_reason?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -52,6 +53,7 @@ export interface Project {
   title: string;
   description: string;
   status: ProjectStatus;
+  rejection_reason?: string | null;
   created_at: string;
   updated_at: string;
   milestones?: Milestone[];
