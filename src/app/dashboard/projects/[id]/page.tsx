@@ -47,6 +47,10 @@ import {
 } from "@/lib/contracts/escrow";
 import { MilestoneEditor } from "@/components/milestones/MilestoneEditor";
 import { MilestoneDisplay } from "@/components/milestones/MilestoneDisplay";
+import {
+  DeploymentModal,
+  type DeploymentProgress,
+} from "@/components/deployment/DeploymentModal";
 
 import { format } from "date-fns";
 
@@ -83,6 +87,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const [showWalletWarning, setShowWalletWarning] = useState(false);
   const [originalCounterpartyWallet, setOriginalCounterpartyWallet] =
     useState("");
+  const [showDeploymentModal, setShowDeploymentModal] = useState(false);
   const { address } = useAuth();
   const { chainId, chainConfig } = useWallet();
   const { data: walletClient } = useWalletClient();
@@ -352,32 +357,35 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     }
   };
 
-  const handleDepositFunds = async () => {
+  const runDepositFlow = async (
+    onProgress?: (p: DeploymentProgress) => void
+  ) => {
+    const useModal = !!onProgress;
     if (!project || !address || !chainId || !chainConfig) {
-      toast.error("Wallet Not Connected", {
-        description: "Please connect your wallet to deposit funds",
-      });
+      const msg = "Please connect your wallet to deposit funds";
+      if (!useModal) toast.error("Wallet Not Connected", { description: msg });
+      else throw new Error(msg);
       return;
     }
 
     const isClient =
       address.toLowerCase() === project.client_wallet.toLowerCase();
     if (!isClient) {
-      toast.error("Permission Denied", {
-        description: "Only the client can deposit funds",
-      });
+      const msg = "Only the client can deposit funds";
+      if (!useModal) toast.error("Permission Denied", { description: msg });
+      else throw new Error(msg);
       return;
     }
 
     if (project.status !== "approved") {
-      toast.error("Project Not Approved", {
-        description:
-          project.status === "pending_approval"
-            ? "Please wait for the freelancer to approve the project"
-            : project.status === "draft"
-              ? "Please send the project for approval first"
-              : "Project must be approved before depositing funds",
-      });
+      const msg =
+        project.status === "pending_approval"
+          ? "Please wait for the freelancer to approve the project"
+          : project.status === "draft"
+            ? "Please send the project for approval first"
+            : "Project must be approved before depositing funds";
+      if (!useModal) toast.error("Project Not Approved", { description: msg });
+      else throw new Error(msg);
       return;
     }
 
@@ -387,35 +395,29 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       project.onchain_address.startsWith("0x") &&
       project.onchain_address.length === 42
     ) {
-      toast.error("Contract Already Deployed", {
-        description: "This project already has a deployed contract",
-      });
+      const msg = "This project already has a deployed contract";
+      if (!useModal) toast.error("Contract Already Deployed", { description: msg });
+      else throw new Error(msg);
       return;
     }
 
-    setLoadingStates((prev) => ({ ...prev, deposit: true }));
+    if (!useModal) setLoadingStates((prev) => ({ ...prev, deposit: true }));
+
+    const milestones = project.milestones || [];
+    if (!walletClient) {
+      if (!useModal) setLoadingStates((prev) => ({ ...prev, deposit: false }));
+      throw new Error("Wallet client not available");
+    }
+    if (!process.env.NEXT_PUBLIC_ESCROW_FACTORY_ADDRESS) {
+      if (!useModal) setLoadingStates((prev) => ({ ...prev, deposit: false }));
+      throw new Error(
+        "Escrow contract is not configured. Please contact support."
+      );
+    }
 
     try {
-      const milestones = project.milestones || [];
-
-      if (!walletClient) {
-        throw new Error("Wallet client not available");
-      }
-
-      if (!process.env.NEXT_PUBLIC_ESCROW_FACTORY_ADDRESS) {
-        throw new Error(
-          "Escrow contract is not configured. Please contact support."
-        );
-      }
-
-      console.log("Starting contract deployment...");
-      console.log(
-        "Factory address:",
-        process.env.NEXT_PUBLIC_ESCROW_FACTORY_ADDRESS
-      );
-      console.log("USDT address:", chainConfig.usdtContractAddress);
-
-      toast.loading("Deploying escrow contract...", { id: "deploy" });
+      if (!useModal) toast.loading("Deploying escrow contract...", { id: "deploy" });
+      onProgress?.({ step: "deploying" });
 
       const deployResult = await deployEscrowContract(
         {
@@ -431,9 +433,18 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       );
 
       const deployedContractAddress = deployResult.contractAddress;
+      onProgress?.({
+        step: "deploying",
+        contractAddress: deployedContractAddress,
+        deployTransactionHash: deployResult.transactionHash,
+      });
 
-      toast.success("Escrow contract deployed!", { id: "deploy" });
-      toast.loading("Depositing funds...", { id: "deposit" });
+      if (!useModal) {
+        toast.success("Escrow contract deployed!", { id: "deploy" });
+        toast.loading("Depositing funds...", { id: "deposit" });
+      }
+      onProgress?.({ step: "depositing" });
+
       const nativeTotal = milestones
         .filter((m) => m.currency === "NATIVE")
         .reduce((sum, m) => sum + parseFloat(m.amount || "0"), 0);
@@ -449,7 +460,6 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
           walletClient
         );
       }
-
       if (usdtTotal > 0) {
         await depositFunds(
           deployedContractAddress,
@@ -459,8 +469,12 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
         );
       }
 
-      toast.success("Funds deposited!", { id: "deposit" });
-      toast.loading("Updating project...", { id: "update" });
+      if (!useModal) {
+        toast.success("Funds deposited!", { id: "deposit" });
+        toast.loading("Updating project...", { id: "update" });
+      }
+      onProgress?.({ step: "updating" });
+
       await updateProjectMutation.mutateAsync({
         id: project.id,
         updates: {
@@ -471,28 +485,37 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
 
       await refetch();
 
-      toast.success("Funds deposited successfully! Project is now active.", {
-        id: "update",
-        description: `Contract: ${deployedContractAddress.substring(0, 6)}...${deployedContractAddress.substring(38)}`,
-        duration: 6000,
-      });
+      if (!useModal) {
+        toast.success("Funds deposited successfully! Project is now active.", {
+          id: "update",
+          description: `Contract: ${deployedContractAddress.substring(0, 6)}...${deployedContractAddress.substring(38)}`,
+          duration: 6000,
+        });
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error
           ? error.message
           : "Failed to deposit funds. Please try again.";
-
-      toast.dismiss("deploy");
-      toast.dismiss("deposit");
-      toast.dismiss("update");
-
-      toast.error("Deposit Failed", {
-        description: errorMessage,
-        duration: 6000,
-      });
+      if (!useModal) {
+        toast.dismiss("deploy");
+        toast.dismiss("deposit");
+        toast.dismiss("update");
+        toast.error("Deposit Failed", {
+          description: errorMessage,
+          duration: 6000,
+        });
+      } else {
+        onProgress?.({ step: "error", error: errorMessage });
+      }
+      throw error;
     } finally {
-      setLoadingStates((prev) => ({ ...prev, deposit: false }));
+      if (!useModal) setLoadingStates((prev) => ({ ...prev, deposit: false }));
     }
+  };
+
+  const handleDepositFunds = () => {
+    setShowDeploymentModal(true);
   };
 
   const handleEditMode = () => {
@@ -812,6 +835,16 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
 
   return (
     <div className="space-y-6">
+      <DeploymentModal
+        open={showDeploymentModal}
+        onClose={() => setShowDeploymentModal(false)}
+        project={project}
+        chainConfig={chainConfig ?? null}
+        walletClient={walletClient ?? undefined}
+        onDeploy={async (onProgress) => {
+          await runDepositFlow(onProgress);
+        }}
+      />
       {/* Back Link */}
       <Link
         href="/dashboard/projects"
