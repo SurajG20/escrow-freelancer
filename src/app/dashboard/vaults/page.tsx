@@ -16,10 +16,13 @@ import {
   History,
   Wallet,
   Loader2,
+  CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useProjects } from "@/lib/hooks/useProjects";
 import { useMemo } from "react";
+import Link from "next/link";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { getProjectWithMilestones } from "@/lib/api/projects";
@@ -33,6 +36,7 @@ export default function VaultsPage() {
   const activeProjects = projects.filter(
     (p) => p.status === "active" || p.status === "in_dispute",
   );
+  const completedProjects = projects.filter((p) => p.status === "completed");
 
   const projectsWithMilestones = useQuery({
     queryKey: ["vaults-projects", activeProjects.map((p) => p.id)],
@@ -46,6 +50,71 @@ export default function VaultsPage() {
     },
     enabled: activeProjects.length > 0,
   });
+
+  const completedWithMilestones = useQuery({
+    queryKey: ["vaults-completed", completedProjects.map((p) => p.id)],
+    queryFn: async () => {
+      const results = await Promise.all(
+        completedProjects.map((p) => getProjectWithMilestones(p.id)),
+      );
+      return results.filter(Boolean) as Array<
+        NonNullable<Awaited<ReturnType<typeof getProjectWithMilestones>>>
+      >;
+    },
+    enabled: completedProjects.length > 0,
+  });
+
+  const historyItems = useMemo(() => {
+    const data = completedWithMilestones.data || [];
+    const items: Array<{
+      projectId: string;
+      projectTitle: string;
+      completedAt: string;
+      releasedNative: number;
+      releasedUSDT: number;
+      releasedCount: number;
+    }> = [];
+    data.forEach((project) => {
+      const milestones = project.milestones || [];
+      let releasedNative = 0;
+      let releasedUSDT = 0;
+      let releasedCount = 0;
+      let latestReleased = project.updated_at;
+      milestones.forEach((m) => {
+        if (m.offchain_state === "released") {
+          releasedCount += 1;
+          const amount = parseFloat(m.amount || "0");
+          if (m.currency === "NATIVE") releasedNative += amount;
+          else if (m.currency === "USDT") releasedUSDT += amount;
+          if (m.updated_at > latestReleased) latestReleased = m.updated_at;
+        }
+      });
+      if (releasedCount > 0) {
+        items.push({
+          projectId: project.id,
+          projectTitle: project.title,
+          completedAt: latestReleased,
+          releasedNative,
+          releasedUSDT,
+          releasedCount,
+        });
+      }
+    });
+    items.sort(
+      (a, b) =>
+        new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime(),
+    );
+    return items;
+  }, [completedWithMilestones.data]);
+
+  const formatCurrencyDisplay = (native: number, usdt: number) => {
+    if (native > 0 && usdt > 0) {
+      return `${native.toFixed(3)} NATIVE + ${usdt.toFixed(2)} USDT`;
+    }
+    if (native > 0) return `$${native.toFixed(2)}`;
+    if (usdt > 0) return `$${usdt.toFixed(2)}`;
+    return "$0.00";
+  };
 
   const stats = useMemo(() => {
     const projectsData = projectsWithMilestones.data || [];
@@ -189,9 +258,9 @@ export default function VaultsPage() {
       <Card className="">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <History className="h-5 w-5" /> Recent Projects
+            <Lock className="h-5 w-5" /> Active vaults
           </CardTitle>
-          <CardDescription>Your active escrow projects.</CardDescription>
+          <CardDescription>Projects with locked escrow funds.</CardDescription>
         </CardHeader>
         <CardContent>
           {activeProjects.length === 0 ? (
@@ -200,9 +269,10 @@ export default function VaultsPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {activeProjects.slice(0, 5).map((project) => (
-                <div
+              {activeProjects.map((project) => (
+                <Link
                   key={project.id}
+                  href={`/dashboard/projects/${project.id}`}
                   className="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white/40 hover:bg-white/60 transition-colors"
                 >
                   <div className="flex items-center gap-4">
@@ -216,15 +286,72 @@ export default function VaultsPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="flex items-center gap-2">
                     <Badge
                       variant={getProjectStatusBadgeVariant(project.status)}
                       className="text-xs"
                     >
                       {formatProjectStatus(project.status)}
                     </Badge>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
                   </div>
-                </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <History className="h-5 w-5" /> Vault history
+          </CardTitle>
+          <CardDescription>
+            Completed projects and released funds.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {completedProjects.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No completed projects yet.
+            </div>
+          ) : completedWithMilestones.isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : historyItems.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No released milestones in completed projects.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {historyItems.map((item) => (
+                <Link
+                  key={item.projectId}
+                  href={`/dashboard/projects/${item.projectId}`}
+                  className="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white/40 hover:bg-white/60 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600">
+                      <CheckCircle2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="font-medium">{item.projectTitle}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {format(new Date(item.completedAt), "MMM d, yyyy")} ·{" "}
+                        {item.releasedCount} milestone
+                        {item.releasedCount !== 1 ? "s" : ""} released
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-right">
+                    <span className="font-medium text-emerald-600">
+                      {formatCurrencyDisplay(item.releasedNative, item.releasedUSDT)}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </Link>
               ))}
             </div>
           )}
