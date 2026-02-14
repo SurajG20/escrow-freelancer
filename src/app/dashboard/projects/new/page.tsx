@@ -21,10 +21,13 @@ import { useWallet } from "@/lib/hooks/useWallet";
 import { useCreateProject } from "@/lib/hooks/useProjects";
 import { useCreateMilestones } from "@/lib/hooks/useMilestones";
 import { getChainConfig } from "@/lib/config/chains";
+import { MilestoneEditor } from "@/components/milestones/MilestoneEditor";
+import { MilestoneDisplay } from "@/components/milestones/MilestoneDisplay";
 
 type MilestoneForm = {
   id: number;
   title: string;
+  description: string;
   amount: string;
   deadline: string;
   currency: "NATIVE" | "USDT";
@@ -43,7 +46,7 @@ export default function NewProjectPage() {
   const [description, setDescription] = useState("");
   const [counterpartyWallet, setCounterpartyWallet] = useState("");
   const [milestones, setMilestones] = useState<MilestoneForm[]>([
-    { id: 1, title: "", amount: "", deadline: "", currency: "NATIVE" },
+    { id: 1, title: "", description: "", amount: "", deadline: "", currency: "NATIVE" },
   ]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,6 +57,7 @@ export default function NewProjectPage() {
       {
         id: milestones.length + 1,
         title: "",
+        description: "",
         amount: "",
         deadline: "",
         currency: milestones[0]?.currency || "NATIVE",
@@ -208,7 +212,7 @@ export default function NewProjectPage() {
         project_id: project.id,
         index: index,
         title: m.title.trim(),
-        description: "",
+        description: m.description ?? "",
         amount: m.amount,
         currency: m.currency,
         chain_id: typeof chainId === "string" ? 56 : chainId,
@@ -385,28 +389,22 @@ export default function NewProjectPage() {
                     {index + 1}.
                   </span>
                   <div className="flex-1 space-y-2">
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium">
-                        Description *
-                      </label>
-                      <Input
-                        placeholder="Deliverable name"
-                        value={ms.title}
-                        onChange={(e) => {
-                          updateMilestone(ms.id, { title: e.target.value });
-                          if (errors[`milestone_${ms.id}_title`]) {
-                            const newErrors = { ...errors };
-                            delete newErrors[`milestone_${ms.id}_title`];
-                            setErrors(newErrors);
-                          }
-                        }}
-                      />
-                      {errors[`milestone_${ms.id}_title`] && (
-                        <p className="text-xs text-red-500">
-                          {errors[`milestone_${ms.id}_title`]}
-                        </p>
-                      )}
-                    </div>
+                    <MilestoneEditor
+                      title={ms.title}
+                      description={ms.description}
+                      onTitleChange={(value) => {
+                        updateMilestone(ms.id, { title: value });
+                        if (errors[`milestone_${ms.id}_title`]) {
+                          const newErrors = { ...errors };
+                          delete newErrors[`milestone_${ms.id}_title`];
+                          setErrors(newErrors);
+                        }
+                      }}
+                      onDescriptionChange={(value) =>
+                        updateMilestone(ms.id, { description: value })
+                      }
+                      titleError={errors[`milestone_${ms.id}_title`]}
+                    />
                     <div className="flex gap-2">
                       <div className="flex-1 space-y-1">
                         <label className="text-xs font-medium">Amount *</label>
@@ -524,6 +522,22 @@ export default function NewProjectPage() {
                         {description.substring(0, 100)}
                         {description.length > 100 ? "..." : ""}
                       </div>
+                    </div>
+                    <div className="bg-white/50 p-4 rounded-lg border border-slate-200">
+                      <div className="text-sm text-muted-foreground mb-2">
+                        Milestones
+                      </div>
+                      <ul className="space-y-2 text-sm">
+                        {milestones.map((ms, i) => (
+                          <li key={ms.id} className="border-l-2 border-accent/30 pl-2">
+                            <MilestoneDisplay
+                              title={ms.title || `Milestone ${i + 1}`}
+                              description={ms.description}
+                              className="text-foreground"
+                            />
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                     <div className="bg-muted/30 p-4 rounded-lg text-sm space-y-2 border border-slate-200">
                       <div className="flex justify-between">

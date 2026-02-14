@@ -35,6 +35,8 @@ export async function depositFunds(
   try {
     if (currency === "NATIVE") {
       hash = await walletClient.writeContract({
+        account: walletClient.account!,
+        chain,
         address: contractAddress as `0x${string}`,
         abi: EscrowABI,
         functionName: "deposit",
@@ -51,6 +53,8 @@ export async function depositFunds(
       let approveHash: `0x${string}`;
       try {
         approveHash = await walletClient.writeContract({
+          account: walletClient.account!,
+          chain,
           address: chainConfig.usdtContractAddress as `0x${string}`,
           abi: ERC20ABI,
           functionName: "approve",
@@ -65,6 +69,8 @@ export async function depositFunds(
 
       try {
         hash = await walletClient.writeContract({
+          account: walletClient.account!,
+          chain,
           address: contractAddress as `0x${string}`,
           abi: EscrowABI,
           functionName: "depositUSDT",
@@ -110,6 +116,8 @@ export async function releaseMilestoneFunds(
   let hash: `0x${string}`;
   try {
     hash = await walletClient.writeContract({
+      account: walletClient.account!,
+      chain,
       address: contractAddress as `0x${string}`,
       abi: EscrowABI,
       functionName: "releaseMilestone",
@@ -179,6 +187,8 @@ export async function submitMilestoneOnChain(
   }
 
   const hash = await walletClient.writeContract({
+    account: walletClient.account!,
+    chain,
     address: contractAddress as `0x${string}`,
     abi: EscrowABI,
     functionName: "submitMilestone",
@@ -208,6 +218,8 @@ export async function approveMilestoneOnChain(
   }
 
   const hash = await walletClient.writeContract({
+    account: walletClient.account!,
+    chain,
     address: contractAddress as `0x${string}`,
     abi: EscrowABI,
     functionName: "approveMilestone",

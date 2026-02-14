@@ -45,6 +45,8 @@ import {
   submitMilestoneOnChain,
   approveMilestoneOnChain,
 } from "@/lib/contracts/escrow";
+import { MilestoneEditor } from "@/components/milestones/MilestoneEditor";
+import { MilestoneDisplay } from "@/components/milestones/MilestoneDisplay";
 
 import { format } from "date-fns";
 
@@ -53,6 +55,7 @@ import { format } from "date-fns";
 type MilestoneForm = {
   id: string | number;
   title: string;
+  description: string;
   amount: string;
   deadline: string;
   currency: "NATIVE" | "USDT";
@@ -140,6 +143,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
           project.milestones.map((m) => ({
             id: m.id,
             title: m.title,
+            description: m.description ?? "",
             amount: m.amount,
             deadline: format(new Date(m.deadline), "yyyy-MM-dd"),
             currency: m.currency,
@@ -512,6 +516,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
           project.milestones.map((m) => ({
             id: m.id,
             title: m.title,
+            description: m.description ?? "",
             amount: m.amount,
             deadline: format(new Date(m.deadline), "yyyy-MM-dd"),
             currency: m.currency,
@@ -611,7 +616,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       const milestonesData = editMilestones.map((m, index) => ({
         index: index,
         title: m.title.trim(),
-        description: "",
+        description: m.description ?? "",
         amount: m.amount,
         currency: m.currency,
         chain_id: typeof chainId === "string" ? 56 : chainId,
@@ -643,6 +648,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       {
         id: Date.now(),
         title: "",
+        description: "",
         amount: "",
         deadline: "",
         currency: editMilestones[0]?.currency || "NATIVE",
@@ -1175,28 +1181,22 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                       {index + 1}.
                     </span>
                     <div className="flex-1 space-y-2">
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium">
-                          Description *
-                        </label>
-                        <Input
-                          placeholder="Deliverable name"
-                          value={ms.title}
-                          onChange={(e) => {
-                            updateMilestone(ms.id, { title: e.target.value });
-                            if (editErrors[`milestone_${ms.id}_title`]) {
-                              const newErrors = { ...editErrors };
-                              delete newErrors[`milestone_${ms.id}_title`];
-                              setEditErrors(newErrors);
-                            }
-                          }}
-                        />
-                        {editErrors[`milestone_${ms.id}_title`] && (
-                          <p className="text-xs text-red-500">
-                            {editErrors[`milestone_${ms.id}_title`]}
-                          </p>
-                        )}
-                      </div>
+                      <MilestoneEditor
+                        title={ms.title}
+                        description={ms.description}
+                        onTitleChange={(value) => {
+                          updateMilestone(ms.id, { title: value });
+                          if (editErrors[`milestone_${ms.id}_title`]) {
+                            const newErrors = { ...editErrors };
+                            delete newErrors[`milestone_${ms.id}_title`];
+                            setEditErrors(newErrors);
+                          }
+                        }}
+                        onDescriptionChange={(value) =>
+                          updateMilestone(ms.id, { description: value })
+                        }
+                        titleError={editErrors[`milestone_${ms.id}_title`]}
+                      />
                       <div className="flex gap-2">
                         <div className="flex-1 space-y-1">
                           <label className="text-xs font-medium">
@@ -1336,24 +1336,22 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="space-y-1 ml-3">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-medium text-foreground">
-                              {milestone.title}
-                            </h3>
+                            <div className="font-medium text-foreground">
+                              <MilestoneDisplay
+                                title={milestone.title}
+                                description={milestone.description}
+                              />
+                            </div>
                             {milestone.offchain_state === "released" && (
-                              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                              <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0" />
                             )}
                             {milestone.offchain_state === "submitted" && (
-                              <Clock className="h-4 w-4 text-orange-400" />
+                              <Clock className="h-4 w-4 text-orange-400 flex-shrink-0" />
                             )}
                             {milestone.offchain_state === "disputed" && (
-                              <AlertTriangle className="h-4 w-4 text-red-500" />
+                              <AlertTriangle className="h-4 w-4 text-red-500 flex-shrink-0" />
                             )}
                           </div>
-                          {milestone.description && (
-                            <p className="text-sm text-muted-foreground">
-                              {milestone.description}
-                            </p>
-                          )}
                           <div className="flex gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />{" "}
