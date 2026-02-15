@@ -3,6 +3,7 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Home, Layers, Shield, User, Settings, Wallet, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,14 +32,30 @@ export function Sidebar({ expanded, onExpandedChange }: SidebarProps) {
       )}
     >
       <div className={cn(
-          "flex h-14 items-center border-b border-slate-200/50 px-3",
+          "flex h-14 items-center border-b border-slate-200/50 px-3 gap-2",
           expanded ? "justify-between" : "justify-center"
         )}>
-        {expanded && (
-          <span className="text-sm font-semibold text-foreground tracking-tight">
-            Custodia
-          </span>
-        )}
+        <Link
+          href="/dashboard"
+          className={cn(
+            "flex items-center gap-2 min-w-0",
+            !expanded && "justify-center"
+          )}
+          aria-label="Custodia home"
+        >
+          <Image
+            src="/android-chrome-192x192.png"
+            alt=""
+            width={expanded ? 32 : 28}
+            height={expanded ? 32 : 28}
+            className="flex-shrink-0 rounded-lg"
+          />
+          {expanded && (
+            <span className="text-sm font-semibold text-foreground tracking-tight truncate">
+              Custodia
+            </span>
+          )}
+        </Link>
         <button
           type="button"
           onClick={() => onExpandedChange(!expanded)}
