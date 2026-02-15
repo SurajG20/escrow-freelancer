@@ -56,10 +56,21 @@ CREATE TABLE IF NOT EXISTS milestones (
     offchain_state TEXT NOT NULL DEFAULT 'awaiting_submission' CHECK (offchain_state IN ('awaiting_submission', 'submitted', 'approved', 'disputed', 'released')),
     onchain_state TEXT,
     rejection_reason TEXT,
+    submission_content TEXT,
+    submission_images TEXT[] DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(project_id, index)
 );
+
+DO $$ BEGIN
+  ALTER TABLE milestones ADD COLUMN submission_content TEXT;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+DO $$ BEGIN
+  ALTER TABLE milestones ADD COLUMN submission_images TEXT[] DEFAULT '{}';
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
 
 -- Disputes table
 CREATE TABLE IF NOT EXISTS disputes (
@@ -291,6 +302,18 @@ CREATE POLICY "Users can read reputation events" ON reputation_events
 
 CREATE POLICY "Users can create reputation events" ON reputation_events
     FOR INSERT WITH CHECK (true);
+
+-- ============================================================================
+-- STORAGE (milestone-submissions bucket)
+-- Create bucket "milestone-submissions" in Dashboard (Storage → New bucket, set Public if you want direct image links).
+-- ============================================================================
+CREATE POLICY "Allow insert milestone submission images"
+ON storage.objects FOR INSERT TO public
+WITH CHECK (bucket_id = 'milestone-submissions');
+
+CREATE POLICY "Allow select milestone submission images"
+ON storage.objects FOR SELECT TO public
+USING (bucket_id = 'milestone-submissions');
 
 -- ============================================================================
 -- NOTES

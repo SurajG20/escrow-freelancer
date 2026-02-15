@@ -42,6 +42,8 @@ export interface Milestone {
   offchain_state: MilestoneStatus;
   onchain_state?: string;
   rejection_reason?: string | null;
+  submission_content?: string | null;
+  submission_images?: string[] | null;
   created_at: string;
   updated_at: string;
 }

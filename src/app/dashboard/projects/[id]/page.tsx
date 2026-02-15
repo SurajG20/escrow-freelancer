@@ -57,6 +57,7 @@ import {
 import { MilestoneEditor } from "@/components/milestones/MilestoneEditor";
 import { MilestoneDisplay } from "@/components/milestones/MilestoneDisplay";
 import { MilestoneRejectionModal } from "@/components/milestones/MilestoneRejectionModal";
+import { SubmitWorkModal } from "@/components/milestones/SubmitWorkModal";
 import { ProjectRejectionModal } from "@/components/projects/ProjectRejectionModal";
 import { RaiseDisputeModal } from "@/components/disputes/RaiseDisputeModal";
 import {
@@ -105,6 +106,9 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     useState(false);
   const [showRaiseDisputeModal, setShowRaiseDisputeModal] = useState(false);
   const [milestoneRejectingId, setMilestoneRejectingId] = useState<
+    string | null
+  >(null);
+  const [milestoneSubmittingId, setMilestoneSubmittingId] = useState<
     string | null
   >(null);
   const [messageInput, setMessageInput] = useState("");
@@ -196,7 +200,64 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     }
   }, [project, isEditMode, address]);
 
-  const handleAction = async (action: string, milestoneId?: string) => {
+  const handleSubmitWorkConfirm = async (
+      content: string,
+      imageUrls: string[]
+    ) => {
+      const mid = milestoneSubmittingId;
+      if (!mid || !project || !walletClient) {
+        if (!walletClient) toast.error("Wallet not connected");
+        return;
+      }
+      const milestone = project.milestones?.find((m) => m.id === mid);
+      if (!milestone) return;
+      setLoadingStates((prev) => ({
+        ...prev,
+        submit: { ...prev.submit, [mid]: true },
+      }));
+      try {
+        toast.loading("Saving submission...", { id: `milestone-${mid}` });
+        if (content || imageUrls.length > 0) {
+          await updateMilestoneMutation.mutateAsync({
+            id: mid,
+            updates: {
+              submission_content: content || null,
+              submission_images: imageUrls.length > 0 ? imageUrls : null,
+            },
+          });
+        }
+        toast.loading("Submitting milestone on-chain...", {
+          id: `milestone-${mid}`,
+        });
+        await submitMilestoneOnChain(
+          project.onchain_address,
+          milestone.index,
+          walletClient
+        );
+        await updateMilestoneMutation.mutateAsync({
+          id: mid,
+          updates: { offchain_state: "submitted" },
+        });
+        toast.success("Milestone submitted!", {
+          id: `milestone-${mid}`,
+          description: "Waiting for client approval",
+        });
+        refetch();
+        setMilestoneSubmittingId(null);
+      } catch (e) {
+        toast.error(
+          e instanceof Error ? e.message : "Submission failed",
+          { id: `milestone-${mid}` }
+        );
+      } finally {
+        setLoadingStates((prev) => ({
+          ...prev,
+          submit: { ...prev.submit, [mid]: false },
+        }));
+      }
+    };
+
+    const handleAction = async (action: string, milestoneId?: string) => {
     if (!milestoneId || !project) return;
 
     if (action === "submit") {
@@ -212,7 +273,6 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
         });
         return;
       }
-
       if (
         !project.onchain_address ||
         project.onchain_address === "Pending" ||
@@ -226,48 +286,19 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
         });
         return;
       }
+      setMilestoneSubmittingId(milestoneId);
+      return;
     }
 
-    const actionKey = action === "submit" ? "submit" : "approve";
     setLoadingStates((prev) => ({
       ...prev,
-      [actionKey]: {
-        ...(prev[actionKey as keyof typeof prev] as Record<string, boolean>),
+      approve: {
+        ...prev.approve,
         [milestoneId]: true,
       },
     }));
     try {
-      if (action === "submit") {
-        if (!walletClient) {
-          throw new Error("Wallet not connected");
-        }
-
-        const milestone = project.milestones?.find((m) => m.id === milestoneId);
-
-        if (!milestone) {
-          throw new Error("Milestone not found");
-        }
-
-        toast.loading("Submitting milestone on-chain...", {
-          id: `milestone-${milestoneId}`,
-        });
-
-        await submitMilestoneOnChain(
-          project.onchain_address,
-          milestone.index,
-          walletClient
-        );
-
-        await updateMilestoneMutation.mutateAsync({
-          id: milestoneId,
-          updates: { offchain_state: "submitted" },
-        });
-
-        toast.success("Milestone submitted!", {
-          id: `milestone-${milestoneId}`,
-          description: "Waiting for client approval",
-        });
-      } else if (action === "approve") {
+      if (action === "approve") {
         if (
           !project.onchain_address ||
           project.onchain_address === "Pending" ||
@@ -372,8 +403,8 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     } finally {
       setLoadingStates((prev) => ({
         ...prev,
-        [actionKey]: {
-          ...(prev[actionKey as keyof typeof prev] as Record<string, boolean>),
+        approve: {
+          ...prev.approve,
           [milestoneId]: false,
         },
       }));
@@ -995,6 +1026,22 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
         onConfirm={handleCreateDispute}
         loading={loadingStates.createDispute}
       />
+      {milestoneSubmittingId && project?.milestones && (
+        <SubmitWorkModal
+          open={!!milestoneSubmittingId}
+          milestoneId={milestoneSubmittingId}
+          projectId={project.id}
+          milestoneTitle={
+            project.milestones.find((m) => m.id === milestoneSubmittingId)
+              ?.title ?? "Milestone"
+          }
+          onClose={() => setMilestoneSubmittingId(null)}
+          onConfirm={handleSubmitWorkConfirm}
+          loading={
+            loadingStates.submit[milestoneSubmittingId] ?? false
+          }
+        />
+      )}
       {/* Back Link */}
       <Link
         href={backToProjectsHref}
@@ -1581,6 +1628,41 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                                 <p className="text-xs text-red-700 mt-1">
                                   Update your work and resubmit when ready.
                                 </p>
+                              </div>
+                            )}
+                          {(milestone.offchain_state === "submitted" ||
+                            milestone.offchain_state === "approved" ||
+                            milestone.offchain_state === "released") &&
+                            (milestone.submission_content ||
+                              (milestone.submission_images &&
+                                milestone.submission_images.length > 0)) && (
+                              <div className="mt-2 rounded-lg bg-slate-50 border border-slate-200 p-2 text-sm">
+                                <p className="font-medium text-slate-700">
+                                  Submitted work
+                                </p>
+                                {milestone.submission_content && (
+                                  <p className="mt-1 text-slate-600 whitespace-pre-wrap break-words">
+                                    {milestone.submission_content}
+                                  </p>
+                                )}
+                                {milestone.submission_images &&
+                                  milestone.submission_images.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                      {milestone.submission_images.map(
+                                        (url, i) => (
+                                          <a
+                                            key={i}
+                                            href={url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-accent hover:underline"
+                                          >
+                                            Image {i + 1}
+                                          </a>
+                                        )
+                                      )}
+                                    </div>
+                                  )}
                               </div>
                             )}
                         </div>

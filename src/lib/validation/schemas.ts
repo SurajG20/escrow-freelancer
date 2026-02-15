@@ -35,6 +35,8 @@ export const milestoneSchema = z.object({
     .nullish()
     .transform((val) => val ?? undefined),
   rejection_reason: z.string().nullable().optional(),
+  submission_content: z.string().nullable().optional(),
+  submission_images: z.array(z.string()).nullable().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });

@@ -75,6 +75,8 @@ export async function updateMilestone(
     offchain_state: string;
     onchain_state: string;
     rejection_reason: string | null;
+    submission_content: string | null;
+    submission_images: string[] | null;
   }>,
 ): Promise<Milestone> {
   // First verify the milestone exists
