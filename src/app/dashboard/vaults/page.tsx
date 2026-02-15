@@ -196,13 +196,13 @@ export default function VaultsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-light tracking-tight">Escrow Vaults</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-light tracking-tight">Escrow Vaults</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Manage your locked funds and view transaction history.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         <Card className=" bg-gradient-to-br from-accent/10 to-white">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -273,20 +273,20 @@ export default function VaultsPage() {
                 <Link
                   key={project.id}
                   href={`/dashboard/projects/${project.id}`}
-                  className="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white/40 hover:bg-white/60 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-slate-200 bg-white/40 hover:bg-white/60 transition-colors"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full flex items-center justify-center bg-blue-100 text-blue-600">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div className="h-10 w-10 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 shrink-0">
                       <Lock className="h-5 w-5" />
                     </div>
-                    <div>
-                      <div className="font-medium">{project.title}</div>
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{project.title}</div>
                       <div className="text-xs text-muted-foreground">
                         {format(new Date(project.created_at), "MMM d, yyyy")}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <Badge
                       variant={getProjectStatusBadgeVariant(project.status)}
                       className="text-xs"
@@ -330,14 +330,14 @@ export default function VaultsPage() {
                 <Link
                   key={item.projectId}
                   href={`/dashboard/projects/${item.projectId}`}
-                  className="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white/40 hover:bg-white/60 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-slate-200 bg-white/40 hover:bg-white/60 transition-colors"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div className="h-10 w-10 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600 shrink-0">
                       <CheckCircle2 className="h-5 w-5" />
                     </div>
-                    <div>
-                      <div className="font-medium">{item.projectTitle}</div>
+                    <div className="min-w-0">
+                      <div className="font-medium truncate">{item.projectTitle}</div>
                       <div className="text-xs text-muted-foreground">
                         {format(new Date(item.completedAt), "MMM d, yyyy")} ·{" "}
                         {item.releasedCount} milestone
@@ -345,8 +345,8 @@ export default function VaultsPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-right">
-                    <span className="font-medium text-emerald-600">
+                  <div className="flex items-center gap-2 text-right shrink-0">
+                    <span className="font-medium text-emerald-600 text-sm sm:text-base">
                       {formatCurrencyDisplay(item.releasedNative, item.releasedUSDT)}
                     </span>
                     <ArrowRight className="h-4 w-4 text-muted-foreground" />

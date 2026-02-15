@@ -90,8 +90,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <h1 className="text-3xl font-light tracking-tight">Settings</h1>
+    <div className="max-w-3xl space-y-6 w-full min-w-0">
+      <h1 className="text-2xl sm:text-3xl font-light tracking-tight">Settings</h1>
 
       <Card className="">
         <CardHeader>
@@ -168,16 +168,16 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {address ? (
-            <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-white/40">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg border border-slate-200 bg-white/40">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
                   <Wallet className="h-4 w-4 text-purple-600" />
                 </div>
-                <div>
-                  <div className="font-mono text-sm">
+                <div className="min-w-0">
+                  <div className="font-mono text-sm break-all sm:break-normal">
                     {address.substring(0, 6)}...{address.substring(38)}
                   </div>
-                  <Badge variant="glass" className="text-[10px] ml-2">
+                  <Badge variant="glass" className="text-[10px] mt-1 sm:mt-0 sm:ml-2 inline-block">
                     Primary
                   </Badge>
                 </div>
@@ -199,10 +199,10 @@ export default function SettingsPage() {
           <CardDescription>Configure how you receive updates.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex gap-3">
-              <Mail className="h-5 w-5 text-muted-foreground" />
-              <div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex gap-3 min-w-0">
+              <Mail className="h-5 w-5 text-muted-foreground shrink-0" />
+              <div className="min-w-0">
                 <div className="text-sm font-medium">Email Notifications</div>
                 <div className="text-xs text-muted-foreground">
                   Receive daily digests and major alerts
@@ -234,10 +234,10 @@ export default function SettingsPage() {
               />
             </button>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex gap-3">
-              <Smartphone className="h-5 w-5 text-muted-foreground" />
-              <div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex gap-3 min-w-0">
+              <Smartphone className="h-5 w-5 text-muted-foreground shrink-0" />
+              <div className="min-w-0">
                 <div className="text-sm font-medium">Push Notifications</div>
                 <div className="text-xs text-muted-foreground">
                   Real-time updates on milestones

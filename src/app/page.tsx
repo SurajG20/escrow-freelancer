@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import {
@@ -17,7 +18,6 @@ import {
   Star,
   Zap,
   Award,
-  Play,
   Check,
 } from "lucide-react";
 import { GlassNav } from "@/components/landing/GlassNav";
@@ -33,12 +33,10 @@ export default function LandingPage() {
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12">
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-6 leading-tight">
-                Transform Your Business with Professional Solutions
+                Crypto Escrow for Freelancers & Clients
               </h1>
-              <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
-                Streamline operations, boost productivity, and achieve your
-                goals with our comprehensive platform designed for modern teams
-                and freelancers.
+              <p className="text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+                Lock funds on-chain. Work with confidence. Get paid only when work is approved—trustless escrow on BSC.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link href="/login">
@@ -46,102 +44,76 @@ export default function LandingPage() {
                     size="lg"
                     className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-shadow bg-teal-600 hover:bg-teal-700"
                   >
-                    Get Started Free
+                    Connect Wallet
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="text-lg px-8 py-6 group border-teal-600 text-teal-700 hover:bg-teal-50"
-                >
-                  <Play className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
-                  Watch Demo
-                </Button>
+                <Link href="#how-it-works">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="text-lg px-8 py-6 group border-teal-600 text-teal-700 hover:bg-teal-50"
+                  >
+                    How It Works
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
         </section>
 
         {/* Who Is This For */}
-        <section className="py-24 px-6 bg-white">
+        <section className="py-20 px-6 bg-white">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-16 text-center">
-              Who Is This For?
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12 text-center">
+              Built for Both Sides
             </h2>
-            <div className="grid md:grid-cols-2 gap-12">
-              <Card className="p-10 shadow-lg hover:shadow-xl transition-shadow border-2 border-gray-100">
+            <div className="grid md:grid-cols-2 gap-10">
+              <Card className="p-8 shadow-lg hover:shadow-xl transition-shadow border-2 border-gray-100">
                 <CardContent className="p-0">
-                  <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-3 mb-5">
                     <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
                       <Users className="w-6 h-6 text-teal-700" />
                     </div>
-                    <h3 className="text-3xl font-bold text-gray-900">
-                      For Businesses
-                    </h3>
+                    <h3 className="text-2xl font-bold text-gray-900">Clients</h3>
                   </div>
-                  <ul className="space-y-4 text-gray-700">
+                  <ul className="space-y-3 text-gray-700">
                     <li className="flex items-start gap-3">
-                      <Check className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-lg">
-                        Streamline project management and workflows
-                      </span>
+                      <Check className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
+                      <span>Lock crypto in escrow—only release when you approve</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <Check className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-lg">
-                        Secure payment processing with milestone tracking
-                      </span>
+                      <Check className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
+                      <span>Milestone-based projects with clear deliverables</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <Check className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-lg">
-                        Reduce administrative overhead by 60%
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-lg">
-                        Scale operations with confidence
-                      </span>
+                      <Check className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
+                      <span>Dispute flow if something goes wrong</span>
                     </li>
                   </ul>
                 </CardContent>
               </Card>
-              <Card className="p-10 shadow-lg hover:shadow-xl transition-shadow border-2 border-gray-100">
+              <Card className="p-8 shadow-lg hover:shadow-xl transition-shadow border-2 border-gray-100">
                 <CardContent className="p-0">
-                  <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-3 mb-5">
                     <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
                       <Award className="w-6 h-6 text-orange-600" />
                     </div>
-                    <h3 className="text-3xl font-bold text-gray-900">
-                      For Freelancers
-                    </h3>
+                    <h3 className="text-2xl font-bold text-gray-900">Freelancers</h3>
                   </div>
-                  <ul className="space-y-4 text-gray-700">
+                  <ul className="space-y-3 text-gray-700">
                     <li className="flex items-start gap-3">
-                      <Check className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-lg">
-                        Get paid securely and on time
-                      </span>
+                      <Check className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                      <span>Funds are locked before you start—no chasing payments</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <Check className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-lg">
-                        Professional project proposals and contracts
-                      </span>
+                      <Check className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                      <span>Submit work per milestone; get paid on approval</span>
                     </li>
                     <li className="flex items-start gap-3">
-                      <Check className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-lg">
-                        Build credibility with verified reviews
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-lg">
-                        Focus on work, not payment chasing
-                      </span>
+                      <Check className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                      <span>BNB & USDT on BSC—simple, transparent</span>
                     </li>
                   </ul>
                 </CardContent>
@@ -153,166 +125,120 @@ export default function LandingPage() {
         {/* How It Works */}
         <section
           id="how-it-works"
-          className="py-24 px-6 bg-gradient-to-b from-gray-50 to-white"
+          className="py-20 px-6 bg-gradient-to-b from-gray-50 to-white"
         >
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">
               How It Works
             </h2>
-            <p className="text-xl text-gray-600 text-center mb-16 max-w-2xl mx-auto">
-              Get started in four simple steps and experience seamless project
-              management
+            <p className="text-lg text-gray-600 text-center mb-12 max-w-xl mx-auto">
+              Four steps from agreement to payment—all on-chain.
             </p>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
-              <div className="hidden lg:block absolute top-20 left-0 right-0 h-1 bg-gradient-to-r from-teal-200 via-orange-200 to-teal-200 -z-10"></div>
+              <div className="hidden lg:block absolute top-20 left-0 right-0 h-1 bg-gradient-to-r from-teal-200 via-orange-200 to-teal-200 -z-10" />
 
               <div className="text-center relative">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal-500 to-teal-600 text-white flex items-center justify-center font-bold text-2xl mx-auto mb-6 shadow-lg">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-teal-600 text-white flex items-center justify-center font-bold text-xl mx-auto mb-4 shadow-lg">
                   1
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Create Your Project
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Set up milestones, deliverables, and timelines in minutes
-                </p>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Create & Agree</h3>
+                <p className="text-gray-600 text-sm">Set milestones and amounts. Freelancer approves terms.</p>
               </div>
 
               <div className="text-center relative">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-600 text-white flex items-center justify-center font-bold text-2xl mx-auto mb-6 shadow-lg">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-600 to-cyan-600 text-white flex items-center justify-center font-bold text-xl mx-auto mb-4 shadow-lg">
                   2
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Secure Agreement
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Both parties approve terms with digital signatures
-                </p>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Deposit</h3>
+                <p className="text-gray-600 text-sm">Client deploys escrow and locks BNB or USDT on BSC.</p>
               </div>
 
               <div className="text-center relative">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center font-bold text-2xl mx-auto mb-6 shadow-lg">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center font-bold text-xl mx-auto mb-4 shadow-lg">
                   3
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Protected Payments
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Funds held securely until milestone completion
-                </p>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Submit Work</h3>
+                <p className="text-gray-600 text-sm">Freelancer delivers per milestone; client reviews.</p>
               </div>
 
               <div className="text-center relative">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-teal-500 to-orange-500 text-white flex items-center justify-center font-bold text-2xl mx-auto mb-6 shadow-lg">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-orange-500 text-white flex items-center justify-center font-bold text-xl mx-auto mb-4 shadow-lg">
                   4
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  Release & Review
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Approve work, release payment, build reputation
-                </p>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">Approve & Release</h3>
+                <p className="text-gray-600 text-sm">Client approves; funds release from escrow to freelancer.</p>
               </div>
             </div>
           </div>
         </section>
 
         {/* Key Features */}
-        <section id="features" className="py-24 px-6 bg-white">
+        <section id="features" className="py-20 px-6 bg-white">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 text-center">
-              Key Features
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">
+              Why Custodia
             </h2>
-            <p className="text-xl text-gray-600 text-center mb-16 max-w-2xl mx-auto">
-              Everything you need to manage projects and payments with
-              confidence
+            <p className="text-lg text-gray-600 text-center mb-12 max-w-xl mx-auto">
+              Trustless escrow and clear workflows—no middleman holds your funds.
             </p>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Card className="p-8 hover:shadow-lg transition-shadow border border-gray-200">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="p-6 hover:shadow-lg transition-shadow border border-gray-200">
                 <CardContent className="p-0">
-                  <div className="w-14 h-14 rounded-xl bg-teal-100 flex items-center justify-center mb-4">
-                    <Lock className="w-7 h-7 text-teal-700" />
+                  <div className="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center mb-3">
+                    <Lock className="w-6 h-6 text-teal-700" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
-                    Secure Escrow Protection
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Military-grade encryption for all transactions with
-                    blockchain security
-                  </p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">On-Chain Escrow</h3>
+                  <p className="text-gray-600 text-sm">Smart contracts hold funds until you approve release. No custody risk.</p>
                 </CardContent>
               </Card>
 
-              <Card className="p-8 hover:shadow-lg transition-shadow border border-gray-200">
+              <Card className="p-6 hover:shadow-lg transition-shadow border border-gray-200">
                 <CardContent className="p-0">
-                  <div className="w-14 h-14 rounded-xl bg-orange-100 flex items-center justify-center mb-4">
-                    <BarChart3 className="w-7 h-7 text-orange-600" />
+                  <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center mb-3">
+                    <BarChart3 className="w-6 h-6 text-orange-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
-                    Milestone Tracking
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Visual progress monitoring and detailed reporting for every
-                    project
-                  </p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Milestone Payments</h3>
+                  <p className="text-gray-600 text-sm">Break work into milestones. Pay per deliverable, not upfront.</p>
                 </CardContent>
               </Card>
 
-              <Card className="p-8 hover:shadow-lg transition-shadow border border-gray-200">
+              <Card className="p-6 hover:shadow-lg transition-shadow border border-gray-200">
                 <CardContent className="p-0">
-                  <div className="w-14 h-14 rounded-xl bg-cyan-100 flex items-center justify-center mb-4">
-                    <Users className="w-7 h-7 text-cyan-700" />
+                  <div className="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center mb-3">
+                    <Users className="w-6 h-6 text-cyan-700" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
-                    Mutual Approval System
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Fair process protecting both parties with transparent
-                    workflows
-                  </p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Client + Freelancer Approval</h3>
+                  <p className="text-gray-600 text-sm">Both parties agree to terms; only client can release funds.</p>
                 </CardContent>
               </Card>
 
-              <Card className="p-8 hover:shadow-lg transition-shadow border border-gray-200">
+              <Card className="p-6 hover:shadow-lg transition-shadow border border-gray-200">
                 <CardContent className="p-0">
-                  <div className="w-14 h-14 rounded-xl bg-teal-100 flex items-center justify-center mb-4">
-                    <Globe className="w-7 h-7 text-teal-700" />
+                  <div className="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center mb-3">
+                    <Globe className="w-6 h-6 text-teal-700" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
-                    Global Payments
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Support for 150+ currencies and crypto-native transactions
-                  </p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">BNB & USDT on BSC</h3>
+                  <p className="text-gray-600 text-sm">Use native BNB or USDT. Deploy and pay on Binance Smart Chain.</p>
                 </CardContent>
               </Card>
 
-              <Card className="p-8 hover:shadow-lg transition-shadow border border-gray-200">
+              <Card className="p-6 hover:shadow-lg transition-shadow border border-gray-200">
                 <CardContent className="p-0">
-                  <div className="w-14 h-14 rounded-xl bg-orange-100 flex items-center justify-center mb-4">
-                    <Smartphone className="w-7 h-7 text-orange-600" />
+                  <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center mb-3">
+                    <Shield className="w-6 h-6 text-orange-600" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
-                    Mobile-First Design
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Manage projects anywhere with our responsive mobile
-                    interface
-                  </p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Dispute Safety</h3>
+                  <p className="text-gray-600 text-sm">Raise a dispute to lock funds; resolution path when needed.</p>
                 </CardContent>
               </Card>
 
-              <Card className="p-8 hover:shadow-lg transition-shadow border border-gray-200">
+              <Card className="p-6 hover:shadow-lg transition-shadow border border-gray-200">
                 <CardContent className="p-0">
-                  <div className="w-14 h-14 rounded-xl bg-cyan-100 flex items-center justify-center mb-4">
-                    <TrendingUp className="w-7 h-7 text-cyan-700" />
+                  <div className="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center mb-3">
+                    <Smartphone className="w-6 h-6 text-cyan-700" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">
-                    Analytics Dashboard
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Real-time insights and comprehensive reporting tools
-                  </p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">Simple Dashboard</h3>
+                  <p className="text-gray-600 text-sm">Create projects, track milestones, and message—all in one place.</p>
                 </CardContent>
               </Card>
             </div>
@@ -320,77 +246,59 @@ export default function LandingPage() {
         </section>
 
         {/* Benefits Section */}
-        <section className="py-24 px-6 bg-gradient-to-b from-gray-50 to-white">
+        <section className="py-20 px-6 bg-gradient-to-b from-gray-50 to-white">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-16 text-center">
-              Why Choose Our Platform
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12 text-center">
+              Trustless by Design
             </h2>
-            <div className="grid md:grid-cols-3 gap-10">
+            <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <Clock className="w-8 h-8 text-white" />
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <Clock className="w-7 h-7 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  Save Time
-                </h3>
-                <ul className="space-y-3 text-gray-600">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">No Payment Chase</h3>
+                <ul className="space-y-2 text-gray-600 text-sm">
                   <li className="flex items-start gap-2 justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
-                    <span>Automated invoicing and reminders</span>
+                    <CheckCircle2 className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" />
+                    <span>Funds locked before work starts</span>
                   </li>
                   <li className="flex items-start gap-2 justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
-                    <span>Template-based contracts</span>
-                  </li>
-                  <li className="flex items-start gap-2 justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
-                    <span>One-click milestone approvals</span>
+                    <CheckCircle2 className="w-4 h-4 text-teal-600 flex-shrink-0 mt-0.5" />
+                    <span>One-click approve & release</span>
                   </li>
                 </ul>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <Shield className="w-8 h-8 text-white" />
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <Shield className="w-7 h-7 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  Reduce Risk
-                </h3>
-                <ul className="space-y-3 text-gray-600">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">You Stay in Control</h3>
+                <ul className="space-y-2 text-gray-600 text-sm">
                   <li className="flex items-start gap-2 justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-cyan-600 flex-shrink-0 mt-0.5" />
-                    <span>Payment disputes decreased by 95%</span>
+                    <CheckCircle2 className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
+                    <span>Smart contract holds funds—not us</span>
                   </li>
                   <li className="flex items-start gap-2 justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-cyan-600 flex-shrink-0 mt-0.5" />
-                    <span>Verified user community</span>
-                  </li>
-                  <li className="flex items-start gap-2 justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-cyan-600 flex-shrink-0 mt-0.5" />
-                    <span>Transparent communication logs</span>
+                    <CheckCircle2 className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
+                    <span>Dispute flow if things go wrong</span>
                   </li>
                 </ul>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <TrendingUp className="w-8 h-8 text-white" />
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <TrendingUp className="w-7 h-7 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  Grow Faster
-                </h3>
-                <ul className="space-y-3 text-gray-600">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Clear & Transparent</h3>
+                <ul className="space-y-2 text-gray-600 text-sm">
                   <li className="flex items-start gap-2 justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                    <span>Average 40% increase in completion</span>
+                    <CheckCircle2 className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                    <span>On-chain history; no hidden fees</span>
                   </li>
                   <li className="flex items-start gap-2 justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                    <span>Built-in reputation system</span>
-                  </li>
-                  <li className="flex items-start gap-2 justify-center">
-                    <CheckCircle2 className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                    <span>Scale from 1 to 100+ projects</span>
+                    <CheckCircle2 className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                    <span>Wallet connect, no signup wall</span>
                   </li>
                 </ul>
               </div>
@@ -399,98 +307,70 @@ export default function LandingPage() {
         </section>
 
         {/* Social Proof Section */}
-        <section className="py-24 px-6 bg-white">
+        <section className="py-20 px-6 bg-white">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 text-center">
-              Trusted by Professionals Worldwide
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">
+              What People Say
             </h2>
-            <p className="text-xl text-gray-600 text-center mb-16">
-              Real feedback from real users
+            <p className="text-lg text-gray-600 text-center mb-12">
+              Escrow that actually protects both sides.
             </p>
-            <div className="grid md:grid-cols-3 gap-8">
-              <Card className="p-8 shadow-md border border-gray-200">
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="p-6 shadow-md border border-gray-200">
                 <CardContent className="p-0">
-                  <div className="flex gap-1 mb-4">
+                  <div className="flex gap-1 mb-3">
                     {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="w-5 h-5 fill-amber-400 text-amber-400"
-                      />
+                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <p className="text-gray-700 mb-6 leading-relaxed">
-                    &quot;This platform has completely transformed how we manage
-                    freelance projects. Payment disputes are now a thing of the
-                    past, and our project completion rate increased
-                    significantly.&quot;
+                  <p className="text-gray-700 text-sm mb-4 leading-relaxed">
+                    &quot;We use Custodia for all our freelance dev work. Funds in escrow = no more payment headaches.&quot;
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center font-bold text-teal-700">
-                      S
-                    </div>
+                    <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center font-bold text-teal-700 text-sm">S</div>
                     <div>
-                      <p className="font-semibold text-gray-900">
-                        Business Owner
-                      </p>
-                      <p className="text-sm text-gray-600">Design Agency</p>
+                      <p className="font-semibold text-gray-900 text-sm">Client</p>
+                      <p className="text-xs text-gray-600">Startup</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="p-8 shadow-md border border-gray-200">
+              <Card className="p-6 shadow-md border border-gray-200">
                 <CardContent className="p-0">
-                  <div className="flex gap-1 mb-4">
+                  <div className="flex gap-1 mb-3">
                     {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="w-5 h-5 fill-amber-400 text-amber-400"
-                      />
+                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <p className="text-gray-700 mb-6 leading-relaxed">
-                    &quot;As a freelancer, getting paid on time was always a
-                    struggle. Now I have peace of mind knowing funds are secured
-                    before I start work. Game changer!&quot;
+                  <p className="text-gray-700 text-sm mb-4 leading-relaxed">
+                    &quot;Knowing the client&apos;s crypto is locked before I start—huge. I just focus on delivery.&quot;
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center font-bold text-orange-700">
-                      J
-                    </div>
+                    <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center font-bold text-orange-700 text-sm">J</div>
                     <div>
-                      <p className="font-semibold text-gray-900">
-                        Freelance Developer
-                      </p>
-                      <p className="text-sm text-gray-600">Full-Stack</p>
+                      <p className="font-semibold text-gray-900 text-sm">Freelancer</p>
+                      <p className="text-xs text-gray-600">Developer</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="p-8 shadow-md border border-gray-200">
+              <Card className="p-6 shadow-md border border-gray-200">
                 <CardContent className="p-0">
-                  <div className="flex gap-1 mb-4">
+                  <div className="flex gap-1 mb-3">
                     {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="w-5 h-5 fill-amber-400 text-amber-400"
-                      />
+                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <p className="text-gray-700 mb-6 leading-relaxed">
-                    &quot;The milestone tracking and automated payments have saved us
-                    countless hours. We&apos;ve scaled our operations significantly
-                    without adding administrative overhead.&quot;
+                  <p className="text-gray-700 text-sm mb-4 leading-relaxed">
+                    &quot;Milestones + on-chain release = clear audit trail. Exactly what we needed.&quot;
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-cyan-100 flex items-center justify-center font-bold text-cyan-700">
-                      E
-                    </div>
+                    <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center font-bold text-cyan-700 text-sm">E</div>
                     <div>
-                      <p className="font-semibold text-gray-900">
-                        Operations Lead
-                      </p>
-                      <p className="text-sm text-gray-600">Tech Company</p>
+                      <p className="font-semibold text-gray-900 text-sm">Client</p>
+                      <p className="text-xs text-gray-600">DAO</p>
                     </div>
                   </div>
                 </CardContent>
@@ -500,83 +380,67 @@ export default function LandingPage() {
         </section>
 
         {/* Trust & Security */}
-        <section className="py-24 px-6 bg-gradient-to-b from-gray-50 to-white">
+        <section className="py-20 px-6 bg-gradient-to-b from-gray-50 to-white">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-16 text-center">
-              Built on Trust and Security
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12 text-center">
+              Secure & Transparent
             </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-8 h-8 text-teal-700" />
+                <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center mx-auto mb-3">
+                  <Shield className="w-7 h-7 text-teal-700" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Secure by Design
-                </h3>
-                <p className="text-gray-600">
-                  End-to-end encryption for all data
-                </p>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">Smart Contracts</h3>
+                <p className="text-gray-600 text-sm">Escrow logic on-chain; no one can move funds without approval.</p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-cyan-100 flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle2 className="w-8 h-8 text-cyan-700" />
+                <div className="w-14 h-14 rounded-full bg-cyan-100 flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 className="w-7 h-7 text-cyan-700" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Fully Transparent
-                </h3>
-                <p className="text-gray-600">
-                  Blockchain-verified transactions
-                </p>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">Verifiable</h3>
+                <p className="text-gray-600 text-sm">Every deposit and release is on BSC; check the explorer.</p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-orange-600" />
+                <div className="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-3">
+                  <Users className="w-7 h-7 text-orange-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Community Support
-                </h3>
-                <p className="text-gray-600">
-                  Active community and documentation
-                </p>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">Wallet-Based</h3>
+                <p className="text-gray-600 text-sm">Connect wallet, sign in. No email signup required.</p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center mx-auto mb-4">
-                  <Zap className="w-8 h-8 text-teal-700" />
+                <div className="w-14 h-14 rounded-full bg-teal-100 flex items-center justify-center mx-auto mb-3">
+                  <Zap className="w-7 h-7 text-teal-700" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Fast & Reliable
-                </h3>
-                <p className="text-gray-600">Optimized for performance</p>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">BSC-Powered</h3>
+                <p className="text-gray-600 text-sm">Low fees, fast finality. Mainnet and testnet supported.</p>
               </div>
             </div>
           </div>
         </section>
 
         {/* Final CTA */}
-        <section className="py-32 px-6 bg-gradient-to-br from-teal-600 to-cyan-700 text-white">
-          <div className="container mx-auto max-w-4xl text-center">
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Ready to Transform How You Work?
+        <section className="py-24 px-6 bg-gradient-to-br from-teal-600 to-cyan-700 text-white">
+          <div className="container mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight">
+              Lock Funds. Ship Work. Get Paid.
             </h2>
-            <p className="text-xl md:text-2xl mb-12 opacity-90">
-              Start managing projects with confidence today.
+            <p className="text-lg md:text-xl mb-10 opacity-90">
+              Connect your wallet and create your first escrow in minutes.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              <Link href="/login">
-                <Button
-                  size="lg"
-                  className="text-lg px-10 py-7 bg-white text-teal-700 hover:bg-gray-100 shadow-xl"
-                >
-                  Get Started Now
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-            </div>
-            <p className="text-sm opacity-75">
-              No credit card required • Start in minutes
+            <Link href="/login">
+              <Button
+                size="lg"
+                className="text-lg px-10 py-6 bg-white text-teal-700 hover:bg-gray-100 shadow-xl"
+              >
+                Connect Wallet
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <p className="text-sm opacity-75 mt-6">
+              No signup form • BSC only • 0% platform fee
             </p>
           </div>
         </section>
@@ -586,10 +450,15 @@ export default function LandingPage() {
           <div className="container mx-auto max-w-6xl">
             <div className="grid md:grid-cols-4 gap-12 mb-12">
               <div>
-                <h3 className="text-white font-bold text-xl mb-4">Custodia</h3>
+                <Image
+                  src="/logo.png"
+                  alt="Custodia"
+                  width={140}
+                  height={40}
+                  className="h-8 w-auto object-contain opacity-95"
+                />
                 <p className="text-sm mb-6 leading-relaxed">
-                  Transform your business with secure, professional project
-                  management and payment solutions.
+                  Crypto escrow for freelancers and clients. Lock funds on BSC; release on approval.
                 </p>
                 <div className="flex gap-4">
                   <Link

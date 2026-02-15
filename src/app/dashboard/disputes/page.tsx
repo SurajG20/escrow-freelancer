@@ -88,7 +88,7 @@ export default function DisputesPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-light tracking-tight text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-light tracking-tight text-foreground">
             Dispute Resolution
           </h1>
           <p className="text-muted-foreground mt-2">

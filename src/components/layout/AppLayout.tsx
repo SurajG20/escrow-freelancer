@@ -10,18 +10,21 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen w-full bg-slate-50 text-slate-900">
       <Sidebar
         expanded={sidebarExpanded}
         onExpandedChange={setSidebarExpanded}
+        mobileOpen={mobileMenuOpen}
+        onMobileOpenChange={setMobileMenuOpen}
       />
       <div
-        className={`flex flex-1 flex-col transition-all duration-200 ${sidebarExpanded ? "pl-64" : "pl-16"}`}
+        className={`flex flex-1 flex-col transition-all duration-200 min-w-0 ${sidebarExpanded ? "lg:pl-64" : "lg:pl-16"}`}
       >
-        <TopBar />
-        <main className="flex-1 p-8">
+        <TopBar onMenuClick={() => setMobileMenuOpen(true)} />
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="mx-auto max-w-7xl">{children}</div>
         </main>
       </div>

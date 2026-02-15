@@ -24,29 +24,29 @@ export function WalletButton() {
 
   if (!isConnected) {
     return (
-      <Button onClick={handleOpen} variant="default">
-        Connect Wallet
+      <Button onClick={handleOpen} variant="default" size="sm" className="shrink-0 text-xs sm:text-sm">
+        Connect
       </Button>
     );
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0 justify-end">
       {!isSupportedChain && (
-        <div className="px-3 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-md">
-          Unsupported Chain
-        </div>
+        <span className="hidden sm:inline px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-md shrink-0">
+          Wrong chain
+        </span>
       )}
       {chainConfig && (
-        <div className="px-3 py-1 text-xs bg-blue-100 text-blue-800 rounded-md">
+        <span className="hidden sm:inline px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-md shrink-0 truncate max-w-[120px]">
           {chainConfig.name}
-        </div>
+        </span>
       )}
-      <Button onClick={handleOpen} variant="outline">
+      <Button onClick={handleOpen} variant="outline" size="sm" className="shrink-0 text-xs sm:text-sm min-w-0">
         {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "Connect"}
       </Button>
       {isAuthenticated && (
-        <Button onClick={handleSignOut} variant="ghost" size="sm">
+        <Button onClick={handleSignOut} variant="ghost" size="sm" className="shrink-0 text-xs hidden sm:inline-flex">
           Sign Out
         </Button>
       )}

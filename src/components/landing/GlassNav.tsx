@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
@@ -14,8 +15,16 @@ export function GlassNav() {
         <div className="container mx-auto h-full flex items-center justify-between px-6">
           <Link
             href="/"
-            className="flex items-center gap-3 font-bold text-xl tracking-wide text-gray-900"
+            className="flex items-center gap-2.5 font-bold text-xl tracking-wide text-gray-900"
+            aria-label="Custodia home"
           >
+            <Image
+              src="/icon.png"
+              alt=""
+              width={42}
+              height={42}
+              className="rounded-lg flex-shrink-0"
+            />
             <span className="tracking-wide">Custodia</span>
           </Link>
 

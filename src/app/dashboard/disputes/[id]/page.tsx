@@ -164,7 +164,7 @@ export default function DisputeDetailPage({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8 min-w-0">
       <Link
         href="/dashboard/disputes"
         className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
@@ -174,7 +174,7 @@ export default function DisputeDetailPage({
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="text-3xl font-light tracking-tight text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-light tracking-tight text-foreground truncate min-w-0">
             Dispute {dispute.id.slice(0, 8)}…
           </h1>
           <Badge variant={dispute.status === "resolved" ? "success" : "destructive"}>

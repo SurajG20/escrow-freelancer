@@ -42,26 +42,26 @@ export default function ProjectsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-light tracking-tight">Projects</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-light tracking-tight">Projects</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage your active contracts and bids.
           </p>
         </div>
-        <Link href="/dashboard/projects/new">
-          <Button className="gap-2 shadow-lg shadow-accent/20">
+        <Link href="/dashboard/projects/new" className="w-full sm:w-auto">
+          <Button className="gap-2 shadow-lg shadow-accent/20 w-full sm:w-auto">
             <Plus className="h-4 w-4" /> New Project
           </Button>
         </Link>
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-between bg-white/30 p-2 rounded-xl border border-slate-200">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-white/30 p-3 rounded-xl border border-slate-200">
+        <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
+          <div className="relative flex-1 sm:flex-none sm:w-64 min-w-0">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground shrink-0" />
             <Input
               placeholder="Search projects..."
-              className="pl-9 bg-white/50 border-transparent shadow-none"
+              className="pl-9 bg-white/50 border-transparent shadow-none w-full min-w-0"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -69,18 +69,18 @@ export default function ProjectsPage() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-muted-foreground hover:bg-white/50"
+            className="text-muted-foreground hover:bg-white/50 shrink-0"
           >
             <Filter className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="flex bg-muted/20 p-1 rounded-lg border border-slate-200/50">
+        <div className="flex bg-muted/20 p-1 rounded-lg border border-slate-200/50 w-full sm:w-auto justify-center sm:justify-end">
           <Button
             variant="ghost"
             size="sm"
             className={cn(
-              "h-8 px-3",
+              "h-8 px-3 flex-1 sm:flex-none",
               view === "list"
                 ? "bg-white shadow-sm text-foreground"
                 : "text-muted-foreground",
@@ -93,7 +93,7 @@ export default function ProjectsPage() {
             variant="ghost"
             size="sm"
             className={cn(
-              "h-8 px-3",
+              "h-8 px-3 flex-1 sm:flex-none",
               view === "board"
                 ? "bg-white shadow-sm text-foreground"
                 : "text-muted-foreground",
@@ -107,66 +107,48 @@ export default function ProjectsPage() {
 
       {/* Content */}
       {view === "list" ? (
-        <div className="rounded-xl border border-slate-200 bg-white/50 overflow-hidden">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-muted/30 text-muted-foreground font-medium">
-              <tr>
-                <th className="px-6 py-4 font-normal">Project Name</th>
-                <th className="px-6 py-4 font-normal">Client</th>
-                <th className="px-6 py-4 font-normal">Locked Value</th>
-                <th className="px-6 py-4 font-normal">Status</th>
-                <th className="px-6 py-4 font-normal text-right">Deadline</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200/50">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center">
-                    <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Loading projects...
-                    </div>
-                  </td>
-                </tr>
-              ) : projects.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-6 py-8 text-center text-muted-foreground"
+        <>
+          <div className="md:hidden space-y-3">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : projects.filter(
+                (p) =>
+                  !searchQuery ||
+                  p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  (p.description?.toLowerCase() ?? "").includes(searchQuery.toLowerCase()),
+              ).length === 0 ? (
+              <div className="rounded-xl border border-slate-200 bg-white/50 p-6 text-center text-muted-foreground text-sm">
+                No projects found.{" "}
+                <Link href="/dashboard/projects/new" className="text-accent hover:underline">
+                  Create your first project
+                </Link>
+              </div>
+            ) : (
+              projects
+                .filter(
+                  (p) =>
+                    !searchQuery ||
+                    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    (p.description?.toLowerCase() ?? "").includes(searchQuery.toLowerCase()),
+                )
+                .map((project) => (
+                  <Link
+                    key={project.id}
+                    href={`/dashboard/projects/${project.id}?fromView=${view}`}
+                    className="block"
                   >
-                    No projects found.{" "}
-                    <Link
-                      href="/dashboard/projects/new"
-                      className="text-accent hover:underline"
-                    >
-                      Create your first project
-                    </Link>
-                  </td>
-                </tr>
-              ) : (
-                projects
-                  .filter(
-                    (project) =>
-                      !searchQuery ||
-                      project.title
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                      (project.description?.toLowerCase() ?? "").includes(
-                        searchQuery.toLowerCase(),
-                      ),
-                  )
-                  .map((project) => (
-                    <tr
-                      key={project.id}
-                      className="hover:bg-white/40 transition-colors group cursor-pointer"
-                      onClick={() =>
-                        (window.location.href = `/dashboard/projects/${project.id}?fromView=${view}`)
-                      }
-                    >
-                      <td className="px-6 py-4 font-medium text-foreground">
-                        {project.title}
-                      </td>
-                      <td className="px-6 py-4 text-muted-foreground text-sm">
+                    <Card className="p-4 hover:border-accent/50 transition-all">
+                      <div className="flex justify-between items-start gap-2 mb-2">
+                        <h3 className="font-semibold text-foreground truncate flex-1 min-w-0">
+                          {project.title}
+                        </h3>
+                        <Badge variant={getProjectStatusBadgeVariant(project.status)} className="text-xs shrink-0">
+                          {formatProjectStatus(project.status)}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">
                         {project.freelancer_wallet
                           ? address?.toLowerCase() === project.freelancer_wallet.toLowerCase()
                             ? "You"
@@ -175,26 +157,107 @@ export default function ProjectsPage() {
                                 project.freelancer_wallet,
                               )
                           : "Not assigned"}
-                      </td>
-                      <td className="px-6 py-4 font-mono text-sm">
-                        {project.onchain_address ? "Deployed" : "Draft"}
-                      </td>
-                      <td className="px-6 py-4">
-                        <Badge
-                          variant={getProjectStatusBadgeVariant(project.status)}
-                        >
-                          {formatProjectStatus(project.status)}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 text-right text-muted-foreground text-sm">
-                        {format(new Date(project.created_at), "MMM d, yyyy")}
+                      </p>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span className="font-mono">{project.onchain_address ? "Deployed" : "Draft"}</span>
+                        <span>{format(new Date(project.created_at), "MMM d, yyyy")}</span>
+                      </div>
+                    </Card>
+                  </Link>
+                ))
+            )}
+          </div>
+          <div className="hidden md:block rounded-xl border border-slate-200 bg-white/50 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left min-w-[600px]">
+                <thead className="bg-muted/30 text-muted-foreground font-medium">
+                  <tr>
+                    <th className="px-4 lg:px-6 py-3 font-normal">Project Name</th>
+                    <th className="px-4 lg:px-6 py-3 font-normal">Client</th>
+                    <th className="px-4 lg:px-6 py-3 font-normal">Locked Value</th>
+                    <th className="px-4 lg:px-6 py-3 font-normal">Status</th>
+                    <th className="px-4 lg:px-6 py-3 font-normal text-right">Deadline</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200/50">
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-8 text-center">
+                        <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Loading projects...
+                        </div>
                       </td>
                     </tr>
-                  ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                  ) : projects.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="px-6 py-8 text-center text-muted-foreground"
+                      >
+                        No projects found.{" "}
+                        <Link
+                          href="/dashboard/projects/new"
+                          className="text-accent hover:underline"
+                        >
+                          Create your first project
+                        </Link>
+                      </td>
+                    </tr>
+                  ) : (
+                    projects
+                      .filter(
+                        (project) =>
+                          !searchQuery ||
+                          project.title
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase()) ||
+                          (project.description?.toLowerCase() ?? "").includes(
+                            searchQuery.toLowerCase(),
+                          ),
+                      )
+                      .map((project) => (
+                        <tr
+                          key={project.id}
+                          className="hover:bg-white/40 transition-colors group cursor-pointer"
+                          onClick={() =>
+                            (window.location.href = `/dashboard/projects/${project.id}?fromView=${view}`)
+                          }
+                        >
+                          <td className="px-4 lg:px-6 py-3 font-medium text-foreground">
+                            {project.title}
+                          </td>
+                          <td className="px-4 lg:px-6 py-3 text-muted-foreground text-sm">
+                            {project.freelancer_wallet
+                              ? address?.toLowerCase() === project.freelancer_wallet.toLowerCase()
+                                ? "You"
+                                : displayNameForUser(
+                                    usersByWallet.get(project.freelancer_wallet.toLowerCase()),
+                                    project.freelancer_wallet,
+                                  )
+                              : "Not assigned"}
+                          </td>
+                          <td className="px-4 lg:px-6 py-3 font-mono text-sm">
+                            {project.onchain_address ? "Deployed" : "Draft"}
+                          </td>
+                          <td className="px-4 lg:px-6 py-3">
+                            <Badge
+                              variant={getProjectStatusBadgeVariant(project.status)}
+                            >
+                              {formatProjectStatus(project.status)}
+                            </Badge>
+                          </td>
+                          <td className="px-4 lg:px-6 py-3 text-right text-muted-foreground text-sm">
+                            {format(new Date(project.created_at), "MMM d, yyyy")}
+                          </td>
+                        </tr>
+                      ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {isLoading ? (

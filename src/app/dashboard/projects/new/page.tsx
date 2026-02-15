@@ -251,7 +251,7 @@ export default function NewProjectPage() {
       </div>
 
       {/* Stepper Indicator */}
-      <div className="flex items-center justify-between px-8">
+      <div className="flex items-center justify-between px-2 sm:px-8">
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex flex-col items-center gap-2 z-10">
             <div

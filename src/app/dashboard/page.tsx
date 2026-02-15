@@ -77,19 +77,19 @@ export default function DashboardPage() {
   }, [projects]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-base font-semibold text-slate-900 mb-1">
             Dashboard
           </h1>
-          <p className="text-sm text-slate-500 flex items-center gap-1">
+          <p className="text-sm text-slate-500 flex items-center gap-1 flex-wrap">
             Welcome back,
             {address && <WalletAddress address={address} />}
           </p>
         </div>
-        <Badge variant="outline" className="text-xs border-slate-200/50">
+        <Badge variant="outline" className="text-xs border-slate-200/50 w-fit">
           {address && dataUpdatedAt
             ? `Updated ${formatTimeAgo(dataUpdatedAt)}`
             : "Live"}
@@ -97,12 +97,12 @@ export default function DashboardPage() {
       </div>
 
       {/* Hero Metrics */}
-      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {isLoading || statsLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
             <Card
               key={i}
-              className="border border-slate-200/50 rounded-xl shadow-sm p-8"
+              className="border border-slate-200/50 rounded-xl shadow-sm p-4 sm:p-6 lg:p-8"
             >
               <Skeleton className="h-4 w-24 mb-4" />
               <Skeleton className="h-8 w-32 mb-2" />
@@ -111,8 +111,8 @@ export default function DashboardPage() {
           ))
         ) : (
           <>
-            <Card className="border border-slate-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-8">
-              <CardHeader className="p-0 pb-4">
+            <Card className="border border-slate-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-4 sm:p-6 lg:p-8">
+              <CardHeader className="p-0 pb-3 sm:pb-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm text-slate-500 font-semibold">
                     Total Locked
@@ -128,8 +128,8 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="border border-slate-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-8">
-              <CardHeader className="p-0 pb-4">
+            <Card className="border border-slate-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-4 sm:p-6 lg:p-8">
+              <CardHeader className="p-0 pb-3 sm:pb-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm text-slate-500 font-semibold">
                     Active Projects
@@ -147,8 +147,8 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="border border-slate-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-8">
-              <CardHeader className="p-0 pb-4">
+            <Card className="border border-slate-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-4 sm:p-6 lg:p-8">
+              <CardHeader className="p-0 pb-3 sm:pb-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm text-slate-500 font-semibold">
                     Pending Actions
@@ -164,8 +164,8 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="border border-slate-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-8">
-              <CardHeader className="p-0 pb-4">
+            <Card className="border border-slate-200/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-4 sm:p-6 lg:p-8">
+              <CardHeader className="p-0 pb-3 sm:pb-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm text-slate-500 font-semibold">
                     Completed
@@ -185,36 +185,36 @@ export default function DashboardPage() {
       </div>
 
       {/* Main Grid */}
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 lg:gap-8 lg:grid-cols-3">
         {/* Recent Projects */}
-        <div className="lg:col-span-2 space-y-8">
-          <Card className="border border-slate-200/50 rounded-xl shadow-sm p-8">
-            <CardHeader className="p-0 pb-6">
-              <div className="flex items-center justify-between">
+        <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+          <Card className="border border-slate-200/50 rounded-xl shadow-sm p-4 sm:p-6 lg:p-8">
+            <CardHeader className="p-0 pb-4 sm:pb-6">
+              <div className="flex items-center justify-between gap-2">
                 <CardTitle className="text-base font-semibold text-slate-900">
                   Recent Projects
                 </CardTitle>
                 <Link
                   href="/dashboard/projects"
-                  className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
+                  className="text-sm text-slate-500 hover:text-slate-900 transition-colors shrink-0"
                   aria-label="View all projects"
                 >
                   View all
                 </Link>
               </div>
             </CardHeader>
-            <CardContent className="p-0 space-y-4">
+            <CardContent className="p-0 space-y-2 sm:space-y-4">
               {isLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <div
                     key={i}
                     className="flex items-center justify-between py-3"
                   >
-                    <div className="space-y-2 flex-1">
+                    <div className="space-y-2 flex-1 min-w-0">
                       <Skeleton className="h-4 w-32" />
                       <Skeleton className="h-3 w-24" />
                     </div>
-                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-5 w-16 shrink-0" />
                   </div>
                 ))
               ) : recentProjects.length > 0 ? (
@@ -222,17 +222,17 @@ export default function DashboardPage() {
                   <Link
                     key={project.id}
                     href={`/dashboard/projects/${project.id}`}
-                    className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors rounded-lg px-2 -mx-2"
+                    className="flex items-center justify-between gap-2 py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors rounded-lg px-2 -mx-2"
                     aria-label={`View project ${project.title}`}
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
                         <h3 className="text-sm font-semibold text-slate-900 truncate">
                           {project.title}
                         </h3>
                         <Badge
                           variant={getProjectStatusBadgeVariant(project.status)}
-                          className="text-xs"
+                          className="text-xs shrink-0"
                         >
                           {formatProjectStatus(project.status)}
                         </Badge>
@@ -241,7 +241,7 @@ export default function DashboardPage() {
                         {project.description || "No description"}
                       </p>
                     </div>
-                    <ArrowUpRight className="h-4 w-4 text-slate-400 ml-4 flex-shrink-0" />
+                    <ArrowUpRight className="h-4 w-4 text-slate-400 flex-shrink-0" />
                   </Link>
                 ))
               ) : (
@@ -259,8 +259,8 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-slate-200/50 rounded-xl shadow-sm p-8">
-            <CardHeader className="p-0 pb-6">
+          <Card className="border border-slate-200/50 rounded-xl shadow-sm p-4 sm:p-6 lg:p-8">
+            <CardHeader className="p-0 pb-4 sm:pb-6">
               <CardTitle className="text-base font-semibold text-slate-900">
                 Activity Overview
               </CardTitle>
@@ -304,9 +304,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Sidebar Stats */}
-        <div className="space-y-8">
-          <Card className="border border-slate-200/50 rounded-xl shadow-sm p-8">
-            <CardHeader className="p-0 pb-6">
+        <div className="space-y-6 sm:space-y-8">
+          <Card className="border border-slate-200/50 rounded-xl shadow-sm p-4 sm:p-6 lg:p-8">
+            <CardHeader className="p-0 pb-4 sm:pb-6">
               <CardTitle className="text-base font-semibold text-slate-900">
                 Project Status
               </CardTitle>
@@ -398,8 +398,8 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-slate-200/50 rounded-xl shadow-sm p-8">
-            <CardHeader className="p-0 pb-6">
+          <Card className="border border-slate-200/50 rounded-xl shadow-sm p-4 sm:p-6 lg:p-8">
+            <CardHeader className="p-0 pb-4 sm:pb-6">
               <CardTitle className="text-base font-semibold text-slate-900">
                 Quick Actions
               </CardTitle>
@@ -410,10 +410,10 @@ export default function DashboardPage() {
                 className="flex items-center gap-3 p-3 rounded-lg border border-slate-200/50 hover:bg-slate-50/50 transition-colors group"
                 aria-label="Create new project"
               >
-                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
                   <FileText className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold text-slate-900">
                     New Project
                   </div>
@@ -421,23 +421,23 @@ export default function DashboardPage() {
                     Create escrow contract
                   </div>
                 </div>
-                <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-slate-900 transition-colors" />
+                <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-slate-900 transition-colors shrink-0" />
               </Link>
               <Link
                 href="/dashboard/disputes"
                 className="flex items-center gap-3 p-3 rounded-lg border border-slate-200/50 hover:bg-slate-50/50 transition-colors group"
                 aria-label="View disputes"
               >
-                <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
                   <Users className="h-4 w-4 text-slate-900" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold text-slate-900">
                     Disputes
                   </div>
                   <div className="text-xs text-slate-500">Manage conflicts</div>
                 </div>
-                <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-slate-900 transition-colors" />
+                <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-slate-900 transition-colors shrink-0" />
               </Link>
             </CardContent>
           </Card>

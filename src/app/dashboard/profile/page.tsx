@@ -116,11 +116,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <Card className=" overflow-hidden">
-        <div className="h-32 bg-linear-to-r from-blue-500/20 to-purple-500/20 -m-6 mb-6" />
-        <div className="relative px-6">
-          <div className="absolute -top-16 left-6 h-24 w-24 rounded-full border-4 border-background bg-zinc-900 shadow-xl flex items-center justify-center text-white text-3xl font-bold overflow-hidden">
+    <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 w-full min-w-0 px-0">
+      <Card className="overflow-hidden">
+        <div className="h-24 sm:h-32 bg-linear-to-r from-blue-500/20 to-purple-500/20 -m-4 sm:-m-6 mb-4 sm:mb-6" />
+        <div className="relative px-4 sm:px-6">
+          <div className="absolute -top-12 sm:-top-16 left-4 sm:left-6 h-20 w-20 sm:h-24 sm:w-24 rounded-full border-4 border-background bg-zinc-900 shadow-xl flex items-center justify-center text-white text-2xl sm:text-3xl font-bold overflow-hidden">
             {user?.avatar_url ? (
               <Image
                 src={user.avatar_url}
@@ -133,26 +133,26 @@ export default function ProfilePage() {
               initials
             )}
           </div>
-          <div className="pt-10 flex flex-col sm:flex-row justify-between items-start gap-4">
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                {displayName}
+          <div className="pt-8 sm:pt-10 flex flex-col sm:flex-row justify-between items-start gap-4">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold flex flex-wrap items-center gap-2">
+                <span className="truncate">{displayName}</span>
                 {user && (
                   <Badge
                     variant="glass"
-                    className="text-xs font-normal bg-accent/10 border-accent/20 text-accent"
+                    className="text-xs font-normal bg-accent/10 border-accent/20 text-accent shrink-0"
                   >
                     Verified
                   </Badge>
                 )}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground break-words">
                 {user?.bio || "No bio available"}
               </p>
-              <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs sm:text-sm text-muted-foreground">
                 {address && (
-                  <span className="flex items-center gap-1">
-                    <Wallet className="h-3 w-3" /> {address.substring(0, 6)}...
+                  <span className="flex items-center gap-1 font-mono">
+                    <Wallet className="h-3 w-3 shrink-0" /> {address.substring(0, 6)}...
                     {address.substring(38)}
                   </span>
                 )}
@@ -163,47 +163,47 @@ export default function ProfilePage() {
                 )}
               </div>
             </div>
-            <Link href="/dashboard/settings">
-              <Button>Edit Profile</Button>
+            <Link href="/dashboard/settings" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto">Edit Profile</Button>
             </Link>
           </div>
         </div>
-        <div className="p-6 mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 border-t border-slate-200">
-          <div className="space-y-1">
+        <div className="p-4 sm:p-6 mt-2 grid gap-4 grid-cols-2 lg:grid-cols-4 border-t border-slate-200">
+          <div className="space-y-1 min-w-0">
             <div className="text-xs text-muted-foreground uppercase">
               Reputation Score
             </div>
-            <div className="text-2xl font-bold text-accent flex items-center gap-2">
+            <div className="text-lg sm:text-2xl font-bold text-accent flex items-center gap-2 truncate">
               {stats.reputation}{" "}
-              <Star className="h-4 w-4 fill-accent text-accent" />
+              <Star className="h-4 w-4 fill-accent text-accent shrink-0" />
             </div>
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1 min-w-0">
             <div className="text-xs text-muted-foreground uppercase">
               Jobs Completed
             </div>
-            <div className="text-2xl font-bold">{stats.jobsCompleted}</div>
+            <div className="text-lg sm:text-2xl font-bold truncate">{stats.jobsCompleted}</div>
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1 min-w-0 col-span-2 lg:col-span-1">
             <div className="text-xs text-muted-foreground uppercase">
               Total Volume
             </div>
-            <div className="text-2xl font-bold font-mono">
+            <div className="text-lg sm:text-2xl font-bold font-mono truncate">
               {stats.totalVolume}
             </div>
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1 min-w-0">
             <div className="text-xs text-muted-foreground uppercase">
               Dispute Rate
             </div>
-            <div className="text-2xl font-bold text-emerald-500">
+            <div className="text-lg sm:text-2xl font-bold text-emerald-500 truncate">
               {stats.disputeRate}
             </div>
           </div>
         </div>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
         <Card className=" md:col-span-1 h-fit">
           <CardHeader>
             <CardTitle className="text-lg">Roles</CardTitle>
