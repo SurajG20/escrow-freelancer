@@ -4,6 +4,8 @@ import {
   getMilestone,
   createMilestones,
   updateMilestone,
+  updateMilestoneByProjectAndIndex,
+  setAllMilestonesReleasedForProject,
   deleteMilestone,
   deleteMilestonesByProject,
   replaceMilestones,
@@ -72,6 +74,54 @@ export function useUpdateMilestone() {
       });
       queryClient.invalidateQueries({
         queryKey: ["project", data.project_id, "with-milestones"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
+    },
+  });
+}
+
+export function useUpdateMilestoneByProjectAndIndex() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      projectId,
+      index,
+      updates,
+    }: {
+      projectId: string;
+      index: number;
+      updates: Parameters<typeof updateMilestoneByProjectAndIndex>[2];
+    }) => updateMilestoneByProjectAndIndex(projectId, index, updates),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["milestones", data.project_id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["milestone", data.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["project", data.project_id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["project", data.project_id, "with-milestones"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["project-stats"] });
+    },
+  });
+}
+
+export function useSetAllMilestonesReleasedForProject() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (projectId: string) =>
+      setAllMilestonesReleasedForProject(projectId),
+    onSuccess: (_, projectId) => {
+      queryClient.invalidateQueries({ queryKey: ["milestones", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] });
+      queryClient.invalidateQueries({
+        queryKey: ["project", projectId, "with-milestones"],
       });
       queryClient.invalidateQueries({ queryKey: ["project-stats"] });
     },

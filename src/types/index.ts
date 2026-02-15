@@ -14,7 +14,7 @@ export type MilestoneStatus =
   | "released";
 export type Currency = "NATIVE" | "USDT";
 export type UserRole = "client" | "freelancer" | "arbitrator";
-export type DisputeStatus = "open" | "voting" | "resolved";
+export type DisputeStatus = "open" | "resolved";
 
 export interface User {
   id: string;
@@ -66,11 +66,13 @@ export interface Dispute {
   project_id: string;
   milestone_id?: string;
   opened_by: string;
+  reason?: string;
   status: DisputeStatus;
   resolution?: {
-    split_percent?: number;
     decision?: string;
-    votes?: Record<string, string>;
+    release_to_freelancer?: boolean;
+    resolved_at?: string;
+    resolved_by?: string;
   };
   created_at: string;
   updated_at: string;

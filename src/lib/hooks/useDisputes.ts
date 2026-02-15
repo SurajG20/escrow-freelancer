@@ -10,7 +10,6 @@ export function useDisputes(filters?: {
   project_id?: string;
   milestone_id?: string;
   status?: string;
-  chain_id?: number;
 }) {
   return useQuery({
     queryKey: ["disputes", filters],

@@ -64,28 +64,24 @@ export const projectSchema = z.object({
   updated_at: z.string(),
 });
 
+const resolutionSchema = z
+  .object({
+    decision: z.string().nullish().transform((v) => v ?? undefined),
+    release_to_freelancer: z.boolean().nullish().transform((v) => v ?? undefined),
+    resolved_at: z.string().nullish().transform((v) => v ?? undefined),
+    resolved_by: z.string().nullish().transform((v) => v ?? undefined),
+  })
+  .nullish()
+  .transform((v) => v ?? undefined);
+
 export const disputeSchema = z.object({
   id: z.string().uuid(),
   project_id: z.string().uuid(),
-  milestone_id: z.string().uuid().optional(),
+  milestone_id: z.string().uuid().nullish().transform((v) => v ?? undefined),
   opened_by: z.string(),
-  status: z.enum(["open", "voting", "resolved"]),
-  resolution: z
-    .object({
-      split_percent: z.number().optional(),
-      decision: z.string().optional(),
-      votes: z
-        .record(z.string(), z.unknown())
-        .transform((val) => {
-          const result: Record<string, string> = {};
-          for (const [key, value] of Object.entries(val)) {
-            result[key] = String(value);
-          }
-          return result;
-        })
-        .optional(),
-    })
-    .optional(),
+  reason: z.string().nullish().transform((v) => v ?? undefined),
+  status: z.enum(["open", "resolved"]),
+  resolution: resolutionSchema,
   created_at: z.string(),
   updated_at: z.string(),
 });

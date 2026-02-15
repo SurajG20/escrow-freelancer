@@ -52,11 +52,13 @@ import {
   releaseMilestoneFunds,
   submitMilestoneOnChain,
   approveMilestoneOnChain,
+  raiseDisputeOnChain,
 } from "@/lib/contracts/escrow";
 import { MilestoneEditor } from "@/components/milestones/MilestoneEditor";
 import { MilestoneDisplay } from "@/components/milestones/MilestoneDisplay";
 import { MilestoneRejectionModal } from "@/components/milestones/MilestoneRejectionModal";
 import { ProjectRejectionModal } from "@/components/projects/ProjectRejectionModal";
+import { RaiseDisputeModal } from "@/components/disputes/RaiseDisputeModal";
 import {
   DeploymentModal,
   type DeploymentProgress,
@@ -101,6 +103,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const [showDeploymentModal, setShowDeploymentModal] = useState(false);
   const [showProjectRejectionModal, setShowProjectRejectionModal] =
     useState(false);
+  const [showRaiseDisputeModal, setShowRaiseDisputeModal] = useState(false);
   const [milestoneRejectingId, setMilestoneRejectingId] = useState<
     string | null
   >(null);
@@ -377,26 +380,56 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     }
   };
 
-  const handleCreateDispute = async (milestoneId?: string) => {
-    if (!project || !address) return;
+  const handleCreateDispute = async (reason: string) => {
+    if (!project || !address || !walletClient) return;
+
+    const hasContract =
+      project.onchain_address &&
+      project.onchain_address !== "Pending" &&
+      project.onchain_address.startsWith("0x") &&
+      project.onchain_address.length === 42;
+    if (project.status !== "active" || !hasContract) {
+      toast.error("Cannot raise dispute", {
+        id: "dispute",
+        description:
+          project.status !== "active"
+            ? "Project must be active to raise a dispute"
+            : "Escrow contract must be deployed first",
+      });
+      return;
+    }
 
     setLoadingStates((prev) => ({ ...prev, createDispute: true }));
     try {
       toast.loading("Creating dispute...", { id: "dispute" });
       await createDisputeMutation.mutateAsync({
         project_id: project.id,
-        milestone_id: milestoneId,
         opened_by: address.toLowerCase(),
+        reason,
         status: "open",
       });
-      toast.success("Dispute created!", {
+      toast.loading("Locking funds on-chain...", { id: "dispute" });
+      await raiseDisputeOnChain(project.onchain_address, walletClient);
+      await updateProjectMutation.mutateAsync({
+        id: project.id,
+        updates: { status: "in_dispute" },
+      });
+      const milestonesToDispute =
+        project.milestones?.filter((m) => m.offchain_state !== "released") ?? [];
+      for (const m of milestonesToDispute) {
+        await updateMilestoneMutation.mutateAsync({
+          id: m.id,
+          updates: { offchain_state: "disputed" },
+        });
+      }
+      toast.success("Dispute raised", {
         id: "dispute",
-        description: "The dispute is now open for resolution",
+        description: "Funds are locked. The platform will review and resolve.",
         duration: 5000,
       });
       await refetch();
     } catch (error) {
-      toast.error("Failed to Create Dispute", {
+      toast.error("Failed to raise dispute", {
         id: "dispute",
         description:
           error instanceof Error ? error.message : "Please try again",
@@ -955,6 +988,13 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
           }
         />
       )}
+      <RaiseDisputeModal
+        open={showRaiseDisputeModal}
+        projectTitle={project?.title ?? "Project"}
+        onClose={() => setShowRaiseDisputeModal(false)}
+        onConfirm={handleCreateDispute}
+        loading={loadingStates.createDispute}
+      />
       {/* Back Link */}
       <Link
         href={backToProjectsHref}
@@ -1846,25 +1886,40 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 )}
               </div>
 
-              <div className="pt-4 border-t border-slate-200">
-                <Button
-                  variant="ghost"
-                  className="w-full text-red-500 hover:text-red-600 hover:bg-red-50"
-                  onClick={() => handleCreateDispute()}
-                  disabled={loadingStates.createDispute || isAnyActionLoading()}
-                >
-                  {loadingStates.createDispute ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />{" "}
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <AlertTriangle className="h-4 w-4 mr-2" /> Raise Dispute
-                    </>
-                  )}
-                </Button>
-              </div>
+              {project.status === "active" && (
+                <div className="pt-4 border-t border-slate-200">
+                  <Button
+                    variant="ghost"
+                    className="w-full text-red-500 hover:text-red-600 hover:bg-red-50"
+                    onClick={() => setShowRaiseDisputeModal(true)}
+                    disabled={
+                      loadingStates.createDispute ||
+                      isAnyActionLoading() ||
+                      !project.onchain_address ||
+                      project.onchain_address === "Pending"
+                    }
+                  >
+                    {loadingStates.createDispute ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />{" "}
+                        Raising dispute...
+                      </>
+                    ) : (
+                      <>
+                        <AlertTriangle className="h-4 w-4 mr-2" /> Raise Dispute
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+              {project.status === "in_dispute" && (
+                <div className="pt-4 border-t border-slate-200">
+                  <p className="text-sm text-amber-600 flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" /> In dispute — awaiting
+                    resolution
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

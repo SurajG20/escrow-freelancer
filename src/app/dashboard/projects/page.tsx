@@ -182,7 +182,6 @@ export default function ProjectsPage() {
                       <td className="px-6 py-4">
                         <Badge
                           variant={getProjectStatusBadgeVariant(project.status)}
-                          className="bg-opacity-10 dark:bg-opacity-20 backdrop-blur-sm"
                         >
                           {formatProjectStatus(project.status)}
                         </Badge>

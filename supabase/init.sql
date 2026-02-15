@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS disputes (
     project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     milestone_id UUID REFERENCES milestones(id) ON DELETE SET NULL,
     opened_by TEXT NOT NULL,
+    reason TEXT,
     status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'voting', 'resolved')),
     resolution JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -213,6 +214,7 @@ DROP POLICY IF EXISTS "Users can update milestones" ON milestones;
 DROP POLICY IF EXISTS "Users can delete milestones" ON milestones;
 DROP POLICY IF EXISTS "Users can read disputes of their projects" ON disputes;
 DROP POLICY IF EXISTS "Users can create disputes" ON disputes;
+DROP POLICY IF EXISTS "Users can update disputes" ON disputes;
 DROP POLICY IF EXISTS "Users can read messages of their projects" ON messages;
 DROP POLICY IF EXISTS "Users can create messages" ON messages;
 
@@ -270,6 +272,9 @@ CREATE POLICY "Users can read disputes of their projects" ON disputes
 
 CREATE POLICY "Users can create disputes" ON disputes
     FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Users can update disputes" ON disputes
+    FOR UPDATE USING (true) WITH CHECK (true);
 
 -- Messages policies
 CREATE POLICY "Users can read messages of their projects" ON messages

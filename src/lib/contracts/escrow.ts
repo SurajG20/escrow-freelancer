@@ -250,3 +250,104 @@ export async function approveMilestoneOnChain(
 
   return { transactionHash: hash };
 }
+
+export async function raiseDisputeOnChain(
+  contractAddress: string,
+  walletClient: WalletClient,
+): Promise<{ transactionHash: `0x${string}` }> {
+  const chainConfig = getCurrentChainConfig();
+  const chain = chainConfig.network === "mainnet" ? bsc : bscTestnet;
+  const publicClient = createPublicClient({
+    chain,
+    transport: http(chainConfig.rpcUrl),
+  });
+
+  if (!walletClient) {
+    throw new Error("Wallet not connected");
+  }
+
+  const hash = await walletClient.writeContract({
+    account: walletClient.account!,
+    chain,
+    address: contractAddress as `0x${string}`,
+    abi: EscrowABI,
+    functionName: "raiseDispute",
+  });
+
+  await publicClient.waitForTransactionReceipt({ hash });
+  return { transactionHash: hash };
+}
+
+export async function resolveDisputeOnChain(
+  contractAddress: string,
+  milestoneIndex: number,
+  releaseToFreelancer: boolean,
+  walletClient: WalletClient,
+): Promise<{ transactionHash: `0x${string}` }> {
+  const chainConfig = getCurrentChainConfig();
+  const chain = chainConfig.network === "mainnet" ? bsc : bscTestnet;
+  const publicClient = createPublicClient({
+    chain,
+    transport: http(chainConfig.rpcUrl),
+  });
+
+  if (!walletClient) {
+    throw new Error("Wallet not connected");
+  }
+
+  const hash = await walletClient.writeContract({
+    account: walletClient.account!,
+    chain,
+    address: contractAddress as `0x${string}`,
+    abi: EscrowABI,
+    functionName: "resolveDispute",
+    args: [BigInt(milestoneIndex), releaseToFreelancer],
+  });
+
+  await publicClient.waitForTransactionReceipt({ hash });
+  return { transactionHash: hash };
+}
+
+export async function resolveDisputeAllOnChain(
+  contractAddress: string,
+  releaseToFreelancer: boolean,
+  walletClient: WalletClient,
+): Promise<{ transactionHash: `0x${string}` }> {
+  const chainConfig = getCurrentChainConfig();
+  const chain = chainConfig.network === "mainnet" ? bsc : bscTestnet;
+  const publicClient = createPublicClient({
+    chain,
+    transport: http(chainConfig.rpcUrl),
+  });
+
+  if (!walletClient) {
+    throw new Error("Wallet not connected");
+  }
+
+  const hash = await walletClient.writeContract({
+    account: walletClient.account!,
+    chain,
+    address: contractAddress as `0x${string}`,
+    abi: EscrowABI,
+    functionName: "resolveDisputeAll",
+    args: [releaseToFreelancer],
+  });
+
+  await publicClient.waitForTransactionReceipt({ hash });
+  return { transactionHash: hash };
+}
+
+export async function getIsDisputed(contractAddress: string): Promise<boolean> {
+  const chainConfig = getCurrentChainConfig();
+  const chain = chainConfig.network === "mainnet" ? bsc : bscTestnet;
+  const publicClient = createPublicClient({
+    chain,
+    transport: http(chainConfig.rpcUrl),
+  });
+
+  return publicClient.readContract({
+    address: contractAddress as `0x${string}`,
+    abi: EscrowABI,
+    functionName: "isDisputed",
+  }) as Promise<boolean>;
+}

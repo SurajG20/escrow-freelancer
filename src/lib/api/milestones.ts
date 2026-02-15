@@ -144,6 +144,50 @@ export async function updateMilestone(
   return milestoneSchema.parse(data);
 }
 
+export async function updateMilestoneByProjectAndIndex(
+  projectId: string,
+  index: number,
+  updates: Parameters<typeof updateMilestone>[1],
+): Promise<Milestone> {
+  const cleanUpdates = Object.fromEntries(
+    Object.entries(updates).filter(([, value]) => value !== undefined),
+  );
+  if (Object.keys(cleanUpdates).length === 0) {
+    const milestone = (await listMilestones(projectId)).find(
+      (m) => m.index === index,
+    );
+    if (!milestone) {
+      throw new Error(
+        `Milestone with index ${index} not found for project ${projectId}`,
+      );
+    }
+    return milestone;
+  }
+
+  const { data, error } = await supabase
+    .from("milestones")
+    .update(cleanUpdates)
+    .eq("project_id", projectId)
+    .eq("index", index)
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === "PGRST116") {
+      throw new Error(
+        `Milestone with index ${index} not found for project ${projectId}`,
+      );
+    }
+    throw new Error(`Failed to update milestone: ${error.message}`);
+  }
+  if (!data) {
+    throw new Error(
+      `Milestone with index ${index} not found for project ${projectId}`,
+    );
+  }
+  return milestoneSchema.parse(data);
+}
+
 export async function rejectMilestone(
   id: string,
   rejection_reason: string,
@@ -183,6 +227,19 @@ export async function deleteMilestone(id: string): Promise<void> {
 
   if (error) {
     throw new Error(`Failed to delete milestone: ${error.message}`);
+  }
+}
+
+export async function setAllMilestonesReleasedForProject(
+  projectId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("milestones")
+    .update({ offchain_state: "released" })
+    .eq("project_id", projectId);
+
+  if (error) {
+    throw new Error(`Failed to set milestones released: ${error.message}`);
   }
 }
 

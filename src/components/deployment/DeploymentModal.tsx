@@ -148,8 +148,8 @@ export function DeploymentModal({
           <h2 className="text-lg font-semibold">
             {phase === "preview" && "Deploy Escrow"}
             {phase === "deploying" && "Deploying..."}
-            {phase === "success" && "Deployment Complete"}
-            {phase === "error" && "Deployment Failed"}
+            {phase === "success" && "Funds Deposited Successfully"}
+            {phase === "error" && "Deposit Failed"}
           </h2>
           <button
             type="button"
@@ -276,7 +276,7 @@ export function DeploymentModal({
             <>
               <div className="flex items-center gap-2 text-emerald-600">
                 <CheckCircle2 className="h-5 w-5" />
-                <span className="font-medium">Escrow deployed and funded</span>
+                <span className="font-medium">Your funds have been deposited. The escrow is active and your project is ready.</span>
               </div>
               <div className="rounded-lg border border-slate-200 p-3 space-y-2 text-sm">
                 <div>
@@ -315,7 +315,7 @@ export function DeploymentModal({
             <>
               <div className="flex items-center gap-2 text-red-600">
                 <AlertTriangle className="h-5 w-5" />
-                <span className="font-medium">Deployment failed</span>
+                <span className="font-medium">Deposit failed</span>
               </div>
               {progress.error && (
                 <p className="text-sm text-muted-foreground rounded-lg bg-red-50 p-3 text-red-800">

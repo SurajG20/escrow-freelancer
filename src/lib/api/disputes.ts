@@ -6,7 +6,6 @@ export async function listDisputes(filters?: {
   project_id?: string;
   milestone_id?: string;
   status?: string;
-  chain_id?: number;
 }): Promise<Dispute[]> {
   let query = supabase.from("disputes").select("*");
 
@@ -19,17 +18,13 @@ export async function listDisputes(filters?: {
   if (filters?.status) {
     query = query.eq("status", filters.status);
   }
-  if (filters?.chain_id) {
-    query = query.eq("chain_id", filters.chain_id);
-  }
 
   const { data, error } = await query.order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(`Failed to fetch disputes: ${error.message}`);
   }
-
-  return disputesArraySchema.parse(data || []);
+  return disputesArraySchema.parse(data ?? []);
 }
 
 export async function getDispute(id: string): Promise<Dispute | null> {
@@ -53,6 +48,7 @@ export async function createDispute(dispute: {
   project_id: string;
   milestone_id?: string;
   opened_by: string;
+  reason?: string;
   status?: string;
 }): Promise<Dispute> {
   const { data, error } = await supabase
@@ -76,9 +72,10 @@ export async function updateDispute(
   updates: Partial<{
     status: string;
     resolution: {
-      split_percent?: number;
       decision?: string;
-      votes?: Record<string, string>;
+      release_to_freelancer?: boolean;
+      resolved_at?: string;
+      resolved_by?: string;
     };
   }>,
 ): Promise<Dispute> {

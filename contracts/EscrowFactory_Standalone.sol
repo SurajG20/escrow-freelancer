@@ -140,11 +140,13 @@ contract Escrow is ReentrancyGuard, Ownable {
         address _client,
         address _freelancer,
         address _usdtToken,
+        address _owner,
         uint256[] memory _milestoneAmounts,
         bool[] memory _milestoneIsNative
-    ) Ownable(msg.sender) {
+    ) Ownable(_owner) {
         require(_client != address(0), "Invalid client address");
         require(_freelancer != address(0), "Invalid freelancer address");
+        require(_owner != address(0), "Invalid owner address");
         require(_milestoneAmounts.length == _milestoneIsNative.length, "Array length mismatch");
         require(_milestoneAmounts.length > 0, "Must have at least one milestone");
 
@@ -283,6 +285,28 @@ contract Escrow is ReentrancyGuard, Ownable {
         isDisputed = false;
     }
 
+    function resolveDisputeAll(bool releaseToFreelancer) external onlyOwner {
+        require(isDisputed, "No active dispute");
+        address to = releaseToFreelancer ? freelancer : client;
+        for (uint256 i = 0; i < milestones.length; i++) {
+            Milestone storage m = milestones[i];
+            if (m.status == MilestoneStatus.Released) continue;
+            m.status = MilestoneStatus.Released;
+            if (m.isNative) {
+                require(totalDepositedNative >= m.amount, "Insufficient native balance");
+                totalDepositedNative -= m.amount;
+                (bool success, ) = payable(to).call{value: m.amount}("");
+                require(success, "Transfer failed");
+            } else {
+                require(totalDepositedUSDT >= m.amount, "Insufficient USDT balance");
+                totalDepositedUSDT -= m.amount;
+                IERC20(usdtToken).safeTransfer(to, m.amount);
+            }
+            emit MilestoneReleased(i, m.amount, m.isNative);
+        }
+        isDisputed = false;
+    }
+
     function getMilestoneCount() external view returns (uint256) {
         return milestones.length;
     }
@@ -307,14 +331,14 @@ contract Escrow is ReentrancyGuard, Ownable {
 }
 
 // EscrowFactory Contract
-contract EscrowFactory {
+contract EscrowFactory is Ownable {
     address public usdtToken;
     address[] public escrows;
     mapping(address => address[]) public userEscrows;
 
     event EscrowCreated(address indexed escrow, address indexed client, address indexed freelancer);
 
-    constructor(address _usdtToken) {
+    constructor(address _usdtToken) Ownable(msg.sender) {
         usdtToken = _usdtToken;
     }
 
@@ -328,6 +352,7 @@ contract EscrowFactory {
             _client,
             _freelancer,
             usdtToken,
+            owner(),
             _milestoneAmounts,
             _milestoneIsNative
         );
