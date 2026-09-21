@@ -2,6 +2,32 @@
 
 Lock funds in crypto. Work with confidence. Get paid only when work is approved. Trustless escrow using smart contracts.
 
+🔗 **Live demo**: [escrow-freelancer.vercel.app](https://escrow-freelancer.vercel.app)
+
+## Problem
+
+Freelancers and clients rarely trust informal payment promises. Milestone work needs **locked funds**, **on-chain release rules**, and **off-chain collaboration** (messages, disputes) without giving custody to a central broker.
+
+## Approach
+
+1. **Smart contracts** on BSC for factory + escrow vaults and milestone releases.
+2. **Wallet auth** (Reown AppKit, Wagmi, Solana adapter) for identity and transactions.
+3. **Supabase** for profiles, project metadata, chat-style messages, and dispute workflow UI.
+4. **Next.js** dashboard for projects, vaults, onboarding, and mobile-friendly ops views.
+
+## Decisions
+
+| Decision | Why |
+|----------|-----|
+| On-chain escrow + off-chain UX | Trustless funds; fast iteration on UI and notifications. |
+| Multi-chain wallet layer | Demonstrates integration breadth (EVM + Solana paths). |
+| Milestone state machine | Maps cleanly to approve/reject/submit flows recruiters recognize. |
+
+## Results
+
+- End-to-end flows: create project → fund → submit milestone → release or dispute.
+- Responsive layout (drawer nav, card tables on small screens).
+
 ## Overview
 
 Custodia is a full-stack web app that lets clients and freelancers create escrow agreements, fund them with crypto (native or USDT), and release funds per milestone. Disputes can be raised and resolved by a platform owner on-chain.
